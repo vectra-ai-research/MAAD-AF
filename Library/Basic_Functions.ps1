@@ -154,7 +154,7 @@ function ValidateMailbox ($mailbox_address){
         $global:mailbox_found = $true
     }
     catch {
-        Write-Host "`nThe mailbox does not exist or the account does not have a mailbox setup."
+        Write-Host "`nThe mailbox does not exist or the account does not have a mailbox setup.`n" -ForegroundColor Red
         $global:mailbox_found = $false
     }
 }
@@ -195,7 +195,7 @@ function ValidateAccount ($account_username){
     $check_account = Get-AzureADUser -SearchString $account_username
     
     if ($check_account -eq $null){
-        Write-Host "The account does not exist or match an account in the tenant!" -ForegroundColor Red
+        Write-Host "The account does not exist or match an account in the tenant!`n" -ForegroundColor Red
         $global:account_found = $false
     }
     

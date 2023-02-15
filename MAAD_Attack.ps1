@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Attack tool to exploits Microsoft 365 and Azure AD configurations to emulate attacker behavior in a compromised Microsoft cloud environment.
+    Attack tool which exploits Microsoft 365 and Azure AD configurations to emulate attacker behavior in a compromised Microsoft cloud environment.
 
 .DESCRIPTION
     MAAD-AF is designed for security teams to test their cloud security controls, detection & response capabilities easily and swiftly. MAAD-AF intends to make cloud security testing simple, fast, and effective for security practitioners by providing an intuitive testing tool focused on prevalent attacker tactics & techniques.

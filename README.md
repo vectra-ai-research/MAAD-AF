@@ -44,8 +44,16 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 ### Requirements
 1. Internet accessible Windows host
 2. PowerShell (version 5 or later) terminal as Administrator
-3. The following powershell modules are required and will be installed automatically:
-- Az, AzureAd, MSOnline, ExchangeOnlineManagement, MicrosoftTeams, AzureADPreview, AADInternals, Microsoft.Online.SharePoint.PowerShell, PnP.PowerShell
+3. The following PowerShell modules are required and will be installed automatically:
+ - [Az](https://www.powershellgallery.com/packages/Az/), 
+ - [AzureAd](https://www.powershellgallery.com/packages/AzureAD/), 
+ - [MSOnline](https://www.powershellgallery.com/packages/MSOnline/), 
+ - [ExchangeOnlineManagement](https://www.powershellgallery.com/packages/ExchangeOnlineManagement/), 
+ - [MicrosoftTeams](https://www.powershellgallery.com/packages/MicrosoftTeams/), 
+ - [AzureADPreview](https://www.powershellgallery.com/packages/AzureADPreview/), 
+ - [ADInternals](https://aadinternals.com/aadinternals/), 
+ - [Microsoft.Online.SharePoint.PowerShell](https://www.powershellgallery.com/packages/Microsoft.Online.SharePoint.PowerShell/16.0.23311.12000), 
+ - [PnP.PowerShell](https://github.com/pnp/powershell)
 
 Note: A 'Global Admin' privilege is required to leverage full capabilities of modules in MAAD-AF
 

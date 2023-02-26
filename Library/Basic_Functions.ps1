@@ -1,9 +1,9 @@
 ###Basic functions
 function RequiredModules {
     ###This function checks for required modules by MAAD and Installs them if unavailable
-    $RequiredModules=@("Az","AzureAd","MSOnline","ExchangeOnlineManagement","MicrosoftTeams","AzureADPreview","AADInternals","Microsoft.Online.SharePoint.PowerShell","PnP.PowerShell")
+    $RequiredModules=@("Az","AzureAd","MSOnline","ExchangeOnlineManagement","MicrosoftTeams","AzureADPreview","AADInternals","ExchangePowerShell","Microsoft.Online.SharePoint.PowerShell","PnP.PowerShell")
     Write-Host "`nMAAD-AF requires the following powershell modules:`n$RequiredModules" -ForegroundColor Gray
-    $allow = Read-Host -Prompt "`nAutomatically check for missing modules and install them? (Yes / No)"
+    $allow = Read-Host -Prompt "`nAutomatically check for dependencies and install missing modules? (Yes / No)"
 
     if ($allow -notin "No","no","N","n") {
         Write-Host "Checking all required modules..." -ForegroundColor Gray

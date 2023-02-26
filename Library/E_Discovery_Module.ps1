@@ -7,9 +7,8 @@ function eDiscovery {
     Write-Host "Establishing PS session to compliance portal..."
 
     try {
-        $Comp_Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid -Credential $global:AdminCredential -Authentication Basic -AllowRedirection
+        Connect-IPPSSession -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid -Credential $global:AdminCredential
         Start-Sleep -Seconds 5
-        Import-PSSession $Comp_Session -AllowClobber -DisableNameChecking
     }
     catch {
         Write-Host "Failed to establish session with compliance portal with the current credentials!"
@@ -18,8 +17,11 @@ function eDiscovery {
     
     #Check privileges
     $role_members = Get-RoleGroupMember "eDiscovery Manager"
-    if ($role_members.Name -notin (Get-AzureADUser -ObjectId $global:AdminUsername).DisplayName){
-        Write-Host "`nNote: You are currently not eDiscovery Manager which might prevent you from executing certain operations. Start by attempting privilege escalation using eDiscovery module 8 ;)" -ForegroundColor Gray
+    $admin_role_members = Get-eDiscoveryCaseAdmin
+
+    #Check eDiscovery Admin 
+    if ((Get-AzureADUser -ObjectId $global:AdminUsername).DisplayName -notin $admin_role_members.Name){
+        Write-Host "`nNote: You are currently not eDiscovery Admin which may prevent you from executing certain operations. Start by attempting privilege escalation using eDiscovery sub-module [8]' ;)" -ForegroundColor Gray
     }
 
     $e_discovery_options = @{0 = "Back"; 1 = "Quick Grab And Run"; 2 = "Create a new eDiscovery Search"; 3 = "Recon Existing eDiscovery Cases"; 4 = "Find eDiscovery Case Members"; 5 = "Recon Existing eDiscovery Searches"; 6 = "Find Details of a Search"; 7 = "Export and Download a Search"; 8 = "Escalate eDiscovery Privileges"; 9 = "Install Unified Export Tool"};
@@ -262,7 +264,16 @@ function E_Discovery_Priv_Esc {
             break
         }
 
-    }
+        ##Create new PSSession
+        Write-Host "Re-establishing session with compliance service using elevated privileges..."
+        try {
+            Connect-IPPSSession -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid -Credential $global:AdminCredential
+            Start-Sleep -Seconds 5
+        }
+        catch {
+            Write-Host "Error: Failed to establish new session!" -ForegroundColor Red
+        }
+        }
     else {
         Write-Host "`nSometimes life is not that hard ;)"
         Write-Host "You are already eDiscovery Admin & Manager!!!" -ForegroundColor Yellow

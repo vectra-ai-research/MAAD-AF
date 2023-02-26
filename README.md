@@ -37,7 +37,7 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
  1. Clone or download the MAAD-AF github repo to your windows host
  2. Open PowerShell as Administrator 
  3. Navigate to the local MAAD-AF directory 
-	 `(cd /MAAD-Attack-Framework)`
+	 `(cd /MAAD-AF)`
  4. Run MAAD_Attack.ps1 
 	 `(./MAAD_Attack.ps1)`
 
@@ -45,17 +45,18 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 1. Internet accessible Windows host
 2. PowerShell (version 5 or later) terminal as Administrator
 3. The following PowerShell modules are required and will be installed automatically:
- - [Az](https://www.powershellgallery.com/packages/Az/), 
- - [AzureAd](https://www.powershellgallery.com/packages/AzureAD/), 
- - [MSOnline](https://www.powershellgallery.com/packages/MSOnline/), 
- - [ExchangeOnlineManagement](https://www.powershellgallery.com/packages/ExchangeOnlineManagement/), 
- - [MicrosoftTeams](https://www.powershellgallery.com/packages/MicrosoftTeams/), 
- - [AzureADPreview](https://www.powershellgallery.com/packages/AzureADPreview/), 
- - [ADInternals](https://aadinternals.com/aadinternals/), 
- - [Microsoft.Online.SharePoint.PowerShell](https://www.powershellgallery.com/packages/Microsoft.Online.SharePoint.PowerShell/16.0.23311.12000), 
+ - [Az](https://www.powershellgallery.com/packages/Az/) 
+ - [AzureAd](https://www.powershellgallery.com/packages/AzureAD/) 
+ - [MSOnline](https://www.powershellgallery.com/packages/MSOnline/) 
+ - [ExchangeOnlineManagement](https://www.powershellgallery.com/packages/ExchangeOnlineManagement/)
+ - [MicrosoftTeams](https://www.powershellgallery.com/packages/MicrosoftTeams/)
+ - [AzureADPreview](https://www.powershellgallery.com/packages/AzureADPreview/)
+ - [ADInternals](https://aadinternals.com/aadinternals/)
+ - [ExchangePowershell](https://www.powershellgallery.com/packages/ExchangeOnlineManagement/3.0.0)
+ - [Microsoft.Online.SharePoint.PowerShell](https://www.powershellgallery.com/packages/Microsoft.Online.SharePoint.PowerShell/16.0.23311.12000)
  - [PnP.PowerShell](https://github.com/pnp/powershell)
 
-Note: A 'Global Admin' privilege is required to leverage full capabilities of modules in MAAD-AF
+Tip: A 'Global Admin' privilege account is recommended to leverage full capabilities of modules in MAAD-AF
 
 ### Limitations
 - MAAD-AF is currently only fully supported on Windows OS
@@ -78,4 +79,4 @@ Note: A 'Global Admin' privilege is required to leverage full capabilities of mo
  - Share those great ideas. Submit new features to add to the MAAD-AFs functionality. 
 
 ## Contact
-- If you found this tool useful, want to share an interesting use-case, bring issues to attention, whatever the reason - I would love to hear from you. You can contact at: maad-af@vectra.ai
+- If you found this tool useful, want to share an interesting use-case, bring issues to attention, whatever the reason - I would love to hear from you. You can contact at: maad-af@vectra.ai or post in repository Discussions.

@@ -127,6 +127,7 @@ function eDiscovery {
                             Start-Sleep -s 5
                             $complianceSearchAction = Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details
                         }
+                    while ($complianceSearch.Status -ne 'Completed')
                     #Start download
                     E_Discovery_Downloader $global:selected_case $export_name
                 }

@@ -59,25 +59,25 @@ function eDiscovery {
         if ($recon_user_choice -eq 4) {
             #Find eDiscovery Case Members
             Display_E_Discovery_Cases $true
-            Get-ComplianceCaseMember -Case $selected_case -ShowCaseAdmin
+            Get-ComplianceCaseMember -Case $global:selected_case -ShowCaseAdmin
         }
 
         if ($recon_user_choice -eq 5) {
             #Find Existing eDiscovery Searches
             Display_E_Discovery_Cases $true
-            Display_E_Discovery_Case_Searches $false $selected_case
+            Display_E_Discovery_Case_Searches $false $global:selected_case
         }
 
         if ($recon_user_choice -eq 6) {
             #Find Details of a Search
             Display_E_Discovery_Cases $true
-            Display_E_Discovery_Case_Searches $true $selected_case
-            $export_name = $selected_search + "_Export"
+            Display_E_Discovery_Case_Searches $true $global:selected_case
+            $export_name = $global:selected_search + "_Export"
 
-            Get-ComplianceSearch -Identity $selected_search
+            Get-ComplianceSearch -Identity $global:selected_search
 
             try {
-                Get-ComplianceSearchAction -Case $selected_case -Identity $export_name -IncludeCredential -Details -ErrorAction Stop
+                Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details -ErrorAction Stop
             }
             catch {
                 Write-Host "No action for this search has been created yet. Use MAAD's E-Discovery export module if you wish to export contents of this search!!!"
@@ -88,43 +88,51 @@ function eDiscovery {
         if ($recon_user_choice -eq 7) {
             #Export and Download a Search"
             Display_E_Discovery_Cases $true
-            Display_E_Discovery_Case_Searches $true $selected_case
-            $export_name = $selected_search + "_Export"
+            Display_E_Discovery_Case_Searches $true $global:selected_case
+            $export_name = $global:selected_search + "_Export"
 
-            if ($selected_search -notin "",$null){
-                Write-Host "Debug!!!"
+            if ($global:selected_search -notin "",$null){
                 try {
-                    New-ComplianceSearchAction -SearchName $selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
-                    Start-Sleep -Seconds 10
-                    Get-ComplianceSearchAction -Case $selected_case -Identity $export_name -IncludeCredential -Details
-
-                    #Start download
-                    E_Discovery_Downloader $selected_case $export_name
-                }
-                catch {
-                    Write-Host "Error: Could not export the search. The search results might be too old and need to be re-ran." -ForegroundColor Red
-                    Write-Host "MAAD attempting to re-run the selected search..."
-                    Start-ComplianceSearch -Identity $selected_search
+                    New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
+                    #Check and wait for SearchAction to complete
                     do
                         {
                             Start-Sleep -s 5
-                            $complianceSearch = Get-ComplianceSearch -Identity $selected_search
+                            $complianceSearchAction = Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details
+                        }
+                    while ($complianceSearchAction.Status -ne 'Completed')
+
+                    #Start download
+                    E_Discovery_Downloader $global:selected_case $export_name
+                    break
+                }
+                catch {
+                    Write-Host "Error: Could not export the search. The search results might be too old and need to be re-ran." -ForegroundColor Red
+                    Write-Host "`nMAAD-AF attempting to re-run the selected search..."
+                    Start-ComplianceSearch -Identity $global:selected_search
+                    do
+                        {
+                            Start-Sleep -s 5
+                            $complianceSearch = Get-ComplianceSearch -Identity $global:selected_search
                         }
                     while ($complianceSearch.Status -ne 'Completed')
                     Write-Host "Successfully completed re-run of the selected compliance search!!!" -ForegroundColor Yellow -BackgroundColor Black  
                 }
             
                 try {
-                    New-ComplianceSearchAction -SearchName $selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
-                    Start-Sleep -Seconds 10
-                    Get-ComplianceSearchAction -Case $selected_case -Identity $export_name -IncludeCredential -Details
-
+                    New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
+                    #Check and wait for SearchAction to complete
+                    do
+                        {
+                            Start-Sleep -s 5
+                            $complianceSearchAction = Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details
+                        }
                     #Start download
-                    E_Discovery_Downloader $selected_case $export_name
+                    E_Discovery_Downloader $global:selected_case $export_name
                 }
                 catch {
-                    Write-Host "Error: Oops, Could not export search again."
-                    Write-Host "Obvious Tip: Try with another case/search." -ForegroundColor Gray
+                    Write-Host "Error: Could not export search again."
+                    Write-Host "Tip: Try with another case/search." -ForegroundColor Gray
                 }
             }
             else {
@@ -203,29 +211,28 @@ function Display_E_Discovery_Case_Searches ($selection = $false, $case_name) {
 function E_Discovery_Downloader ($case_name, $export_name){
 
     $export_tool = ((Get-ChildItem -Path $($env:LOCALAPPDATA + "\Apps\2.0\") -Filter microsoft.office.client.discovery.unifiedexporttool.exe -Recurse).FullName | Where-Object{ $_ -notmatch "_none_" } | Select-Object -First 1)    
-
-    $export_details = Get-ComplianceSearchAction -Case $case_name -Identity $export_name -IncludeCredential -Details    
+    $export_location = ".\Outputs\"
+    
     ##Export Details
+    $export_details = Get-ComplianceSearchAction -Case $case_name -Identity $export_name -IncludeCredential -Details
     $export_details = $export_details.Results.split(";")
     $container_url = $export_details[0].trimStart("Container url: ")
     $sas_token = $export_details[1].trimStart(" SAS token: ")
 
-    Write-Host "#######################################################################################"
+    Write-Host "`n#######################################################################################"
     Write-Host "Download URL:" $container_url
     Write-Host "Download Key:" $sas_token
-    Write-Host "#######################################################################################"
+    Write-Host "#######################################################################################`n"
 
     #Download the exported file from M365
     
-    Write-Host "`nInitiating download of export ..."
-    Write-Host "Saving export to: " + $export_location
+    Write-Host "Initiating download of export ..."
+    Write-Host "Saving export to:" $export_location
     
-
     #Start-Process -FilePath $export_tool -ArgumentList $Arguments
     & $export_tool -name $export_name -source $container_url -key $sas_token -dest $export_location -trace true
 
     Write-Host "Download completed!!!"
-    
 }
 
 function E_Discovery_Priv_Esc {

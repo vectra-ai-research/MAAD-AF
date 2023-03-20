@@ -2,7 +2,7 @@ function LaunchPreCompromise {
     $ext_recon_option_list = @{0 = "Main menu"; 1 = "Recon organization/user"; 2 = "Brute force credentials"};
         do{ 
             #Display options
-            OptionDisplay "External recon options:" $ext_recon_option_list
+            OptionDisplay "Pre-compromise options:" $ext_recon_option_list
             
             #Take user choice
             while ($true) {

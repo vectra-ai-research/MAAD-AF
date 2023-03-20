@@ -10,14 +10,24 @@ function RequiredModules {
 
         foreach ($module in $RequiredModules.GetEnumerator()) {
             if (Get-InstalledModule -Name $($module) ) {
-                Import-Module -Name $($module) -WarningAction SilentlyContinue 
+                try {
+                    Import-Module -Name $($module) -WarningAction SilentlyContinue
+                }
+                catch {
+                    Write-Host "Failed to import. Skippig module: $module. " -ForegroundColor Red
+                }  
             } 
             else {
                 Write-Host "'$module' module does NOT exist. The tool will attempt to install it now..." -ForegroundColor Gray
-                Set-ExecutionPolicy Unrestricted -Force
-                Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
-                Install-Module -Name $($module) -Confirm:$False -WarningAction SilentlyContinue
-                Import-Module -Name $($module) -WarningAction SilentlyContinue
+                try {
+                    Set-ExecutionPolicy Unrestricted -Force
+                    Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+                    Install-Module -Name $($module) -Confirm:$False -WarningAction SilentlyContinue
+                    Import-Module -Name $($module) -WarningAction SilentlyContinue
+                }
+                catch {
+                    Write-Host "Failed to install. Skippig module: $module. " -ForegroundColor Red
+                }   
             }
         }
         Write-Host "All required modules available!" -ForegroundColor Gray

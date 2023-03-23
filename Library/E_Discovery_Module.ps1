@@ -11,7 +11,7 @@ function eDiscovery {
         Start-Sleep -Seconds 5
     }
     catch {
-        Write-Host "Failed to establish session with compliance portal with the current credentials!"
+        Write-Host "Failed to establish session with compliance portal with the current credentials!" -ForegroundColor Red
         return
     }
     
@@ -59,85 +59,97 @@ function eDiscovery {
         if ($recon_user_choice -eq 4) {
             #Find eDiscovery Case Members
             Display_E_Discovery_Cases $true
-            Get-ComplianceCaseMember -Case $global:selected_case -ShowCaseAdmin
+            
+            if ($null -ne $global:selected_case){
+                Get-ComplianceCaseMember -Case $global:selected_case -ShowCaseAdmin
+            }
         }
 
         if ($recon_user_choice -eq 5) {
             #Find Existing eDiscovery Searches
             Display_E_Discovery_Cases $true
-            Display_E_Discovery_Case_Searches $false $global:selected_case
+            
+            if ($null -ne $global:selected_case){
+                Display_E_Discovery_Case_Searches $false $global:selected_case
+            }
         }
 
         if ($recon_user_choice -eq 6) {
             #Find Details of a Search
             Display_E_Discovery_Cases $true
-            Display_E_Discovery_Case_Searches $true $global:selected_case
-            $export_name = $global:selected_search + "_Export"
-
-            Get-ComplianceSearch -Identity $global:selected_search
-
-            try {
-                Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details -ErrorAction Stop
-            }
-            catch {
-                Write-Host "No action for this search has been created yet. Use MAAD's E-Discovery export module if you wish to export contents of this search!!!"
-            }
             
+            if ($null -ne $global:selected_case){
+                Display_E_Discovery_Case_Searches $true $global:selected_case
+            
+                $export_name = $global:selected_search + "_Export"
+
+                Get-ComplianceSearch -Identity $global:selected_search
+
+                try {
+                    Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details -ErrorAction Stop
+                }
+                catch {
+                    Write-Host "No action for this search has been created yet. Use MAAD's E-Discovery export module if you wish to export contents of this search!!!"
+                }
+            }            
         }
 
         if ($recon_user_choice -eq 7) {
             #Export and Download a Search"
             Display_E_Discovery_Cases $true
-            Display_E_Discovery_Case_Searches $true $global:selected_case
-            $export_name = $global:selected_search + "_Export"
-
-            if ($global:selected_search -notin "",$null){
-                try {
-                    New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
-                    #Check and wait for SearchAction to complete
-                    do
-                        {
-                            Start-Sleep -s 5
-                            $complianceSearchAction = Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details
-                        }
-                    while ($complianceSearchAction.Status -ne 'Completed')
-
-                    #Start download
-                    E_Discovery_Downloader $global:selected_case $export_name
-                    break
-                }
-                catch {
-                    Write-Host "Error: Could not export the search. The search results might be too old and need to be re-ran." -ForegroundColor Red
-                    Write-Host "`nMAAD-AF attempting to re-run the selected search..."
-                    Start-ComplianceSearch -Identity $global:selected_search
-                    do
-                        {
-                            Start-Sleep -s 5
-                            $complianceSearch = Get-ComplianceSearch -Identity $global:selected_search
-                        }
-                    while ($complianceSearch.Status -ne 'Completed')
-                    Write-Host "Successfully completed re-run of the selected compliance search!!!" -ForegroundColor Yellow -BackgroundColor Black  
-                }
             
-                try {
-                    New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
-                    #Check and wait for SearchAction to complete
-                    do
-                        {
-                            Start-Sleep -s 5
-                            $complianceSearchAction = Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details
-                        }
-                    while ($complianceSearchAction.Status -ne 'Completed')
-                    #Start download
-                    E_Discovery_Downloader $global:selected_case $export_name
+            if ($null -ne $global:selected_case){   
+                Display_E_Discovery_Case_Searches $true $global:selected_case
+                $export_name = $global:selected_search + "_Export"
+
+                if ($global:selected_search -notin "",$null){
+                    try {
+                        New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
+                        #Check and wait for SearchAction to complete
+                        do
+                            {
+                                Start-Sleep -s 5
+                                $complianceSearchAction = Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details
+                            }
+                        while ($complianceSearchAction.Status -ne 'Completed')
+
+                        #Start download
+                        E_Discovery_Downloader $global:selected_case $export_name
+                        break
+                    }
+                    catch {
+                        Write-Host "Error: Could not export the search. The search results might be too old and need to be re-ran." -ForegroundColor Red
+                        Write-Host "`nMAAD-AF attempting to re-run the selected search..."
+                        Start-ComplianceSearch -Identity $global:selected_search
+                        do
+                            {
+                                Start-Sleep -s 5
+                                $complianceSearch = Get-ComplianceSearch -Identity $global:selected_search
+                            }
+                        while ($complianceSearch.Status -ne 'Completed')
+                        Write-Host "Successfully completed re-run of the selected compliance search!!!" -ForegroundColor Yellow -BackgroundColor Black  
+                    }
+                
+                    try {
+                        New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
+                        #Check and wait for SearchAction to complete
+                        do
+                            {
+                                Start-Sleep -s 5
+                                $complianceSearchAction = Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details
+                            }
+                        while ($complianceSearchAction.Status -ne 'Completed')
+                        #Start download
+                        E_Discovery_Downloader $global:selected_case $export_name
+                    }
+                    catch {
+                        Write-Host "Error: Could not export search again."
+                        Write-Host "Tip: Try with another case/search." -ForegroundColor Gray
+                    }
                 }
-                catch {
-                    Write-Host "Error: Could not export search again."
-                    Write-Host "Tip: Try with another case/search." -ForegroundColor Gray
+                else {
+                    Write-Host "No search available in selected case to export!!!`n Try another case."
                 }
-            }
-            else {
-                Write-Host "No search available in selected case to export!!!`n Try another case."
             }
         }
 
@@ -161,10 +173,17 @@ function Display_E_Discovery_Cases ($selection = $false) {
     $all_e_discovery_cases = Get-ComplianceCase
     Write-Host ""
 
+    if ($null -eq $all_e_discovery_cases){
+        Write-Host "No eDiscovery cases found!!!"
+        $continue = $false
+        return
+    }
+
     Write-Host "eDiscovery cases in the environment" -ForegroundColor Gray
     foreach ($item in $all_e_discovery_cases){
         Write-Host $([array]::IndexOf($all_e_discovery_cases,$item)+1) ':' $item.Name
     } 
+
 
     while ($selection) {
         try {

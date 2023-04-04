@@ -35,20 +35,21 @@ function DisableAntiPhishing {
     
     #Undo changes
     if ($allow_undo -eq $true) {
+        #Re-enble AntiPhishing Policy
         $user_choice = Read-Host -Prompt "`nWould you like to re-enable the Anti-Phishing policy? (yes/no)"
 
         if ($user_choice -notin "No","no","N","n") {
-            #Re-enble AntiPhishing Policy
-            #Set-AntiPhishPolicy -Identity $policy_name -Enabled 1
-            Enable-AntiPhishRule -Identity 'SE Seike Field Test O365 Risky Exchange Operation' -Confirm:$false
-            Start-Sleep -s 5 
-
-            #Get-AntiPhishPolicy -Identity $policy_name | Format-Table Name,Enabled,IsDefault
-            Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
-            Write-Host "Undo successful: Re-enabled Anti-Phishing policy: '$policy_name'" -ForegroundColor Yellow -BackgroundColor Black
-        }
-        else {
-            Write-Host "Failed to undo changes" -ForegroundColor Red
+            try {
+                Enable-AntiPhishRule -Identity 'SE Seike Field Test O365 Risky Exchange Operation' -Confirm:$false
+                Start-Sleep -s 5 
+    
+                #Get-AntiPhishPolicy -Identity $policy_name | Format-Table Name,Enabled,IsDefault
+                Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
+                Write-Host "Undo successful: Re-enabled Anti-Phishing policy: '$policy_name'" -ForegroundColor Yellow -BackgroundColor Black
+            }
+            catch {
+                Write-Host "Failed to undo changes" -ForegroundColor Red
+            }
         }
     }
     Pause

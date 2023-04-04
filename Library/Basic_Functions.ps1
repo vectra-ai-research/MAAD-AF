@@ -43,71 +43,20 @@ function ClearActiveSessions {
     Get-PSSession | Remove-PSSession
 }
 
-function establish_connection {
-    Write-Host "`n"
-
-    if ($global:AdminUsername -eq $null -or $global:AdminUsername -eq "" -or $global:AdminPassword -eq "" -or $global:AdminUsername -eq "enter_username_here@domain.com" -or $global:AdminPassword -eq "Enter_Password_Here!") {
-        Write-Host "Enter admin credentials to access Azure AD & M365 environment" -ForegroundColor Red
-        $global:AdminUsername = Read-Host -Prompt "Enter admin username:"
-        $global:AdminSecurePass = Read-Host -Prompt "Enter $global:AdminUsername password:" -AsSecureString 
-        $global:AdminCredential = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:AdminUsername, $global:AdminSecurePass)
-        Write-Host "`nTip: You can also store credentials in MAAD_Config.ps1 if you would like to." -ForegroundColor Gray
-    }
-    else {
-        Write-Host "Retrieved credentials set in config ...`n"
-        $global:AdminSecurePass = ConvertTo-SecureString $global:AdminPassword -AsPlainText -Force
-        $global:AdminCredential = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:AdminUsername, $global:AdminSecurePass)
-    }
-
-    #Create Sessions
-    Write-Host "`nHold tight!!! Establishing access to Azure AD and M365 services ..." -ForegroundColor Yellow 
-
-    try {
-        Connect-AzureAD -Credential $global:AdminCredential -WarningAction SilentlyContinue | Out-Null 
-        Connect-MsolService  -Credential $global:AdminCredential -WarningAction SilentlyContinue | Out-Null
-        Write-Host "`nYou are in - Connection established successfully!!!" -ForegroundColor Yellow -BackgroundColor Black
-    }
-    catch {
-        Write-Host "Failed to establish access to AzureAD. Validate credentials!"
-        $null = Read-Host "Exiting tool now!!!"
-        exit
-    }
-
-    try { 
-        Connect-ExchangeOnline -Credential $global:AdminCredential -WarningAction SilentlyContinue  -ShowBanner:$false -ErrorAction Stop| Out-Null 
-        Write-Host "Successfully established access to Exchange Online!"
-    }
-    catch {
-        Write-Host "Failed to establish access to Exchange online service. Some attack modules requiring this service might not work!" -ForegroundColor Red
-        $_
-    }
-
-    #Connect to AzAccount
-    try { 
-        Connect-AzAccount -Credential $global:AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null
-    }
-    catch {
-        Write-Host "Failed to establish access to AzAccount. Some attack modules requiring this service might not work!" -ForegroundColor Red
-        $_
-    }
-
-    try { 
-        Connect-MicrosoftTeams -Credential $global:AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null
-        Write-Host "Successfully established access to Teams!"
-    }
-    catch {
-        Write-Host "`nFailed to establish access to Teams service. Some attack modules requiring this service might not work!" -ForegroundColor Red
-        $_
-    }
-}
-
 function terminate_connection {
-    Write-Host "`nClosing all existing connections........." -ForegroundColor Yellow -BackgroundColor Black
-    Disconnect-AzureAD -Confirm:$false | Out-Null
-    Disconnect-ExchangeOnline -Confirm:$false | Out-Null
-    Disconnect-AzAccount -Confirm:$false | Out-Null
-    Disconnect-MicrosoftTeams -Confirm:$false | Out-Null
-    [Microsoft.Online.Administration.Automation.ConnectMsolService]::ClearUserSessionState() | Out-Null
+    try {
+        Write-Host "`nClosing all existing connections........." -ForegroundColor Yellow -BackgroundColor Black
+        Disconnect-AzureAD -Confirm:$false | Out-Null
+        Disconnect-ExchangeOnline -Confirm:$false | Out-Null
+        Disconnect-AzAccount -Confirm:$false | Out-Null
+        Disconnect-MicrosoftTeams -Confirm:$false | Out-Null
+        Disconnect-PnPOnline | Out-Null
+        Disconnect-SPOService | Out-Null
+        [Microsoft.Online.Administration.Automation.ConnectMsolService]::ClearUserSessionState() | Out-Null
+    }
+    catch {
+        #Do nothing. We are leaving. Bye!
+    }
 }
 
 function OptionDisplay ($menu_message, $option_list_dictionary){

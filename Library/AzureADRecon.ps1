@@ -23,9 +23,26 @@ function AzureADRecon {
 
       if ($recon_user_choice -eq 2) {
          #Get current user access token
-         $token = Get-AzAccessToken
-         $token
-         $token | Out-File -FilePath .\Outputs\Azure_AD_Token$current_time.txt
+
+         #Display options to generate different types of tokens
+         $token_types = @("AadGraph", "AnalysisServices", "AppConfiguration", "Arm", "Attestation", "Batch", "DataLake", "KeyVault", "MSGraph", "OperationalInsights", "ResourceManager", "Storage", "Synapse")
+         foreach ($item in $token_types){
+            Write-Host $token_types.IndexOf($item) ":" $item -ForegroundColor Gray
+         }
+         [int]$token_type_choice = Read-Host "`nChoose a token type to generate"
+         $token_type = $token_types[$token_type_choice]
+         #Generate token
+         try {
+            $token = Get-AzAccessToken -ResourceTypeName $token_type
+            Write-Host $token
+            #Saved token information to tokens file
+            "Token type: $token_type" | Out-File -Append -FilePath .\Outputs\Azure_AD_Tokens.txt
+            $token | Out-File -Append -FilePath .\Outputs\Azure_AD_Tokens.txt
+            Write-Host "Token saved to Outputs directory" -ForegroundColor Gray
+         }
+         catch {
+            Write-Host "Failed to generate token!" -ForegroundColor Red
+         }
       }
 
       if ($recon_user_choice -eq 3) {

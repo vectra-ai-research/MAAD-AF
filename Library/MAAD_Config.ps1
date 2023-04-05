@@ -15,15 +15,15 @@ Add credntials to $CredentialList in the following format:
 $global:CredentialsList = @(@{"username" = "user1@foo.com";"password" = "xyz_zyx";"token"= "123abc"},@{"username" = "user2@foo.com";"password" = "xyz_zyx";"token"=""})
 #>
 
-#####Access credentials#####
+                #####Access credentials#####
 
 #Note: This configuration is totally optional. Add the crompromised credentials to the if you wish to the $global:CredentialsList list below.
 
 $global:CredentialsList = @()
 
-#####TOR Configuration#####
+                ############################
 
-
+                #####TOR Configuration#####
 
 #Enter TOR root folder path
 $global:tor_root_directory = "C:\Users\username\sub_folder\Tor Browser"
@@ -34,3 +34,5 @@ $global:tor_host = "127.0.0.1"
 $global:tor_port = 9150
 #TOR controller port
 $global:control_port = 9151
+
+                ###########################

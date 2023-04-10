@@ -13,9 +13,9 @@ $Global:MAAD_AF= @"
 function MAADInitialization {
 $host.UI.RawUI.WindowTitle = "MAAD Attack Framework"
 Write-Host $Global:MAAD_AF -ForegroundColor Yellow
-Write-Host "                                            Created by Arpan Sarkar (@openre0n)`n" -ForegroundColor Gray
+Write-Host "                                            Created by Arpan Sarkar (@openrec0n)`n" -ForegroundColor Gray
 
 #Initiation disclaimer
 Write-Host "                                              Welcome to MAAD Attack Framework`n                                 Attack Tool for simple, fast & effective security testing`n" 
-$null = Read-Host "By continuing you agree to use MAAD-AF for educational purposes or authorized security testing only. `nPress 'Enter' to continue or hit [Ctrl+C] to exit..."
+$null = Read-Host "By using MAAD-AF you agree to use it for educational purposes or authorized security testing only. `nPress 'Enter' to continue or hit [Ctrl+C] to exit..."
 }

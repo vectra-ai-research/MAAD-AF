@@ -448,7 +448,7 @@ function AccessSharepoint {
     #Find the sharepoint URL
     if ($sharepoint_url -notin "No","no","N","n"){
         $tenant = $AdminUsername.Split("@")[1]
-        $tenant_intel = Invoke-AADIntReconAsOutsider -DomainName $tenant | Out-Null
+        $tenant_intel = Invoke-AADIntReconAsOutsider -DomainName $tenant
 
         foreach ($domain in $tenant_intel){
             #Write-Host $domain.Name
@@ -457,7 +457,7 @@ function AccessSharepoint {
             }
         }
         $sharepoint_url = "https://$global:sharepoint_tenant.sharepoint.com"
-        #Write-Host "Sharepoint url: $sharepoint_url"
+        Write-Host "Sharepoint url: $sharepoint_url"
     }
     
     if ($AccessToken -notin "",$null ) {
@@ -511,7 +511,7 @@ function AccessSharepoint {
     else {
         try {
             #Attempt basic authentication
-            Connect-PnPOnline -Url $sharepoint_url -Credentials $AdminCredential
+            Connect-PnPOnline -Url $sharepoint_url -Credentials $AdminCredential -ErrorAction Stop
             Write-Host "[.]Established access to SharePoint`n" -ForegroundColor Yellow
         }
         catch [Microsoft.Identity.Client.MsalUiRequiredException]{

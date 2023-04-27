@@ -8,7 +8,7 @@ function ExternalTeamsAccess {
         if ($module_choice -eq 1) {
             $user_choice = Read-Host -Prompt "Would you like to initiate recon to find available teams? (yes/no)"
             if ($user_choice -notin "No","no","N","n") {
-                Write-Host "`nRecon: Searching information on available teams in the environment ..." -ForegroundColor Yellow
+                Write-Host "`nRecon: Searching information on available teams in the environment ..." @fg_yellow
                 Get-Team | Format-Table DisplayName,GroupID,Description,Visibility    
             }
             
@@ -68,7 +68,7 @@ function ExternalTeamsAccess {
     while ($timer -le $time_limit_sec){
         try{
             Add-TeamUser -GroupId $group_id -Role Member -User $external_email_address -ErrorAction Stop
-            Write-Host "Successfully added new account: $external_email_address to teams group: $display_name" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "Successfully added new account: $external_email_address to teams group: $display_name" @fg_yellow @bg_black
             $allow_undo = $true
             break
         }

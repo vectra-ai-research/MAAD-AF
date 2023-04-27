@@ -11,7 +11,7 @@ function eDiscovery {
         Start-Sleep -Seconds 5
     }
     catch {
-        Write-Host "Failed to establish session with compliance portal with the current credentials!" -ForegroundColor Red
+        Write-Host "Failed to establish session with compliance portal with the current credentials!" @fg_red
         return
     }
     
@@ -21,7 +21,7 @@ function eDiscovery {
 
     #Check eDiscovery Admin 
     if ((Get-AzureADUser -ObjectId $global:AdminUsername).DisplayName -notin $admin_role_members.Name){
-        Write-Host "`nNote: You are currently not eDiscovery Admin which may prevent you from executing certain operations. Start by attempting privilege escalation using eDiscovery sub-module [8]' ;)" -ForegroundColor Gray
+        Write-Host "`nNote: You are currently not eDiscovery Admin which may prevent you from executing certain operations. Start by attempting privilege escalation using eDiscovery sub-module [8]' ;)" @fg_gray
     }
 
     $e_discovery_options = @{0 = "Back"; 1 = "Quick Grab And Run"; 2 = "Create a new eDiscovery Search"; 3 = "Recon Existing eDiscovery Cases"; 4 = "Find eDiscovery Case Members"; 5 = "Recon Existing eDiscovery Searches"; 6 = "Find Details of a Search"; 7 = "Export and Download a Search"; 8 = "Escalate eDiscovery Privileges"; 9 = "Install Unified Export Tool"};
@@ -118,7 +118,7 @@ function eDiscovery {
                         break
                     }
                     catch {
-                        Write-Host "Error: Could not export the search. The search results might be too old and need to be re-ran." -ForegroundColor Red
+                        Write-Host "Error: Could not export the search. The search results might be too old and need to be re-ran." @fg_red
                         Write-Host "`nMAAD-AF attempting to re-run the selected search..."
                         Start-ComplianceSearch -Identity $global:selected_search
                         do
@@ -127,7 +127,7 @@ function eDiscovery {
                                 $complianceSearch = Get-ComplianceSearch -Identity $global:selected_search
                             }
                         while ($complianceSearch.Status -ne 'Completed')
-                        Write-Host "Successfully completed re-run of the selected compliance search!!!" -ForegroundColor Yellow -BackgroundColor Black  
+                        Write-Host "Successfully completed re-run of the selected compliance search!!!" @fg_yellow @bg_black  
                     }
                 
                     try {
@@ -144,7 +144,7 @@ function eDiscovery {
                     }
                     catch {
                         Write-Host "Error: Could not export search again."
-                        Write-Host "Tip: Try with another case/search." -ForegroundColor Gray
+                        Write-Host "Tip: Try with another case/search." @fg_gray
                     }
                 }
                 else {
@@ -179,7 +179,7 @@ function Display_E_Discovery_Cases ($selection = $false) {
         return
     }
 
-    Write-Host "eDiscovery cases in the environment" -ForegroundColor Gray
+    Write-Host "eDiscovery cases in the environment" @fg_gray
     foreach ($item in $all_e_discovery_cases){
         Write-Host $([array]::IndexOf($all_e_discovery_cases,$item)+1) ':' $item.Name
     } 
@@ -203,7 +203,7 @@ function Display_E_Discovery_Case_Searches ($selection = $false, $case_name) {
     $all_case_searches = Get-ComplianceSearch -Case $case_name
     Write-Host ""
 
-    Write-Host "Here are the available searches in the case: $case_name" -ForegroundColor Gray
+    Write-Host "Here are the available searches in the case: $case_name" @fg_gray
     if ($all_case_searches -is [array]) {
         foreach ($item in $all_case_searches){
             Write-Host $([array]::IndexOf($all_case_searches,$item)+1) ':' $item.Name
@@ -266,10 +266,10 @@ function E_Discovery_Priv_Esc {
         if ((Get-AzureADUser -ObjectId $global:AdminUsername).DisplayName -notin $role_members.Name){ 
             #Escalate to Manager
             try {
-                Write-Host "`nAttempting to escalate privileges to eDiscovery Manager role ..." -ForegroundColor Gray
+                Write-Host "`nAttempting to escalate privileges to eDiscovery Manager role ..." @fg_gray
                 Add-RoleGroupMember -Identity "eDiscovery Manager" -Member $global:AdminUsername -ErrorAction Stop
                 Write-Host "`nSuccessfully elevated privileges to eDiscovery Manager role!"
-                Write-Host "Waiting for changes to take effect..." -ForegroundColor Gray
+                Write-Host "Waiting for changes to take effect..." @fg_gray
                 Start-Sleep -Seconds 30
             }
             catch {
@@ -280,14 +280,14 @@ function E_Discovery_Priv_Esc {
         
         ###Escalate to eDiscovery Admin
         try {
-            Write-Host "`nNow attempting to escalate privileges to eDiscovery Administrator..." -ForegroundColor Gray
+            Write-Host "`nNow attempting to escalate privileges to eDiscovery Administrator..." @fg_gray
             Add-eDiscoveryCaseAdmin -User $global:AdminUsername
-            Write-Host "Waiting for changes to take effect..." -ForegroundColor Gray
+            Write-Host "Waiting for changes to take effect..." @fg_gray
             Start-Sleep -Seconds 30
-            Write-Host "`nYou are now eDiscovery Admin!!!" -ForegroundColor Yellow
+            Write-Host "`nYou are now eDiscovery Admin!!!" @fg_yellow
         }
         catch {
-            Write-Host "Failed to escalate privileges to eDiscovery Admin!" -ForegroundColor Red
+            Write-Host "Failed to escalate privileges to eDiscovery Admin!" @fg_red
             break
         }
 
@@ -298,12 +298,12 @@ function E_Discovery_Priv_Esc {
             Start-Sleep -Seconds 5
         }
         catch {
-            Write-Host "Error: Failed to establish new session!" -ForegroundColor Red
+            Write-Host "Error: Failed to establish new session!" @fg_red
         }
         }
     else {
         Write-Host "`nSometimes life is not that hard ;)"
-        Write-Host "You are already eDiscovery Admin & Manager!!!" -ForegroundColor Yellow
+        Write-Host "You are already eDiscovery Admin & Manager!!!" @fg_yellow
         return
     }
 }
@@ -344,7 +344,7 @@ function Create_New_Search {
         Start-ComplianceSearch -Identity $search_name -ErrorAction Stop
     }
     catch {
-        Write-Host "Failed to start compliance search!" -ForegroundColor Red
+        Write-Host "Failed to start compliance search!" @fg_red
         break
     }
     
@@ -354,7 +354,7 @@ function Create_New_Search {
             $complianceSearch = Get-ComplianceSearch -Identity $search_name
         }
     while ($complianceSearch.Status -ne 'Completed')
-    Write-Host "Compliance Search completed!!!" -ForegroundColor Yellow -BackgroundColor Black
+    Write-Host "Compliance Search completed!!!" @fg_yellow @bg_black
 
     Read-Host -Prompt "Press enter to see details of the compliance search:"
     Get-ComplianceSearch -Identity $search_name | fl
@@ -411,5 +411,5 @@ function Install_Unified_Export_Tool {
             Get-EventSubscriber|? {$_.SourceObject.ToString() -eq 'System.Deployment.Application.InPlaceHostingManager'} | Unregister-Event
         }
     }
-    Write-Host "Unified Export tool already installed. You are all set here!" -BackgroundColor Black -ForegroundColor Yellow
+    Write-Host "Unified Export tool already installed. You are all set here!" @bg_black @fg_yellow
 }

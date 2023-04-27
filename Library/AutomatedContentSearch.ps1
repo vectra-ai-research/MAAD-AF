@@ -83,7 +83,7 @@ function AutomatedContentSearch {
             $Comp_Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid -Credential $global:AdminCredential -Authentication Basic -AllowRedirection 
             Import-PSSession $Comp_Session -AllowClobber
 
-            Write-Host "`nAttempting to escalate privileges to eDiscovery Manager role ..." -ForegroundColor Gray
+            Write-Host "`nAttempting to escalate privileges to eDiscovery Manager role ..." @fg_gray
             Add-RoleGroupMember -Identity "eDiscovery Manager" -Member $global:AdminUsername -ErrorAction Stop
             #Add-eDiscoveryCaseAdmin -User $global:AdminUsername
             Write-Host "`nSuccessfully elevated privileges to eDiscovery Manager role!"
@@ -117,7 +117,7 @@ function AutomatedContentSearch {
             $complianceSearch = Get-ComplianceSearch -Identity $search_name
         }
     while ($complianceSearch.Status -ne 'Completed')
-    Write-Host "Compliance Search completed!!!" -ForegroundColor Yellow -BackgroundColor Black
+    Write-Host "Compliance Search completed!!!" @fg_yellow @bg_black
     
     Get-ComplianceSearch -Identity $search_name | fl
  
@@ -148,7 +148,7 @@ function AutomatedContentSearch {
             }
         while ($complete.Status -ne 'Completed')
         
-        Write-Host "`nExport completed" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`nExport completed" @fg_yellow @bg_black
         
         $export_details = Get-ComplianceSearchAction -Case $case_name -Identity $export_name -IncludeCredential -Details
         
@@ -181,7 +181,7 @@ function AutomatedContentSearch {
                     #Deleting case
                     Write-Host "Deleting case"
                     Remove-ComplianceCase -Identity $case_name -Confirm:$false
-                    Write-Host "`Undo successful: Removed E-discovery case: $case_name`n" -ForegroundColor Yellow -BackgroundColor Black
+                    Write-Host "`Undo successful: Removed E-discovery case: $case_name`n" @fg_yellow @bg_black
                 }
                 catch {
                     Write-Host "Error: Failed to delete E-discovery case $case_name!`n You can try to delete it manually from the Admin console."

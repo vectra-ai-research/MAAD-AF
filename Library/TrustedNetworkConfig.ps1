@@ -15,7 +15,7 @@ function TrustedNetworkConfig {
         Pause
 
         if ($ip_addr -eq "") {
-            Write-Host "`nFailed to resolve IP automatically." -ForegroundColor Gray
+            Write-Host "`nFailed to resolve IP automatically." @fg_gray
             $ip_addr = Read-Host -Prompt "Manually enter IP address to add as trusted named location"
         }
     }
@@ -25,7 +25,7 @@ function TrustedNetworkConfig {
         Write-Host "Creating policy $trusted_policy_name to add your IP as trusted named location...`n"
         $trusted_nw = New-AzureADMSNamedLocationPolicy -OdataType "#microsoft.graph.ipNamedLocation" -DisplayName $trusted_policy_name -IsTrusted $true -IpRanges "$ip_addr/32" -ErrorAction Stop
         $trusted_nw
-        Write-Host "Successfully created trusted location policy $trusted_policy_name with IP $ip_addr !!!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "Successfully created trusted location policy $trusted_policy_name with IP $ip_addr !!!" @fg_yellow @bg_black
         $allow_undo = $true
     }
     catch {
@@ -41,10 +41,10 @@ function TrustedNetworkConfig {
             try {
                 Write-Host "Removing trusted location policy: $trusted_policy_name ...`n"
                 Remove-AzureADMSNamedLocationPolicy -PolicyId $trusted_nw.Id
-                Write-Host "Undo successful: Removed the trusted location policy!!!" -ForegroundColor Yellow
+                Write-Host "Undo successful: Removed the trusted location policy!!!" @fg_yellow
             }
             catch {
-                Write-Host "Failed to remove the trusted location policy!!!" -ForegroundColor Red
+                Write-Host "Failed to remove the trusted location policy!!!" @fg_red
             }
             
         }

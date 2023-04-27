@@ -37,7 +37,7 @@ TORAnonymizer("start")
 ###Main Script###
 while ($true) {
     #Display primary modes
-    Write-Host "`n                    ___MAAD-AF Modes___`n(1)Pre-compromise                  (2)Exploit M365/AzureAD`n" -ForegroundColor Yellow
+    Write-Host "`n                    ___MAAD-AF Modes___`n(1)Pre-compromise                  (2)Exploit M365/AzureAD`n" @fg_yellow
     
     [int]$mode = Read-Host "Choose mode:"
     switch ($mode) {

@@ -4,9 +4,9 @@ function establish_connection {
     Write-Host ""
     #Checking if saved credentials are available in MAAD_Config.ps1
     if ($global:CredentialsList.Count -gt 0) {
-        Write-Host "Credentials available:" -ForegroundColor Gray
+        Write-Host "Credentials available:" @fg_gray
         foreach ($item in $global:CredentialsList){
-            Write-Host $global:CredentialsList.IndexOf($item) ":" $item["username"] -ForegroundColor Gray
+            Write-Host $global:CredentialsList.IndexOf($item) ":" $item["username"] @fg_gray
         }
         $credential_choice = Read-Host "`nChoose a credential from the list or enter 'x' to enter new credentials manually"
 
@@ -26,11 +26,11 @@ function establish_connection {
 
     #Get credentials if not found in config file
     if ($global:AdminUsername -in $null,"" -or $global:AdminPassword -in "",$null) {
-        Write-Host "`nEnter admin credentials to access Azure AD & M365 environment" -ForegroundColor Red
+        Write-Host "`nEnter admin credentials to access Azure AD & M365 environment" @fg_red
         $global:AdminUsername = Read-Host -Prompt "Enter admin username:"
         $global:AdminSecurePass = Read-Host -Prompt "Enter $global:AdminUsername password:" -AsSecureString 
         $global:AdminCredential = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:AdminUsername, $global:AdminSecurePass)
-        Write-Host "`nTip: You can also store credentials in MAAD_Config.ps1 if you would like to." -ForegroundColor Gray
+        Write-Host "`nTip: You can also store credentials in MAAD_Config.ps1 if you would like to." @fg_gray
     }
     else {
         Write-Host "Retrieved credentials...`n"
@@ -39,7 +39,7 @@ function establish_connection {
     }
 
     #Create Sessions
-    Write-Host "`nHold tight!!! Establishing access to Azure AD and M365 services..." -ForegroundColor Yellow -BackgroundColor Black
+    Write-Host "`nHold tight!!! Establishing access to Azure AD and M365 services..." @fg_yellow @bg_black
     AccessAzureAD $global:AdminUsername $global:AdminCredential $global:AccessToken
     AccessAzAccount $global:AdminUsername $global:AdminCredential $global:AccessToken
     AccessTeams $global:AdminUsername $global:AdminCredential $global:AccessToken
@@ -60,34 +60,34 @@ function AccessAzureAD{
         try {
         #Attempt token authentication  
         Connect-AzureAD -AadAccessToken $AccessToken -AccountId $AdminUsername -ErrorAction Stop | Out-Null
-        Write-Host "[.]Established access to AzureAD`n" -ForegroundColor Yellow
+        Write-Host "[.]Established access to AzureAD`n" @fg_yellow
         }
         catch {
             Write-Host "Token authentication failed. Attempting basic authentication now..."
             try {
                 #Attempt basic authentication
                 Connect-AzureAD -Credential $AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null 
-                Write-Host "[.]Established access to AzureAD`n" -ForegroundColor Yellow
+                Write-Host "[.]Established access to AzureAD`n" @fg_yellow
             }
             catch [Microsoft.Open.Azure.AD.CommonLibrary.AadAuthenticationFailedException]{
                 #Check if account has MFA requirements for authentication
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-AzureAD -ErrorAction Stop | Out-Null
-                        Write-Host "[.]Established access to AzureAD`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to AzureAD`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n" @fg_red
                     }
                 }
                 if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             catch {
-                Write-Host "Failed to establish access to AzureAD. Validate credentials!`n" -ForegroundColor Red
+                Write-Host "Failed to establish access to AzureAD. Validate credentials!`n" @fg_red
             }
         }
     }
@@ -95,27 +95,27 @@ function AccessAzureAD{
         try {
             #Attempt basic authentication
             Connect-AzureAD -Credential $AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null 
-            Write-Host "[.]Established access to AzureAD`n" -ForegroundColor Yellow  
+            Write-Host "[.]Established access to AzureAD`n" @fg_yellow  
         }
         catch [Microsoft.Open.Azure.AD.CommonLibrary.AadAuthenticationFailedException]{
             #Check if account has MFA requirements for authentication
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-AzureAD -ErrorAction Stop | Out-Null
-                    Write-Host "[.]Established access to AzureAD`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to AzureAD`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                Write-Host "Invalid credentials!`n" @fg_red
             }
         }
         catch {
-            Write-Host "Failed to establish access to AzureAD. Validate credentials!`n" -ForegroundColor Red
+            Write-Host "Failed to establish access to AzureAD. Validate credentials!`n" @fg_red
         }
     }
 }
@@ -131,34 +131,34 @@ function AccessAzAccount {
         try {
         #Attempt token authentication  
         Connect-AzAccount -AccessToken $AccessToken -AccountId $AdminUsername -ErrorAction Stop | Out-Null
-        Write-Host "[.]Established access to Az`n" -ForegroundColor Yellow
+        Write-Host "[.]Established access to Az`n" @fg_yellow
         }
         catch {
             Write-Host "Token authentication failed. Attempting basic authentication now..."
             try {
                 #Attempt basic authentication
                 Connect-AzAccount -Credential $AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null 
-                Write-Host "[.]Established access to Az`n" -ForegroundColor Yellow
+                Write-Host "[.]Established access to Az`n" @fg_yellow
             }
             catch [Microsoft.Azure.Commands.Common.Exceptions.AzPSAuthenticationFailedException]{
                 #Check if account has MFA requirements for authentication
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-AzAccount -ErrorAction Stop | Out-Null
-                        Write-Host "[.]Established access to Az`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to Az`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n`n" @fg_red
                     }
                 }
                 if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                    Write-Host "Invalid credentials!`n`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n`n" @fg_red
                 }
             }
             catch {
-                Write-Host "Failed to establish access to Az. Validate credentials!`n" -ForegroundColor Red
+                Write-Host "Failed to establish access to Az. Validate credentials!`n" @fg_red
             }
         }
     }
@@ -166,28 +166,28 @@ function AccessAzAccount {
         try {
             #Attempt basic authentication
             Connect-AzAccount -Credential $AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null 
-            Write-Host "[.]Established access to Az`n" -ForegroundColor Yellow
+            Write-Host "[.]Established access to Az`n" @fg_yellow
         }
         catch [Microsoft.Azure.Commands.Common.Exceptions.AzPSAuthenticationFailedException]{
             #Check if account has MFA requirements for authentication
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-AzAccount -ErrorAction Stop | Out-Null
-                    Write-Host "[.]Established access to Az`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to Az`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n`n" @fg_red
                 }
             }
             if ($null -ne (Select-String -Pattern "invalid username or password`n" -InputObject $_.Exception.Message)) {
-                Write-Host "Invalid credentials!`n`n" -ForegroundColor Red
+                Write-Host "Invalid credentials!`n`n" @fg_red
             }
         }
         catch {
             $_
-            Write-Host "Failed to establish access to Az. Validate credentials!`n" -ForegroundColor Red
+            Write-Host "Failed to establish access to Az. Validate credentials!`n" @fg_red
         }
     }
 }
@@ -203,36 +203,36 @@ function AccessTeams {
         try {
         #Attempt token authentication  
         Connect-MicrosoftTeams -AadAccessToken $AccessToken -AccountId $AdminUsername -ErrorAction Stop | Out-Null
-        Write-Host "[.]Established access to Teams`n" -ForegroundColor Yellow
+        Write-Host "[.]Established access to Teams`n" @fg_yellow
         }
         catch {
             Write-Host "Token authentication failed. Attempting basic authentication now..."
             try {
                 #Attempt basic authentication
                 Connect-MicrosoftTeams -Credential $AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null 
-                Write-Host "[.]Established access to Teams`n" -ForegroundColor Yellow
+                Write-Host "[.]Established access to Teams`n" @fg_yellow
             }
             catch [System.AggregateException]{
                 #Check if account has MFA requirements for authentication
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-MicrosoftTeams -ErrorAction Stop | Out-Null
-                        Write-Host "[.]Established access to Teams`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to Teams`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n" @fg_red
                     }
                 }
                 if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                     $null = Read-Host "Exiting tool now!!!"
                     exit
                 }
             }
             catch {
-                Write-Host "Failed to establish access to AzureAD. Validate credentials!`n" -ForegroundColor Red
+                Write-Host "Failed to establish access to AzureAD. Validate credentials!`n" @fg_red
             }
         }
     }
@@ -240,29 +240,29 @@ function AccessTeams {
         try {
             #Attempt basic authentication
             Connect-MicrosoftTeams -Credential $AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null 
-            Write-Host "[.]Established access to Teams`n" -ForegroundColor Yellow  
+            Write-Host "[.]Established access to Teams`n" @fg_yellow  
         }
         catch [System.AggregateException]{
             #Check if account has MFA requirements for authentication
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-MicrosoftTeams -ErrorAction Stop | Out-Null
-                    Write-Host "[.]Established access to Teams`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to Teams`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                Write-Host "Invalid credentials!`n" @fg_red
                 $null = Read-Host "Exiting tool now!!!"
                 exit
             }
         }
         catch {
-            Write-Host "Failed to establish access to Teams. Validate credentials!`n" -ForegroundColor Red
+            Write-Host "Failed to establish access to Teams. Validate credentials!`n" @fg_red
         }       
     }
 }
@@ -278,47 +278,47 @@ function AccessExchangeOnline {
         try {
         #Attempt token authentication  
         Connect-ExchangeOnline -AadAccessToken $AccessToken -AccountId $AdminUsername -ShowBanner:$false -ErrorAction Stop | Out-Null
-        Write-Host "[.]Established access to ExchangeOnline`n" -ForegroundColor Yellow
+        Write-Host "[.]Established access to ExchangeOnline`n" @fg_yellow
         }
         catch {
             Write-Host "Token authentication failed. Attempting basic authentication now..."
             try {
                 #Attempt basic authentication
                 Connect-ExchangeOnline -Credential $AdminCredential -WarningAction SilentlyContinue -ShowBanner:$false -ErrorAction Stop| Out-Null 
-                Write-Host "[.]Established access to ExchangeOnline`n" -ForegroundColor Yellow
+                Write-Host "[.]Established access to ExchangeOnline`n" @fg_yellow
             }
             catch [Microsoft.Identity.Client.MsalUiRequiredException]{
                 #Check if account has MFA requirements for authentication
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-ExchangeOnline -ErrorAction Stop -ShowBanner:$false | Out-Null
-                        Write-Host "[.]Established access to ExchangeOnline`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to ExchangeOnline`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n" @fg_red
                     }
                 }
                 if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             catch [System.Exception]{
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-ExchangeOnline -ErrorAction Stop -ShowBanner:$false | Out-Null
-                        Write-Host "[.]Established access to ExchangeOnline`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to ExchangeOnline`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n" @fg_red
                     }
                 }
             }
             catch {
-                Write-Host "Failed to establish access to ExchangeOnline. Validate credentials!`n" -ForegroundColor Red
+                Write-Host "Failed to establish access to ExchangeOnline. Validate credentials!`n" @fg_red
             }
         }
     }
@@ -326,40 +326,40 @@ function AccessExchangeOnline {
         try {
             #Attempt basic authentication
             Connect-ExchangeOnline -Credential $AdminCredential -WarningAction SilentlyContinue -ShowBanner:$false -ErrorAction Stop | Out-Null 
-            Write-Host "[.]Established access to ExchangeOnline`n" -ForegroundColor Yellow  
+            Write-Host "[.]Established access to ExchangeOnline`n" @fg_yellow  
         }
         catch [Microsoft.Identity.Client.MsalUiRequiredException]{
             #Check if account has MFA requirements for authentication
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-ExchangeOnline -ErrorAction Stop -ShowBanner:$false | Out-Null
-                    Write-Host "[.]Established access to ExchangeOnline`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to ExchangeOnline`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                Write-Host "Invalid credentials!`n" @fg_red
             }
         }
         catch [System.Exception]{
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-ExchangeOnline -ErrorAction Stop -ShowBanner:$false | Out-Null
-                    Write-Host "[.]Established access to ExchangeOnline`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to ExchangeOnline`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
         }
         catch {
-            Write-Host "Failed to establish access to ExchangeOnline. Validate credentials!`n" -ForegroundColor Red
+            Write-Host "Failed to establish access to ExchangeOnline. Validate credentials!`n" @fg_red
         }
     }
 }
@@ -375,34 +375,34 @@ function AccessMsol {
         try {
         #Attempt token authentication  
         Connect-MsolService -AdGraphAccessToken $AccessToken -ErrorAction Stop | Out-Null
-        Write-Host "[.]Established access to Msol`n" -ForegroundColor Yellow
+        Write-Host "[.]Established access to Msol`n" @fg_yellow
         }
         catch {
             Write-Host "Token authentication failed. Attempting basic authentication now..."
             try {
                 #Attempt basic authentication
                 Connect-MsolService -Credential $AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null 
-                Write-Host "[.]Established access to Msol" -ForegroundColor Yellow
+                Write-Host "[.]Established access to Msol" @fg_yellow
             }
             catch [Microsoft.Open.Azure.AD.CommonLibrary.AadAuthenticationFailedException]{
                 #Check if account has MFA requirements for authentication
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-MsolService -ErrorAction Stop | Out-Null
-                        Write-Host "[.]Established access to Msol`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to Msol`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n" @fg_red
                     }
                 }
                 if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             catch {
-                Write-Host "Failed to establish access to Msol. Validate credentials!`n" -ForegroundColor Red
+                Write-Host "Failed to establish access to Msol. Validate credentials!`n" @fg_red
             }
         }
     }
@@ -410,27 +410,27 @@ function AccessMsol {
         try {
             #Attempt basic authentication
             Connect-MsolService -Credential $AdminCredential -WarningAction SilentlyContinue -ErrorAction Stop| Out-Null 
-            Write-Host "[.]Established access to Msol`n" -ForegroundColor Yellow  
+            Write-Host "[.]Established access to Msol`n" @fg_yellow  
         }
         catch [Microsoft.Open.Azure.AD.CommonLibrary.AadAuthenticationFailedException]{
             #Check if account has MFA requirements for authentication
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-MsolService -ErrorAction Stop | Out-Null
-                    Write-Host "[.]Established access to Msol`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to Msol`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                Write-Host "Invalid credentials!`n" @fg_red
             }
         }
         catch {
-            Write-Host "Failed to establish access to Msol. Validate credentials!`n" -ForegroundColor Red
+            Write-Host "Failed to establish access to Msol. Validate credentials!`n" @fg_red
         }
     }
 }
@@ -442,7 +442,7 @@ function AccessSharepoint {
         $AccessToken
     )
     ###Connect Sharepoint
-    Write-Host "Attempting access to SharePoint..." -ForegroundColor Gray
+    Write-Host "Attempting access to SharePoint..." @fg_gray
     #$sharepoint_url = Read-Host -Prompt "Enter sharepoint url (or leave blank if you would like the tool to OSINT and find the url"
 
     #Find the sharepoint URL
@@ -464,47 +464,47 @@ function AccessSharepoint {
         try {
         #Attempt token authentication  
         Connect-PnPOnline -Url $sharepoint_url -AccessToken $AccessToken -ErrorAction Stop | Out-Null
-        Write-Host "[.]Established access to SharePoint`n" -ForegroundColor Yellow
+        Write-Host "[.]Established access to SharePoint`n" @fg_yellow
         }
         catch {
             Write-Host "Token authentication failed. Attempting basic authentication now..."
             try {
                 #Attempt basic authentication
                 Connect-PnPOnline -Url $sharepoint_url -Credentials $AdminCredential -ErrorAction Stop
-                Write-Host "[.]Established access to SharePoint`n" -ForegroundColor Yellow
+                Write-Host "[.]Established access to SharePoint`n" @fg_yellow
             }
             catch [Microsoft.Identity.Client.MsalUiRequiredException]{
                 #Check if account has MFA requirements for authentication
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-PnPOnline -Url $sharepoint_url -Interactive -ErrorAction Stop | Out-Null
-                        Write-Host "[.]Established access to SharePoint`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to SharePoint`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n" @fg_red
                     }
                 }
                 if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             catch [System.Exception]{
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-PnPOnline -Url $sharepoint_url -Interactive -ErrorAction Stop | Out-Null
-                        Write-Host "[.]Established access to SharePoint`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to SharePoint`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n" @fg_red
                     }
                 }
             }
             catch {
-                Write-Host "Failed to establish access to SharePoint. Validate credentials!`n" -ForegroundColor Red
+                Write-Host "Failed to establish access to SharePoint. Validate credentials!`n" @fg_red
             }
         }
     }
@@ -512,23 +512,23 @@ function AccessSharepoint {
         try {
             #Attempt basic authentication
             Connect-PnPOnline -Url $sharepoint_url -Credentials $AdminCredential -ErrorAction Stop
-            Write-Host "[.]Established access to SharePoint`n" -ForegroundColor Yellow
+            Write-Host "[.]Established access to SharePoint`n" @fg_yellow
         }
         catch [Microsoft.Identity.Client.MsalUiRequiredException]{
             #Check if account has MFA requirements for authentication
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-PnPOnline -Url $sharepoint_url -Interactive -ErrorAction Stop | Out-Null
-                    Write-Host "[.]Established access to SharePoint`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to SharePoint`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                Write-Host "Invalid credentials!`n" @fg_red
             }
             else {
                 Write-Error "Failed to access Sharepoint. `n"
@@ -537,7 +537,7 @@ function AccessSharepoint {
                 Write-Host "Accessing sharepoint via powershell requires explicit consent to allow access to sharepoint."
                 $null = Read-Host "MAAD-AF will now launch an authorization page on your browser. Consent to the terms and hit authorize, then return here. press 'Enter' to launch the browser authorization page" 
                 Register-PnPManagementShellAccess
-                Write-Host "Note: If the browser does not launch automatically for some reason. Open your browser and use this URL to visit the authorization page `nURL: https://login.microsoftonline.com/$tenant/adminconsent?client_id=9bc3ab49-b65d-410a-85ad-de819febfddc `n" -ForegroundColor Gray
+                Write-Host "Note: If the browser does not launch automatically for some reason. Open your browser and use this URL to visit the authorization page `nURL: https://login.microsoftonline.com/$tenant/adminconsent?client_id=9bc3ab49-b65d-410a-85ad-de819febfddc `n" @fg_gray
                 
                 $user_prompt = Read-Host "Once you have completed the authorization in browser press 'Enter' to continue or type 'exit' to exit the module..." 
                 
@@ -548,19 +548,19 @@ function AccessSharepoint {
         }
         catch [System.Exception]{
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-PnPOnline -Url $sharepoint_url -Interactive -ErrorAction Stop | Out-Null
-                    Write-Host "[.]Established access to SharePoint`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to SharePoint`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
         }
         catch {
-            Write-Host "Failed to establish access to SharePoint. Validate credentials!`n" -ForegroundColor Red
+            Write-Host "Failed to establish access to SharePoint. Validate credentials!`n" @fg_red
         }
     }
 }
@@ -578,34 +578,34 @@ function AccessSharepointAdmin {
         #Attempt token authentication  
         Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -AccessToken $AccessToken -ErrorAction Stop | Out-Null
         #SPOService currently does not support token auth so this is intended to fail and rollover to other auth methods
-        Write-Host "[.]Established access to SharePoint Online Administration Center`n" -ForegroundColor Yellow
+        Write-Host "[.]Established access to SharePoint Online Administration Center`n" @fg_yellow
         }
         catch {
             Write-Host "Token authentication failed. Attempting basic authentication now..."
             try {
                 #Attempt basic authentication
                 Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -Credential $AdminCredential -ErrorAction Stop
-                Write-Host "[.]Established access to SharePoint Online Administration Center`n" -ForegroundColor Yellow
+                Write-Host "[.]Established access to SharePoint Online Administration Center`n" @fg_yellow
             }
             catch [Microsoft.Online.SharePoint.PowerShell.AuthenticationException]{
                 #Check if account has MFA requirements for authentication
                 if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                     try {
                         #Attempt interactive authentication  
                         Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -ErrorAction Stop | Out-Null
-                        Write-Host "[.]Established access to SharePoint Online Administration Center`n" -ForegroundColor Yellow
+                        Write-Host "[.]Established access to SharePoint Online Administration Center`n" @fg_yellow
                     }
                     catch {
-                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                        Write-Host "Invalid credentials!`n" @fg_red
                     }
                 }
                 if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             catch {
-                Write-Host "Failed to establish access to SharePoint Online Administration Center. Validate credentials!`n" -ForegroundColor Red
+                Write-Host "Failed to establish access to SharePoint Online Administration Center. Validate credentials!`n" @fg_red
             }
         }
     }
@@ -613,27 +613,27 @@ function AccessSharepointAdmin {
         try {
             #Attempt basic authentication
             Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -Credential $AdminCredential -ErrorAction Stop
-            Write-Host "[.]Established access to SharePoint Online Administration Center`n" -ForegroundColor Yellow 
+            Write-Host "[.]Established access to SharePoint Online Administration Center`n" @fg_yellow 
         }
         catch [Microsoft.Online.SharePoint.PowerShell.AuthenticationException]{
             #Check if account has MFA requirements for authentication
             if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.Message)) {
-                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." @fg_gray
                 try {
                     #Attempt interactive authentication  
                     Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -ErrorAction Stop | Out-Null
-                    Write-Host "[.]Established access to SharePoint Online Administration Center`n" -ForegroundColor Yellow
+                    Write-Host "[.]Established access to SharePoint Online Administration Center`n" @fg_yellow
                 }
                 catch {
-                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    Write-Host "Invalid credentials!`n" @fg_red
                 }
             }
             if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
-                Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                Write-Host "Invalid credentials!`n" @fg_red
             }
         }
         catch {
-            Write-Host "Failed to establish access to SharePoint Online Administration Center. Validate credentials!`n" -ForegroundColor Red
+            Write-Host "Failed to establish access to SharePoint Online Administration Center. Validate credentials!`n" @fg_red
         }
     }
 }

@@ -8,8 +8,8 @@ function RemoveAccess {
     $target_account = $global:input_user_account
 
     if ($target_account -eq $global:AdminUsername){
-        Write-Host "`nSorry, you are too great to destroy yourself!" -ForegroundColor Red
-        Write-Host "Tip: Try deleting another account or create a backdoor account then use it to delete this account (MAAD can help you with that)" -ForegroundColor Gray
+        Write-Host "`nSorry, you are too great to destroy yourself!" @fg_red
+        Write-Host "Tip: Try deleting another account or create a backdoor account then use it to delete this account (MAAD can help you with that)" @fg_gray
         break
     }
 
@@ -18,10 +18,10 @@ function RemoveAccess {
         Write-Host "`nDeleting the selected account ..."
         Remove-AzureADUser -ObjectId $target_account -ErrorAction Stop
         Start-Sleep -s 5 
-        Write-Host "`nAccount: $target_account successfully deleted!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`nAccount: $target_account successfully deleted!" @fg_yellow @bg_black
     }
     catch {
-        Write-Host "`nError: Failed to delete account $target_account" -ForegroundColor Red
+        Write-Host "`nError: Failed to delete account $target_account" @fg_red
     }
     
 }

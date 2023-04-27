@@ -27,7 +27,7 @@ function AzureADRecon {
          #Display options to generate different types of tokens
          $token_types = @("AadGraph", "AnalysisServices", "AppConfiguration", "Arm", "Attestation", "Batch", "DataLake", "KeyVault", "MSGraph", "OperationalInsights", "ResourceManager", "Storage", "Synapse")
          foreach ($item in $token_types){
-            Write-Host $token_types.IndexOf($item) ":" $item -ForegroundColor Gray
+            Write-Host $token_types.IndexOf($item) ":" $item @fg_gray
          }
          [int]$token_type_choice = Read-Host "`nChoose a token type to generate"
          $token_type = $token_types[$token_type_choice]
@@ -38,10 +38,10 @@ function AzureADRecon {
             #Saved token information to tokens file
             "Token type: $token_type" | Out-File -Append -FilePath .\Outputs\Azure_AD_Tokens.txt
             $token | Out-File -Append -FilePath .\Outputs\Azure_AD_Tokens.txt
-            Write-Host "Token saved to Outputs directory" -ForegroundColor Gray
+            Write-Host "Token saved to Outputs directory" @fg_gray
          }
          catch {
-            Write-Host "Failed to generate token!" -ForegroundColor Red
+            Write-Host "Failed to generate token!" @fg_red
          }
       }
 
@@ -78,13 +78,13 @@ function AzureADRecon {
       if ($recon_user_choice -eq 9) {
          #Get a user's registered device
          Get-AzureADMSConditionalAccessPolicy | Format-Table DisplayName, Id, State
-         Write-Host "`nShowing detailed information on each policy below...`n" -ForegroundColor Gray
+         Write-Host "`nShowing detailed information on each policy below...`n" @fg_gray
          Start-Sleep -Seconds 5
 
          $conditional_policy_list = Get-AzureADMSConditionalAccessPolicy
          foreach ($policy in $conditional_policy_list){
                Write-Host "`n###########################################" 
-               Write-Host "Policy Name:" -ForegroundColor Yellow
+               Write-Host "Policy Name:" @fg_yellow
                $policy.DisplayName
                Write-Host "###########################################" 
                Write-Host "`nPolicy state:"

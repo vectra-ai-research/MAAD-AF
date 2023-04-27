@@ -15,11 +15,11 @@ function GrantMailboxAccess{
     try {
         Add-MailboxPermission -Identity $target_mailbox -user $recipient_mailbox -AccessRights FullAccess
         Write-Host "`nPermission grant succesful!"
-        Write-Host "$recipient_mailbox has full access rights to $target_mailbox mailbox" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "$recipient_mailbox has full access rights to $target_mailbox mailbox" @fg_yellow @bg_black
         $allow_undo = $true
     }
     catch {
-        Write-Host "Failed to add mailbox permission" -ForegroundColor Red
+        Write-Host "Failed to add mailbox permission" @fg_red
     }
 
     if ($allow_undo -eq $true) {
@@ -28,7 +28,7 @@ function GrantMailboxAccess{
         if ($user_confirm -notin "No","no","N","n") {
             Write-Host "Removing mailbox access to: $target_mailbox ...`n"
             Remove-MailboxPermission -Identity $target_mailbox -User $recipient_mailbox -AccessRights FullAccess
-            Write-Host "`nUndo successful: Removed mailbox access grant to $target_mailbox mailbox!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "`nUndo successful: Removed mailbox access grant to $target_mailbox mailbox!!!" @fg_yellow @bg_black
         }
     }
     Pause

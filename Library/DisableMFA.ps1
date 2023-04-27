@@ -2,7 +2,7 @@ function DisableMFA {
 
     mitre_details("DisableMFA")
 
-    EnterAccount ("Enter an account to disable MFA for (user@org.com)")
+    EnterAccount ("Enter an account to disable MFA for (user@example.com)")
     $target_account = $global:input_user_account
 
     #Disabe MFA
@@ -10,7 +10,7 @@ function DisableMFA {
         Write-Host "`nDisabling MFA for the account ..."
         Get-MsolUser -UserPrincipalName $target_account | Set-MsolUser -StrongAuthenticationRequirements @() -ErrorAction Stop
         Start-Sleep -s 5 
-        Write-Host "`nGuards Down!!! MFA successfully disabled for $target_account" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`nGuards Down!!! MFA successfully disabled for $target_account" @fg_yellow @bg_black
         $allow_undo = $true
     }
     catch {
@@ -30,7 +30,7 @@ function DisableMFA {
             $mfax = @($mfa)
             try {
                 Set-MsolUser -UserPrincipalName $target_account -StrongAuthenticationRequirements $mfax
-                Write-Host "Undo successful: Re-enabled MFA for account $target_account!" -ForegroundColor Yellow -BackgroundColor Black
+                Write-Host "Undo successful: Re-enabled MFA for account $target_account!" @fg_yellow @bg_black
             }
             catch {
                 Write-Host "Error: Failed to enable MFA for the account $target_account. Try enabling through Admin console."

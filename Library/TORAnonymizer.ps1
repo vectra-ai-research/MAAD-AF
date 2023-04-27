@@ -6,14 +6,14 @@ function TORAnonymizer ($command){
         $inititate_anonymity = Read-Host -Prompt "`nWould you like to keep your traffic anonymous? (Yes/No)"
 
         if ($inititate_anonymity -notin "No","no","N","n") {
-            Write-Host "`n#####################Important Information#####################" -ForegroundColor Red
+            Write-Host "`n#####################Important Information#####################" @fg_red
             Write-Host "To offer anonymity the tool will attempt to route your traffic through TOR nodes."
             Write-Host "Selecting (Yes) will attempt to hide the source of your traffic by executing TOR and configuring your device to use a proxy(tool can do this automatically)."
             Write-Host "Enabling TOR may result in overall slower network traffic simply due to the nature of it."
             Write-Host "Selecting (No) will not make any changes to your host or network and MAAD-AF will continue as usual."
             Write-Host "Enabling TOR module requires TOR executable installed on your host, if not already installed."
             Write-Host "If you do not have the TOR executable installed on your host please select (No) now to skip using TOR."
-            Write-Host "###############################################################" -ForegroundColor Red
+            Write-Host "###############################################################" @fg_red
             $inititate_anonymity = Read-Host -Prompt "`nWould you like to continue and establish anonymity? (Yes/No)"
         }
         
@@ -21,8 +21,8 @@ function TORAnonymizer ($command){
             mitre_details("TORAnonymizer")
             #Check from global config file if TOR config file has been added by user
             if ($global:tor_root_directory -eq "C:\Users\username\sub_folder\Tor Browser"){
-                Write-Host "TOR executable not found on the host!!!" -ForegroundColor Red
-                Write-Host "`nTip:`n1. Check there's have TOR installed on your host. Checkout: https://www.torproject.org/`n2. Update the TOR direcotry path in MAAD_Config.ps1" -ForegroundColor Gray
+                Write-Host "TOR executable not found on the host!!!" @fg_red
+                Write-Host "`nTip:`n1. Check there's have TOR installed on your host. Checkout: https://www.torproject.org/`n2. Update the TOR direcotry path in MAAD_Config.ps1" @fg_gray
                 Write-Host "`nNote: MAAD-AF will now continue without TOR!!!"
                 return
             }
@@ -36,9 +36,9 @@ function TORAnonymizer ($command){
             Write-Host "Configuring Proxy on host to route traffic through TOR..."
             try {
                 Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyServer -Value "http://127.0.0.1:9150" -ErrorAction Stop
-                Write-Host "- Successfully modified keys to add TOR proxy!" -ForegroundColor Gray
+                Write-Host "- Successfully modified keys to add TOR proxy!" @fg_gray
                 Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyEnable -Value 1 -ErrorAction Stop
-                Write-Host "- Successfully modified keys to enable TOR proxy!" -ForegroundColor Gray
+                Write-Host "- Successfully modified keys to enable TOR proxy!" @fg_gray
                 $global:tor_proxy = $true
             }
             catch {
@@ -47,16 +47,16 @@ function TORAnonymizer ($command){
             }
 
             Write-Host "Routing traffic through TOR nodes..."
-            Write-Host "Going Dark!!! You are now anonymous!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "Going Dark!!! You are now anonymous!!!" @fg_yellow @bg_black
         }
     }
 
     if ($command -eq "stop" -and $global:tor_proxy -eq $true) {
         try {
             Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyServer -Value "" -ErrorAction Stop
-            Write-Host "`n- Successfully removed TOR proxy!" -ForegroundColor Gray
+            Write-Host "`n- Successfully removed TOR proxy!" @fg_gray
             Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyEnable -Value 0 -ErrorAction Stop
-            Write-Host "- Successfully disabled proxy!" -ForegroundColor Gray
+            Write-Host "- Successfully disabled proxy!" @fg_gray
             Write-Host "`Successfully reverted all network changes made by the tool!!!`n"
             $global:tor_proxy = $false
         }
@@ -80,7 +80,7 @@ function TORProxy {
     $geo_IPv6_file = "$global:tor_root_directory\Browser\TorBrowser\Data\Tor\geoip6"
 
     #Run TOR proxy
-    Write-Host "Running TOR..." -ForegroundColor Red
+    Write-Host "Running TOR..." @fg_red
     Write-Host "Hit 'Ctrl+C' to stop Tor!"
     & "$tor_exe" --defaults-torrc $torrc_defaults -f $torrc DataDirectory $tor_data GeoIPFile $geo_IP_file GeoIPv6File $geo_IPv6_file +__ControlPort $global:control_port +__HTTPTunnelPort "${global:tor_host}:$global:tor_port IPv6Traffic PreferIPv6 KeepAliveIsolateSOCKSAuth" __OwningControllerProcess $PID | more
 }

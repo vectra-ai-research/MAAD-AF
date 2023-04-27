@@ -6,12 +6,12 @@ function BruteForce ($username){
         #Display available files in MAAD-AF directory
         $file_list = Get-ChildItem -Path ./* -Include *.txt
         if ($null -eq $file_list) {
-            Write-Host "`nNote: No potential dictionary files found. Add a password dictionary text file to '$((Get-Item ./).FullName)'" -ForegroundColor Red
+            Write-Host "`nNote: No potential dictionary files found. Add a password dictionary text file to '$((Get-Item ./).FullName)'" @fg_red
         }
         else {
-            Write-Host "`nPossible dictionary files found in the MAAD-AF directory:" -ForegroundColor Gray
+            Write-Host "`nPossible dictionary files found in the MAAD-AF directory:" @fg_gray
             foreach ($file in $file_list.Name){
-                Write-Host "- $file" -ForegroundColor Gray
+                Write-Host "- $file" @fg_gray
             }
         }
 
@@ -24,7 +24,7 @@ function BruteForce ($username){
             #Check file format - Only txt files accepted
             $extn = [IO.Path]::GetExtension($filename) 
             if ($extn -ne ".txt") {
-                Write-Host "`nInvalid file type: Please provide a 'txt' dictionary file with each password on a new line." -ForegroundColor Red
+                Write-Host "`nInvalid file type: Please provide a 'txt' dictionary file with each password on a new line." @fg_red
                 $check_file = $false
             }
             else {
@@ -32,7 +32,7 @@ function BruteForce ($username){
             } 
         }
         else {
-            Write-Host "`nPassword file: '$filename' not found. Check -`n1.If the spelling is correct`n2.If the file exists in the same directory as the tool`n3.Include extension in filename" -ForegroundColor Red
+            Write-Host "`nPassword file: '$filename' not found. Check -`n1.If the spelling is correct`n2.If the file exists in the same directory as the tool`n3.Include extension in filename" @fg_red
             $check_file = $false
         }
     }
@@ -61,7 +61,7 @@ function BruteForce ($username){
             $userobject | Add-Member -MemberType NoteProperty -Name "UserName" -Value $username
             $userobject | Add-Member -MemberType NoteProperty -Name "Password" -Value $password
             
-            Write-Host "`nSuccess is No Accident ;) Successfully cracked account password!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "`nSuccess is No Accident ;) Successfully cracked account password!!!" @fg_yellow @bg_black
             $userobject | Format-Table 
             $userobject | Out-File -FilePath .\Outputs\External_BruteForce_Result.txt
             break
@@ -74,7 +74,7 @@ function BruteForce ($username){
     }
     #Print if brute-force unsuccessful
     if ($userobject -eq $null){
-        Write-Host "`nBrute-force Unsuccessful!!! Try another password dictionary or account!!!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`nBrute-force Unsuccessful!!! Try another password dictionary or account!!!" @fg_yellow @bg_black
     }
     Pause
 }
@@ -84,7 +84,7 @@ function InternalBruteForce {
     mitre_details("BruteForce")
 
     #Get account to target
-    EnterAccount ("`nEnter an account to brute-force (eg:user@org.com) or enter 'recon' to find all available accounts")
+    EnterAccount ("`nEnter an account to brute-force (eg:user@example.com) or enter 'recon' to find all available accounts")
     $username = $global:input_user_account
 
     BruteForce($username)
@@ -96,7 +96,7 @@ function ExternalBruteForce {
 
     #Get account to target
     do {
-        $username = Read-Host -Prompt "`nEnter an account to brute-force (eg:user@org.com)"
+        $username = Read-Host -Prompt "`nEnter an account to brute-force (eg:user@example.com)"
     } until ("" -ne $username)
 
     BruteForce($username)

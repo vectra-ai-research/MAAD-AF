@@ -18,11 +18,11 @@ function MailForwarding {
         Set-Mailbox -Identity $target_mailbox -DeliverToMailboxAndForward $true -ForwardingSMTPAddress $ExternalAccount -ErrorAction Stop
         Start-Sleep -s 10
         Get-Mailbox -Identity $target_mailbox | Format-List -Property ForwardingSMTPAddress
-        Write-Host "Successfully configured mailbox $target_mailbox to forward emails to $ExternalAccount!!!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "Successfully configured mailbox $target_mailbox to forward emails to $ExternalAccount!!!" @fg_yellow @bg_black
         $allow_undo = $true
     }
     catch {
-        Write-Host "Error: Failed to setup forwarding on the mailbox $target_mailbox!!!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "Error: Failed to setup forwarding on the mailbox $target_mailbox!!!" @fg_yellow @bg_black
     }
     
     #Undo changes
@@ -32,7 +32,7 @@ function MailForwarding {
         if ($user_confirm -notin "No","no","N","n") {
             Write-Host "Removing mailbox forwarding from mailbox: $target_mailbox ...`n"
             Set-Mailbox -Identity $target_mailbox -ForwardingSMTPAddress $null
-            Write-Host "`nUndo successful: Removed mailbox forwarding config!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "`nUndo successful: Removed mailbox forwarding config!!!" @fg_yellow @bg_black
         }
     }
     Pause    

@@ -2,11 +2,11 @@
 function RequiredModules {
     ###This function checks for required modules by MAAD and Installs them if unavailable
     $RequiredModules=@("Az","AzureAd","MSOnline","ExchangeOnlineManagement","MicrosoftTeams","AzureADPreview","AADInternals","Microsoft.Online.SharePoint.PowerShell","PnP.PowerShell")
-    Write-Host "`nMAAD-AF requires the following powershell modules:`n$RequiredModules" -ForegroundColor Gray
+    Write-Host "`nMAAD-AF requires the following powershell modules:`n$RequiredModules" @fg_gray
     $allow = Read-Host -Prompt "`nAutomatically check for dependencies and install missing modules? (Yes / No)"
 
     if ($allow -notin "No","no","N","n") {
-        Write-Host "Checking all required modules..." -ForegroundColor Gray
+        Write-Host "Checking all required modules..." @fg_gray
 
         foreach ($module in $RequiredModules.GetEnumerator()) {
             if (Get-InstalledModule -Name $($module) ) {
@@ -14,11 +14,11 @@ function RequiredModules {
                     Import-Module -Name $($module) -WarningAction SilentlyContinue
                 }
                 catch {
-                    Write-Host "Failed to import. Skippig module: $module. " -ForegroundColor Red
+                    Write-Host "Failed to import. Skipping module: $module. " @fg_red
                 }  
             } 
             else {
-                Write-Host "'$module' module does NOT exist. The tool will attempt to install it now..." -ForegroundColor Gray
+                Write-Host "'$module' module does NOT exist. The tool will attempt to install it now..." @fg_gray
                 try {
                     Set-ExecutionPolicy Unrestricted -Force
                     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
@@ -26,14 +26,14 @@ function RequiredModules {
                     Import-Module -Name $($module) -WarningAction SilentlyContinue
                 }
                 catch {
-                    Write-Host "Failed to install. Skippig module: $module. " -ForegroundColor Red
+                    Write-Host "Failed to install. Skipping module: $module. " @fg_red
                 }   
             }
         }
-        Write-Host "All required modules available!" -ForegroundColor Gray
+        Write-Host "All required modules available!" @fg_gray
     }
     else {
-        Write-Host "Note: Some functions may fail if required modules are missing" -ForegroundColor Gray
+        Write-Host "Note: Some functions may fail if required modules are missing" @fg_gray
     }  
     #To prevent overwrite from any imported modules 
     $host.UI.RawUI.WindowTitle = "MAAD Attack Framework"
@@ -45,7 +45,7 @@ function ClearActiveSessions {
 
 function terminate_connection {
     try {
-        Write-Host "`nClosing all existing connections........." -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`nClosing all existing connections........." @fg_yellow @bg_black
         Disconnect-AzureAD -Confirm:$false | Out-Null
         Disconnect-ExchangeOnline -Confirm:$false | Out-Null
         Disconnect-AzAccount -Confirm:$false | Out-Null
@@ -61,7 +61,7 @@ function terminate_connection {
 
 function OptionDisplay ($menu_message, $option_list_dictionary){
     ###This function diplays a list of options from a dictionary.
-    Write-Host "`n$menu_message" -ForegroundColor Red
+    Write-Host "`n$menu_message" @fg_red
     $option_list_array = $option_list_dictionary.GetEnumerator() |sort Name
 
     foreach ($item in $option_list_array){
@@ -83,12 +83,12 @@ function EnterMailbox ($input_prompt){
 
         if ($global:input_mailbox_address.ToUpper() -eq "RECON" -or $global:input_mailbox_address -eq "" -or $global:input_mailbox_address -eq $null) {
             try {
-                Write-Host "`nExecuting recon to list available mailboxes in the environment" -ForegroundColor Gray
+                Write-Host "`nExecuting recon to list available mailboxes in the environment" @fg_gray
                 Get-Mailbox | Format-Table -Property DisplayName,PrimarySmtpAddress 
                 $repeat = $true
             }
             catch {
-                Write-Host "Failed to find mailboxes" -ForegroundColor Red
+                Write-Host "Failed to find mailboxes" @fg_red
                 $repeat = $false
             }
         }
@@ -113,7 +113,7 @@ function ValidateMailbox ($mailbox_address){
         $global:mailbox_found = $true
     }
     catch {
-        Write-Host "`nThe mailbox does not exist or the account does not have a mailbox setup.`n" -ForegroundColor Red
+        Write-Host "`nThe mailbox does not exist or the account does not have a mailbox setup.`n" @fg_red
         $global:mailbox_found = $false
     }
 }
@@ -126,12 +126,12 @@ function EnterAccount ($input_prompt){
 
         if ($global:input_user_account.ToUpper() -eq "RECON" -or $global:input_user_account -eq "" -or $global:input_user_account -eq $null) {
             try {
-                Write-Host "`nExecuting recon to list available accounts in the tenant" -ForegroundColor Gray
+                Write-Host "`nExecuting recon to list available accounts in the tenant" @fg_gray
                 Get-AzureADUser | Format-Table -Property DisplayName,UserPrincipalName,UserType
                 $repeat = $true
             }
             catch {
-                Write-Host "Failed to find mailboxes" -ForegroundColor Red
+                Write-Host "Failed to find mailboxes" @fg_red
                 $repeat = $false
             }
         }
@@ -154,13 +154,13 @@ function ValidateAccount ($account_username){
     $check_account = Get-AzureADUser -SearchString $account_username
     
     if ($check_account -eq $null){
-        Write-Host "The account does not exist or match an account in the tenant!`n" -ForegroundColor Red
+        Write-Host "The account does not exist or match an account in the tenant!`n" @fg_red
         $global:account_found = $false
     }
     
     else {
         if ($check_account.GetType().BaseType.Name -eq "Array"){
-            Write-Host "Multiple accounts found matching your search. Lets take things slow ;) Be more specific to target one account!" -ForegroundColor Red
+            Write-Host "Multiple accounts found matching your search. Lets take things slow ;) Be more specific to target one account!" @fg_red
             $global:account_found = $false
         }
         else {

@@ -17,17 +17,17 @@ $global:maad_mitre_map =
 "TORAnonymizer" = @{"tactic"="Command and Control"; "technique"="Proxy"; "sub-technique"="Multi-hop Proxy"; "description"="To disguise the source of malicious traffic, adversaries may chain together multiple proxies. Typically, a defender will be able to identify the last proxy traffic traversed before it enters their network; the defender may or may not be able to identify any previous proxies before the last-hop proxy. This technique makes identifying the original source of the malicious traffic even more difficult by requiring the defender to trace malicious traffic through several proxies to identify its source. A particular variant of this behavior is to use onion routing networks, such as the publicly available TOR network."; "ref"="https://attack.mitre.org/techniques/T1090/003/"}};
 
 function mitre_details ($module_name){
-    Write-Host "`n###################################### MITRE ######################################" -ForegroundColor Gray
+    Write-Host "`n###################################### MITRE ######################################" @fg_gray
     try {
         Write-Host
-        Write-Host "Tactic:" $global:maad_mitre_map[$module_name]["tactic"]`n -ForegroundColor Gray
-        Write-Host "Technique:" $global:maad_mitre_map[$module_name]["technique"]`n -ForegroundColor Gray
+        Write-Host "Tactic:" $global:maad_mitre_map[$module_name]["tactic"]`n @fg_gray
+        Write-Host "Technique:" $global:maad_mitre_map[$module_name]["technique"]`n @fg_gray
         if ($global:maad_mitre_map[$module_name]["sub-technique"] -ne "") {
-            Write-Host "Sub-Technique:" $global:maad_mitre_map[$module_name]["sub-technique"]`n -ForegroundColor Gray
+            Write-Host "Sub-Technique:" $global:maad_mitre_map[$module_name]["sub-technique"]`n @fg_gray
         }
-        Write-Host "Description:" $global:maad_mitre_map[$module_name]["description"]`n -ForegroundColor Gray
-        Write-Host "Reference:" $global:maad_mitre_map[$module_name]["ref"] -ForegroundColor Gray
-        Write-Host "`n###################################################################################" -ForegroundColor Gray
+        Write-Host "Description:" $global:maad_mitre_map[$module_name]["description"]`n @fg_gray
+        Write-Host "Reference:" $global:maad_mitre_map[$module_name]["ref"] @fg_gray
+        Write-Host "`n###################################################################################" @fg_gray
     }
     catch {
         #Do-nothing

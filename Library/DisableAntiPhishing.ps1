@@ -26,7 +26,7 @@ function DisableAntiPhishing {
         Start-Sleep -s 5  
         #Get-AntiPhishPolicy -Identity $policy_name | Format-Table Name,Enabled,IsDefault
         Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
-        Write-Host "Guard's down!!! Successfully disabled Anti-Phishing policy!!!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "Guard's down!!! Successfully disabled Anti-Phishing policy!!!" @fg_yellow @bg_black
         $allow_undo = $true
     }
     catch {
@@ -43,10 +43,10 @@ function DisableAntiPhishing {
                 Enable-AntiPhishRule -Identity $policy_name -Confirm:$false
                 Start-Sleep -s 5 
                 Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
-                Write-Host "Undo successful: Re-enabled Anti-Phishing policy: '$policy_name'" -ForegroundColor Yellow -BackgroundColor Black
+                Write-Host "Undo successful: Re-enabled Anti-Phishing policy: '$policy_name'" @fg_yellow @bg_black
             }
             catch {
-                Write-Host "Failed to undo changes" -ForegroundColor Red
+                Write-Host "Failed to undo changes" @fg_red
             }
         }
     }

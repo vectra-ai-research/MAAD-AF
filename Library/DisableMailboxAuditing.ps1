@@ -23,11 +23,11 @@ function DisableMailboxAuditing{
             Set-MailboxAuditBypassAssociation -Identity $InternalUserName -AuditByPassEnabled $true -ErrorAction Stop
             Start-Sleep -s 60
             Get-MailboxAuditBypassAssociation -Identity $InternalUserName | Format-Table AuditBypassEnabled
-            Write-Host "Let's fly low! Successfully disabled auditing!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "Let's fly low! Successfully disabled auditing!!!" @fg_yellow @bg_black
             $allow_undo = $true
         }
         catch {
-            Write-Host "Error: Failed to disable auditing on mailbox $InternalUserName!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "Error: Failed to disable auditing on mailbox $InternalUserName!!!" @fg_yellow @bg_black
         }      
     }
 
@@ -41,7 +41,7 @@ function DisableMailboxAuditing{
             Set-MailboxAuditBypassAssociation -Identity $InternalUserName -AuditByPassEnabled $false
             Start-Sleep -s 60    
             Get-MailboxAuditBypassAssociation -Identity $InternalUserName | Format-Table AuditBypassEnabled 
-            Write-Host "Undo successful: Re-enabled auditing!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "Undo successful: Re-enabled auditing!!!" @fg_yellow @bg_black
         }
     }
     Pause

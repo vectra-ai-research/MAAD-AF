@@ -6,14 +6,14 @@ function MailboxDeleteRuleSetup {
     #Enter account to compromise
     $target_mailbox = $global:input_mailbox_address
     $InboxRuleName = Read-Host -Prompt "Enter a name for the mailbox rule you want to create"
-    Write-Host "`nConfiguring mailbox rule to delete emails from $target_mailbox mailbox containing specific terms" -ForegroundColor Gray
+    Write-Host "`nConfiguring mailbox rule to delete emails from $target_mailbox mailbox containing specific terms" @fg_gray
 
     #Take keywords for the mailbox rule
     do {
         $input_rule_keywords = Read-Host -Prompt "Enter a term or multiple terms separated by comma(,) to include in the mailbox rule"
 
         if ($input_rule_keywords -eq $null) {
-            Write-Host "Its not like giving a compliment. I am sure you can come up with a few words ;)" -ForegroundColor Red
+            Write-Host "Its not like giving a compliment. I am sure you can come up with a few words ;)" @fg_red
         }
     } while (
         $input_rule_keywords -eq $null
@@ -29,7 +29,7 @@ function MailboxDeleteRuleSetup {
 
         #Confirm rule setup
         Get-InboxRule -Mailbox $target_mailbox
-        Write-Host "`nNew mailbox rule has been deployed successfully!!!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`nNew mailbox rule has been deployed successfully!!!" @fg_yellow @bg_black
         $allow_undo = $true
     }
     catch {
@@ -45,7 +45,7 @@ function MailboxDeleteRuleSetup {
             try {
                 Write-Host "`nRemoving the new mailbox rules created..."
                 Remove-InboxRule -Mailbox $target_mailbox -Identity $InboxRuleName -Confirm:$false -ErrorAction Stop
-                Write-Host "`nUndo successful: Removed mailbox rule: $InboxRuleName" -ForegroundColor Yellow -BackgroundColor Black
+                Write-Host "`nUndo successful: Removed mailbox rule: $InboxRuleName" @fg_yellow @bg_black
             }
             catch {
                 Write-Host "`nError: Failed to delete mailbox rule $InboxRuleName!`n You can try to delete it manually from the Admin console."

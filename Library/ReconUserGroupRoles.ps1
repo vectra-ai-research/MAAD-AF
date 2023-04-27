@@ -18,7 +18,7 @@ function ReconUserGroupRoles {
         }
     }
 
-    Write-Host "`nFollowing role groups were found for user $target_account :" -ForegroundColor Gray
+    Write-Host "`nFollowing role groups were found for user $target_account :" @fg_gray
     $user_roles
 
     Write-Host "`nUser has: $($user_roles.Count)/$($all_roles.Count))`n" 

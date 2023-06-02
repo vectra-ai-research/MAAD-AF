@@ -19,6 +19,7 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 - Azure AD External Recon (Includes sub-modules)
 - Azure AD Internal Recon (Includes sub-modules)
 - Backdoor Account Setup
+- Backdoor through Cross Tenant Synchronization
 - Trusted Network Modification
 - Disable Mailbox Auditing
 - Disable Anti-Phishing
@@ -55,8 +56,7 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
  - [ExchangePowershell](https://www.powershellgallery.com/packages/ExchangeOnlineManagement/3.0.0)
  - [Microsoft.Online.SharePoint.PowerShell](https://www.powershellgallery.com/packages/Microsoft.Online.SharePoint.PowerShell/16.0.23311.12000)
  - [PnP.PowerShell](https://github.com/pnp/powershell)
-
-Tip: A 'Global Admin' privilege account is recommended to leverage full capabilities of modules in MAAD-AF
+ - [Microsoft.Graph.Identity.SignIns](https://www.powershellgallery.com/packages/Microsoft.Graph.Identity.SignIns/2.0.0-rc3)
 
 ### Limitations
 - MAAD-AF is currently only fully supported on Windows OS
@@ -76,7 +76,7 @@ Tip: A 'Global Admin' privilege account is recommended to leverage full capabili
  - Submit bugs or other issues related to the tool directly in the "Issues" section
 
 ### Request Features
- - Share those great ideas. Submit new features to add to the MAAD-AFs functionality. 
+ - Share those great ideas. Submit new features by submitting a PR or sharing them in the Discussions. 
 
 ## Contact
-- If you found this tool useful, want to share an interesting use-case, bring issues to attention, whatever the reason - I would love to hear from you. You can contact at: maad-af@vectra.ai or post in repository Discussions.
+- If you found this tool useful, want to share an interesting use-case, bring issues to attention, whatever the reason - share them. You can email at: maad-af@vectra.ai or post it in Discussions on GitHub.

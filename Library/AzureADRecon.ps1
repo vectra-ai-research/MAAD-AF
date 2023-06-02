@@ -1,6 +1,6 @@
 function AzureADRecon {
    
-   $recon_options = @{0 = "Back to main menu"; 1 = "Retrieve Current Session Information"; 2 = "Grab Azure Access Token"; 3 = "Enumerate accounts group roles"; 4 = "Retrieve Domain Information"; 5 = "Retrieve All Users in Domain"; 6 = "Retrieve all Groups in Domain"; 7 = "Retrieve AD Authorization Policy"; 8 = "Retrieve Named Location Policies"; 9 = "Get AzureAD Conditional Access Policies"; 10 = "Retrieve Users Registered Device"; 11 = "Retrieve Service Principal Information"; 12 = "List Administrator Roles"};
+   $recon_options = @{0 = "Back to main menu"; 1 = "Retrieve Current Session Information"; 2 = "Grab Azure Access Token"; 3 = "Enumerate accounts group roles"; 4 = "Retrieve Domain Information"; 5 = "Retrieve All Users in Domain"; 6 = "Retrieve all Groups in Domain"; 7 = "Retrieve AD Authorization Policy"; 8 = "Retrieve Named Location Policies"; 9 = "Get AzureAD Conditional Access Policies"; 10 = "Retrieve Users Registered Device"; 11 = "Retrieve Service Principal Information"; 12 = "List Administrator Roles"; 13 = "List Accessible Tenants"};
 
    do {
       OptionDisplay "Recon Options:" $recon_options
@@ -116,6 +116,11 @@ function AzureADRecon {
       if ($recon_user_choice -eq 12) {
          #Gets Administrator roles
          Get-MsolRole | Format-Table
+      }
+
+      if ($recon_user_choice -eq 13) {
+         #List accessible tenants
+         Get-AzTenant | Format-Table
       }
 
    } while (

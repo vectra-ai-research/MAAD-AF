@@ -1,43 +1,75 @@
 ###Basic functions
 function RequiredModules {
     ###This function checks for required modules by MAAD and Installs them if unavailable
-    $RequiredModules=@("Az","AzureAd","MSOnline","ExchangeOnlineManagement","MicrosoftTeams","AzureADPreview","AADInternals","Microsoft.Online.SharePoint.PowerShell","PnP.PowerShell","Microsoft.Graph.Identity.SignIns")
-    Write-Host "`nMAAD-AF requires the following powershell modules:`n$RequiredModules" -ForegroundColor Gray
-    $allow = Read-Host -Prompt "`nAutomatically check for dependencies and install missing modules? (Yes / No)"
+    $RequiredModules=@("Az","AzureAd","MSOnline","ExchangeOnlineManagement","MicrosoftTeams","AADInternals","Microsoft.Online.SharePoint.PowerShell","PnP.PowerShell","Microsoft.Graph.Identity.SignIns")
+    $missing_modules = @()
+    $installed_modules = @()
 
+    #Check for available modules
+    Write-Host "Checking dependencies..."
+    $installed_modules_count = 0
+    foreach ($module in $RequiredModules) {
+        try {
+            Get-InstalledModule -Name $module -ErrorAction Stop
+            $installed_modules_count+=1
+            $installed_modules += $module
+        }
+        catch {
+            $missing_modules += $module
+        }
+    }
+
+    #Display information and check user choice
+    if ( $installed_modules_count -eq $RequiredModules.Count) {
+        Write-Host "All required modules available! `n" -ForegroundColor Gray
+        Write-Host "Continuing..."
+        break
+    }
+    elseif ($installed_modules_count -lt $RequiredModules.Count) {
+        Write-Host "`n$installed_modules_count / $($RequiredModules.Count) modules currently installed" -ForegroundColor Gray
+
+        Write-Host "`nMAAD-AF requires the following powershell modules:`n$RequiredModules" -ForegroundColor Gray
+        $allow = Read-Host -Prompt "`nAutomatically check dependencies and install missing modules? (Yes / No)"
+    }
+    
     if ($allow -notin "No","no","N","n") {
         Write-Host "Checking all required modules..." -ForegroundColor Gray
 
-        foreach ($module in $RequiredModules.GetEnumerator()) {
-            if (Get-InstalledModule -Name $($module) ) {
-                try {
-                    Import-Module -Name $($module) -WarningAction SilentlyContinue
-                }
-                catch {
-                    Write-Host "Failed to import. Skippig module: $module. " -ForegroundColor Red
-                }  
-            } 
-            else {
-                Write-Host "'$module' module does NOT exist. The tool will attempt to install it now..." -ForegroundColor Gray
-                try {
-                    Set-ExecutionPolicy Unrestricted -Force
-                    Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
-                    Install-Module -Name $($module) -Confirm:$False -WarningAction SilentlyContinue
-                    Import-Module -Name $($module) -WarningAction SilentlyContinue
-                }
-                catch {
-                    Write-Host "Failed to install. Skippig module: $module. " -ForegroundColor Red
-                }   
+        Set-ExecutionPolicy Unrestricted -Force
+        Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+
+        #Install missing modules
+        foreach ($module in $missing_modules){
+            Write-Host "'$module' module does not exist. Installing it now..." -ForegroundColor Gray
+            try {
+                Install-Module -Name $module -Confirm:$False -WarningAction SilentlyContinue -ErrorAction Stop
+                $installed_modules += $module
+                Write-Host "Successfully installed module $module" -ForegroundColor Yellow
             }
+            catch {
+                Write-Host "Failed to install. Skippig module: $module. " -ForegroundColor Red
+            }   
         }
-        Write-Host "All required modules available!" -ForegroundColor Gray
+
+        #Import all installed Modules
+        foreach ($module in $installed_modules){
+            try {
+                Import-Module -Name $module -WarningAction SilentlyContinue -ErrorAction Stop
+            }
+            catch {
+                Write-Host "Failed to import. Skippig module: $module. " -ForegroundColor Red
+            }
+        }          
+        Write-Host "Modules check completed!" -ForegroundColor Gray
+        Write-Host " $($installed_modules.Count) / $($RequiredModules.Count) modules available!"
     }
+
     else {
-        Write-Host "Note: Some functions may fail if required modules are missing" -ForegroundColor Gray
+        Write-Host "Note: Some MAAD-AF functions may fail if required modules are missing" -ForegroundColor Gray
     }  
     #To prevent overwrite from any imported modules 
     $host.UI.RawUI.WindowTitle = "MAAD Attack Framework"
-} 
+}
 
 function ClearActiveSessions {
     Get-PSSession | Remove-PSSession

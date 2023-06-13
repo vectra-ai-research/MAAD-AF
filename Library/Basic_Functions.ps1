@@ -69,7 +69,7 @@ function RequiredModules {
     }  
     #To prevent overwrite from any imported modules 
     $host.UI.RawUI.WindowTitle = "MAAD Attack Framework"
-}
+} 
 
 function ClearActiveSessions {
     Get-PSSession | Remove-PSSession

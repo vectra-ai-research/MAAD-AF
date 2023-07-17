@@ -61,7 +61,7 @@ function ExternalTeamsAccess {
     Write-Warning -Message "This configuration can sometimes take several minutes to take effect.`n"
     [int]$time_limit_min = (Read-Host -Prompt "Set a limit on how long you would like to wait (minutes)")
     [int]$time_limit_sec = $time_limit_min*60
-    Write-Host "`nIts been a long day of hacking things. Go grab youself some coffee!!! The tool is checking for config change...`n"
+    Write-Host "`nIts been a long day of hacking things. Go grab yourself some coffee!!! The tool is checking for config change...`n"
 
     #Add to teams group 
     [int]$timer = 0

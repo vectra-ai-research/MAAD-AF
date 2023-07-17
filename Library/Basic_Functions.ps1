@@ -1,21 +1,29 @@
 ###Basic functions
 function RequiredModules {
-    ###This function checks for required modules by MAAD and Installs them if unavailable
-    $RequiredModules=@("Az","AzureAd","MSOnline","ExchangeOnlineManagement","MicrosoftTeams","AADInternals","Microsoft.Online.SharePoint.PowerShell","PnP.PowerShell","Microsoft.Graph.Identity.SignIns")
-    $missing_modules = @()
-    $installed_modules = @()
+    ###This function checks for required modules by MAAD and Installs them if unavailable. Some modules have specific version requirements specified in the dictionary values
+    $RequiredModules=@{"Az" = "";"AzureAd" = "";"MSOnline" = "";"ExchangeOnlineManagement" = "";"MicrosoftTeams" = "";"AADInternals" = "";"Microsoft.Online.SharePoint.PowerShell" = "";"PnP.PowerShell" = "1.12.0";"Microsoft.Graph.Identity.SignIns" = "";"Microsoft.Graph.Applications" = "";"Microsoft.Graph.Users" = "";"Microsoft.Graph.Groups" = ""}
+    $missing_modules = @{}
+    $installed_modules = @{}
 
     #Check for available modules
     Write-Host "Checking dependencies..."
     $installed_modules_count = 0
-    foreach ($module in $RequiredModules) {
+    foreach ($module in $RequiredModules.Keys) {
         try {
-            Get-InstalledModule -Name $module -ErrorAction Stop
-            $installed_modules_count+=1
-            $installed_modules += $module
+            if ($RequiredModules[$module] -ne "") {
+                Get-InstalledModule -Name $module -RequiredVersion $RequiredModules[$module] -ErrorAction Stop
+                $installed_modules_count+=1
+                $installed_modules[$module] = $RequiredModules[$module]
+            }
+            else {
+                Get-InstalledModule -Name $module -ErrorAction Stop
+                $installed_modules_count+=1
+                $installed_modules[$module] = $RequiredModules[$module]
+            }
         }
         catch {
-            $missing_modules += $module
+            #Add modules to missing modules dict
+            $missing_modules[$module] = $RequiredModules[$module]
         }
     }
 
@@ -36,18 +44,26 @@ function RequiredModules {
         #do nothing
     }
     elseif ($allow -notin "No","no","N","n") {
-        Write-Host "Checking all required modules..." -ForegroundColor Gray
+        Write-Host "Installing missing modules..." -ForegroundColor Gray
 
         Set-ExecutionPolicy Unrestricted -Force
         Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 
         #Install missing modules
-        foreach ($module in $missing_modules){
+        foreach ($module in $missing_modules.Keys){
             Write-Host "'$module' module does not exist. Installing it now..." -ForegroundColor Gray
             try {
-                Install-Module -Name $module -Confirm:$False -WarningAction SilentlyContinue -ErrorAction Stop
-                $installed_modules += $module
-                Write-Host "Successfully installed module $module" -ForegroundColor Yellow
+                if ($missing_modules[$module] -ne "") {
+                    Install-Module -Name $module -Confirm:$False -WarningAction SilentlyContinue -ErrorAction Stop
+                    #Add module to installed modules dict
+                    $installed_modules[$module] = $RequiredModules[$module]
+                    Write-Host "Successfully installed module $module" -ForegroundColor Yellow
+                }
+                else {
+                    Install-Module -Name $module -RequiredVersion $missing_modules[$module] -Confirm:$False -WarningAction SilentlyContinue -ErrorAction Stop
+                    $installed_modules[$module] = $RequiredModules[$module]
+                    Write-Host "Successfully installed module $module" -ForegroundColor Yellow
+                }
             }
             catch {
                 Write-Host "Failed to install. Skippig module: $module. " -ForegroundColor Red
@@ -55,12 +71,19 @@ function RequiredModules {
         }
 
         #Import all installed Modules
-        foreach ($module in $installed_modules){
+        foreach ($module in $installed_modules.Keys){
+            #Remove any member of module from current session
+            Remove-Module -Name $module
             try {
-                Import-Module -Name $module -WarningAction SilentlyContinue -ErrorAction Stop
+                if ($installed_modules[$module] -ne "") {
+                    Import-Module -Name $module -WarningAction SilentlyContinue -ErrorAction Stop
+                }
+                else {
+                    Import-Module -Name $module -RequiredVersion $installed_modules[$module] -WarningAction SilentlyContinue -ErrorAction Stop
+                }
             }
             catch {
-                Write-Host "Failed to import. Skippig module: $module. " -ForegroundColor Red
+                Write-Host "Failed to import. Skippig module: $module . " -ForegroundColor Red
             }
         }          
         Write-Host "Modules check completed!" -ForegroundColor Gray
@@ -88,6 +111,7 @@ function terminate_connection {
         Disconnect-PnPOnline | Out-Null
         Disconnect-SPOService | Out-Null
         [Microsoft.Online.Administration.Automation.ConnectMsolService]::ClearUserSessionState() | Out-Null
+        Disconnect-MgGraph | Out-Null
     }
     catch {
         #Do nothing. We are leaving. Bye!

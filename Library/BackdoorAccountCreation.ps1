@@ -1,5 +1,5 @@
-function NewAdminAccountCreation {
-    mitre_details("NewAdminAccountCreation")
+function BackdoorAccountCreation {
+    mitre_details("BackdoorAccountCreation")
 
     #Create Admin Account
     Write-Host "`nDisplaying available domain information:" -ForegroundColor Yellow

@@ -19,7 +19,6 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 - Azure AD External Recon (Includes sub-modules)
 - Azure AD Internal Recon (Includes sub-modules)
 - Backdoor Account Setup
-- Backdoor through Cross Tenant Synchronization
 - Trusted Network Modification
 - Disable Mailbox Auditing
 - Disable Anti-Phishing
@@ -27,6 +26,7 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 - Exfiltration through Mailbox Forwarding
 - Gain User Mailbox Access
 - External Teams Access Setup (Includes sub-modules)
+- Cross Tenant Synchronization Exploits (Includes sub-modules)
 - eDiscovery exploitation (Includes sub-modules)
 - Bruteforce
 - MFA Manipulation

@@ -86,6 +86,19 @@ function AccessAzureAD{
                     Write-Host "Invalid credentials!`n" -ForegroundColor Red
                 }
             }
+            catch [System.Exception]{
+                if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    try {
+                        #Attempt interactive authentication  
+                        Connect-AzureAD -ErrorAction Stop | Out-Null
+                        Write-Host "[.]Established access to AzureAD`n" -ForegroundColor Yellow
+                    }
+                    catch {
+                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    }
+                }
+            }
             catch {
                 Write-Host "Failed to establish access to AzureAD. Validate credentials!`n" -ForegroundColor Red
             }
@@ -112,6 +125,19 @@ function AccessAzureAD{
             }
             if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
                 Write-Host "Invalid credentials!`n" -ForegroundColor Red
+            }
+        }
+        catch [System.Exception]{
+            if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                try {
+                    #Attempt interactive authentication  
+                    Connect-AzureAD -ErrorAction Stop | Out-Null
+                    Write-Host "[.]Established access to AzureAD`n" -ForegroundColor Yellow
+                }
+                catch {
+                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                }
             }
         }
         catch {
@@ -157,6 +183,19 @@ function AccessAzAccount {
                     Write-Host "Invalid credentials!`n`n" -ForegroundColor Red
                 }
             }
+            catch [System.Exception]{
+                if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    try {
+                        #Attempt interactive authentication  
+                        Connect-AzAccount -ErrorAction Stop | Out-Null
+                        Write-Host "[.]Established access to Az`n" -ForegroundColor Yellow
+                    }
+                    catch {
+                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    }
+                }
+            }
             catch {
                 Write-Host "Failed to establish access to Az. Validate credentials!`n" -ForegroundColor Red
             }
@@ -183,6 +222,19 @@ function AccessAzAccount {
             }
             if ($null -ne (Select-String -Pattern "invalid username or password`n" -InputObject $_.Exception.Message)) {
                 Write-Host "Invalid credentials!`n`n" -ForegroundColor Red
+            }
+        }
+        catch [System.Exception]{
+            if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                try {
+                    #Attempt interactive authentication  
+                    Connect-AzAccount -ErrorAction Stop | Out-Null
+                    Write-Host "[.]Established access to Az`n" -ForegroundColor Yellow
+                }
+                catch {
+                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                }
             }
         }
         catch {
@@ -231,6 +283,19 @@ function AccessTeams {
                     exit
                 }
             }
+            catch [System.Exception]{
+                if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    try {
+                        #Attempt interactive authentication  
+                        Connect-MicrosoftTeams -ErrorAction Stop | Out-Null
+                        Write-Host "[.]Established access to Teams`n" -ForegroundColor Yellow
+                    }
+                    catch {
+                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    }
+                }
+            }
             catch {
                 Write-Host "Failed to establish access to AzureAD. Validate credentials!`n" -ForegroundColor Red
             }
@@ -259,6 +324,19 @@ function AccessTeams {
                 Write-Host "Invalid credentials!`n" -ForegroundColor Red
                 $null = Read-Host "Exiting tool now!!!"
                 exit
+            }
+        }
+        catch [System.Exception]{
+            if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                try {
+                    #Attempt interactive authentication  
+                    Connect-MicrosoftTeams -ErrorAction Stop | Out-Null
+                    Write-Host "[.]Established access to Teams`n" -ForegroundColor Yellow
+                }
+                catch {
+                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                }
             }
         }
         catch {
@@ -401,6 +479,19 @@ function AccessMsol {
                     Write-Host "Invalid credentials!`n" -ForegroundColor Red
                 }
             }
+            catch [System.Exception]{
+                if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
+                    Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                    try {
+                        #Attempt interactive authentication  
+                        Connect-MsolService -ErrorAction Stop | Out-Null
+                        Write-Host "[.]Established access to Msol`n" -ForegroundColor Yellow
+                    }
+                    catch {
+                        Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                    }
+                }
+            }
             catch {
                 Write-Host "Failed to establish access to Msol. Validate credentials!`n" -ForegroundColor Red
             }
@@ -427,6 +518,19 @@ function AccessMsol {
             }
             if ($null -ne (Select-String -Pattern "invalid username or password" -InputObject $_.Exception.Message)) {
                 Write-Host "Invalid credentials!`n" -ForegroundColor Red
+            }
+        }
+        catch [System.Exception]{
+            if ($null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception.InnerException) -or $null -ne (Select-String -Pattern "multi-factor authentication" -InputObject $_.Exception)) {
+                Write-Host "Account requires interactive MFA for authentication.`nLaunching interactive authentication window to continue..." -ForegroundColor Gray
+                try {
+                    #Attempt interactive authentication  
+                    Connect-MsolService -ErrorAction Stop | Out-Null
+                    Write-Host "[.]Established access to Msol`n" -ForegroundColor Yellow
+                }
+                catch {
+                    Write-Host "Invalid credentials!`n" -ForegroundColor Red
+                }
             }
         }
         catch {

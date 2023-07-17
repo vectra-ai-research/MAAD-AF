@@ -1,7 +1,6 @@
 function TrustedNetworkConfig {
     mitre_details("TrustedNetworkConfig")
 
-    #REF Azure Active Directory -> Security -> Conditional Access -> Named Locations
     #Get public IP
     $trusted_policy_name = Read-Host -Prompt "Provide a name to create the trusted network policy"
 
@@ -24,7 +23,8 @@ function TrustedNetworkConfig {
     try {
         Write-Host "Creating policy $trusted_policy_name to add your IP as trusted named location...`n"
         $trusted_nw = New-AzureADMSNamedLocationPolicy -OdataType "#microsoft.graph.ipNamedLocation" -DisplayName $trusted_policy_name -IsTrusted $true -IpRanges "$ip_addr/32" -ErrorAction Stop
-        $trusted_nw
+        Write-Host "Displaying details of deployed policy ..." -ForegroundColor Gray
+        $trusted_nw | Out-Host
         Write-Host "Successfully created trusted location policy $trusted_policy_name with IP $ip_addr !!!" -ForegroundColor Yellow -BackgroundColor Black
         $allow_undo = $true
     }

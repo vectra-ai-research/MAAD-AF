@@ -38,9 +38,12 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
  1. Clone or download the MAAD-AF github repo to your windows host
  2. Open PowerShell as Administrator 
  3. Navigate to the local MAAD-AF directory 
-	 `(cd /MAAD-AF)`
  4. Run MAAD_Attack.ps1 
-	 `(./MAAD_Attack.ps1)`
+```
+> git clone https://github.com/vectra-ai-research/MAAD-AF.git
+> cd /MAAD-AF
+> ./MAAD_Attack.ps1
+```
 
 ### Requirements
 1. Internet accessible Windows host
@@ -65,8 +68,8 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
  - Thank you for considering contributing to MAAD-AF!  
  - Your contributions will help make MAAD-AF better.
  - Join the mission to make security testing simple, fast and effective.
- - There's ongoing efforts to make the source code more modular to enable easier contributions.
- - Continue monitoring this space for updates on how you can easily incorporate new attack modules into MAAD-AF.
+ - There's an ongoing efforts to make the source code more modular.
+ - Submit a PR to the main branch to contribute to MAAD-AF.
 
 ### Add Custom Modules
  - Everyone is encouraged to come up with new attack modules that can be added to the MAAD-AF Library. 

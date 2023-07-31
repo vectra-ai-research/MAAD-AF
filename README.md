@@ -49,7 +49,8 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 1. Internet accessible Windows host
 2. PowerShell (version 5 or later) terminal as Administrator
 3. The following PowerShell modules are required and will be installed automatically:
- - [Az](https://www.powershellgallery.com/packages/Az/) 
+ - [Az.Accounts](https://www.powershellgallery.com/packages/Az.Accounts/2.12.4)
+ - [Az.Resources](https://www.powershellgallery.com/packages/Az.Resources/6.8.0)
  - [AzureAd](https://www.powershellgallery.com/packages/AzureAD/) 
  - [MSOnline](https://www.powershellgallery.com/packages/MSOnline/) 
  - [ExchangeOnlineManagement](https://www.powershellgallery.com/packages/ExchangeOnlineManagement/)
@@ -63,9 +64,6 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
  - [Microsoft.Graph.Applications](https://www.powershellgallery.com/packages/Microsoft.Graph.Applications/2.0.0-rc3)
  - [Microsoft.Graph.Users](https://www.powershellgallery.com/packages/Microsoft.Graph.Users/2.0.0-rc3)
  - [Microsoft.Graph.Groups](https://www.powershellgallery.com/packages/Microsoft.Graph.Groups/2.0.0-rc3)
-
-### Limitations
-- MAAD-AF is currently only fully supported on Windows OS
 
 ## Contribute
  - Thank you for considering contributing to MAAD-AF!  

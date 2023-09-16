@@ -1,52 +1,95 @@
-function establish_connection {
-    #Setting all variables as $null
-    $global:AdminUsername, $global:AdminPassword, $global:AccessToken, $global:AdminCredential = $null
-    Write-Host ""
-    #Checking if saved credentials are available in MAAD_Config.ps1
-    if ($global:CredentialsList.Count -gt 0) {
-        Write-Host "Credentials available:" -ForegroundColor Gray
-        foreach ($item in $global:CredentialsList){
-            Write-Host $global:CredentialsList.IndexOf($item) ":" $item["username"] -ForegroundColor Gray
-        }
-        $credential_choice = Read-Host "`nChoose a credential from the list or enter 'x' to enter new credentials manually"
+function EstablishAccess ($target_service){
+    Write-MAADLog "start" "EstablishAccess"
 
-        try {
-            $credential_choice = [int]$credential_choice
-            if ($credential_choice -lt $global:CredentialsList.Count) {
-                Write-Host $global:CredentialsList[$credential_choice]["username"]
-                $global:AdminUsername = $global:CredentialsList[$credential_choice]["username"]
-                $global:AdminPassword = $global:CredentialsList[$credential_choice]["password"]
-                $global:AccessToken = $global:CredentialsList[$credential_choice]["token"]
+    #Setting all variables as $null
+    $global:current_username, $global:current_password, $global:current_access_token, $global:current_credentials = $null
+    Write-Host ""
+
+    #Checking if saved credentials are available in credentials.json
+    try {
+        $credential_file_path = $global:maad_credential_store
+        $available_credentials = Get-Content $credential_file_path | ConvertFrom-Json
+    }
+    catch {
+        Write-Host "[CS Error] Failed to access credentials file" -ForegroundColor Red
+    }
+
+    if ($null -ne $available_credentials){
+        #Display available credentials
+        foreach ($credential in $available_credentials.PSObject.Properties){        
+            $credential_type = $credential.Value.type
+            if ($credential.Value.type -eq "password"){
+                Write-Host ($credential_type).ToUpper() "### UID:" $credential.Name "[Username: $($credential.Value.username)]"-ForegroundColor Yellow
+            }
+            elseif ($credential.Value.type -eq "token"){
+                Write-Host ($credential_type).ToUpper() "   ###" $credential.Name -ForegroundColor Yellow
             }
         }
-        catch {
-            #Do Nothing
-        }
+
+        do{
+            $retrived_creds = $false
+            $credential_choice = Read-Host -Prompt "`nEnter ID to select credential from store"
+            if ($credential_choice -in $null, "") {
+                break
+            }
+            foreach ($credential in $available_credentials.PSObject.Properties){
+                if ($credential.Name -eq $credential_choice){
+                    if ($credential.Value.type -eq "password"){
+                        $global:current_username  = $credential.Value.username
+                        $global:current_password = $credential.Value.password
+                        $retrived_creds = $true
+                        break
+                    }
+                    elseif ($credential.Value.type -eq "token"){
+                        $global:current_access_token = $credential.Value.token
+                        $retrived_creds = $true
+                        break
+                    }
+                }
+            }
+        }while($retrived_creds -eq $false)
+    }
+    else{
+        #Do nothing
     }
 
     #Get credentials if not found in config file
-    if ($global:AdminUsername -in $null,"" -or $global:AdminPassword -in "",$null) {
-        Write-Host "`nEnter admin credentials to access Azure AD & M365 environment" -ForegroundColor Red
-        $global:AdminUsername = Read-Host -Prompt "Enter admin username:"
-        $global:AdminSecurePass = Read-Host -Prompt "Enter $global:AdminUsername password:" -AsSecureString 
-        $global:AdminCredential = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:AdminUsername, $global:AdminSecurePass)
+    if ($global:current_username -in $null,"" -or $global:current_password -in "",$null) {
+        Write-Host "`nEnter credentials to access Azure AD & M365 environment" -ForegroundColor Red
+        $global:current_username = Read-Host -Prompt "Enter username:"
+        $global:current_secure_pass = Read-Host -Prompt "Enter $global:current_username password:" -AsSecureString 
+        $global:current_credentials = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:current_username, $global:current_secure_pass)
         Write-Host "`nTip: You can also store credentials in MAAD_Config.ps1 if you would like to." -ForegroundColor Gray
     }
     else {
-        Write-Host "Retrieved credentials...`n"
-        $global:AdminSecurePass = ConvertTo-SecureString $global:AdminPassword -AsPlainText -Force
-        $global:AdminCredential = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:AdminUsername, $global:AdminSecurePass)
+        Write-Host "`nRetrieved credentials..." -ForegroundColor Gray
+        $global:current_secure_pass = ConvertTo-SecureString $global:current_password -AsPlainText -Force
+        $global:current_credentials = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:current_username, $global:current_secure_pass)
     }
-
-    #Create Sessions
-    Write-Host "`nHold tight!!! Establishing access to Azure AD and M365 services..." -ForegroundColor Yellow -BackgroundColor Black
-    AccessAzureAD $global:AdminUsername $global:AdminCredential $global:AccessToken
-    AccessAzAccount $global:AdminUsername $global:AdminCredential $global:AccessToken
-    AccessTeams $global:AdminUsername $global:AdminCredential $global:AccessToken
-    AccessExchangeOnline $global:AdminUsername $global:AdminCredential $global:AccessToken
-    AccessMsol $global:AdminUsername $global:AdminCredential $global:AccessToken
-    AccessSharepoint $global:AdminUsername $global:AdminCredential $global:AccessToken
-    AccessSharepointAdmin $global:AdminUsername $global:AdminCredential $global:AccessToken
+    
+    switch ($target_service) {
+        "azure_ad"{AccessAzureAD $global:current_username $global:current_credentials $global:current_access_token}
+        "az"{AccessAzAccount $global:current_username $global:current_credentials $global:current_access_token}
+        "exchange_online"{AccessExchangeOnline $global:current_username $global:current_credentials $global:current_access_token}
+        "teams"{AccessTeams $global:current_username $global:current_credentials $global:current_access_token}
+        "msol"{AccessMsol $global:current_username $global:current_credentials $global:current_access_token}
+        "sharepoint_site"{AccessSharepoint $global:current_username $global:current_credentials $global:current_access_token}
+        "sharepoint_admin_center"{AccessSharepointAdmin $global:current_username $global:current_credentials $global:current_access_token}
+        "ediscovery"{ConnectEdiscovery $global:current_credentials}
+        Default {
+            AccessAzureAD $global:current_username $global:current_credentials $global:current_access_token
+            AccessAzAccount $global:current_username $global:current_credentials $global:current_access_token
+            AccessTeams $global:current_username $global:current_credentials $global:current_access_token
+            AccessExchangeOnline $global:current_username $global:current_credentials $global:current_access_token
+            AccessMsol $global:current_username $global:current_credentials $global:current_access_token
+            AccessSharepoint $global:current_username $global:current_credentials $global:current_access_token
+            AccessSharepointAdmin $global:current_username $global:current_credentials $global:current_access_token
+            ConnectEdiscovery $global:current_credentials
+        
+            #Display access info after establishing connection
+            AccessInfo
+        }
+    }
 }
 
 function AccessAzureAD{
@@ -676,6 +719,22 @@ function AccessSharepointAdmin {
         [Parameter(Mandatory)][PSCredential] $AdminCredential,
         $AccessToken
     )
+
+    #Find the sharepoint URL
+    if ($sharepoint_url -notin "No","no","N","n"){
+        $tenant = $AdminUsername.Split("@")[1]
+        $tenant_intel = Invoke-AADIntReconAsOutsider -DomainName $tenant
+
+        foreach ($domain in $tenant_intel){
+            #Write-Host $domain.Name
+            if ($domain.Name -match ".onmicrosoft.com" -and $domain.Name -notmatch ".mail.onmicrosoft.com"){
+                $global:sharepoint_tenant = $domain.Name.Split(".")[0]
+            }
+        }
+        $sharepoint_url = "https://$global:sharepoint_tenant.sharepoint.com"
+        Write-Host "Sharepoint url: $sharepoint_url"
+    }
+
     ###Connect SharePoint Online Administration Center 
     if ($AccessToken -notin "",$null) {
         try {
@@ -740,4 +799,95 @@ function AccessSharepointAdmin {
             Write-Host "Failed to establish access to SharePoint Online Administration Center. Validate credentials!`n" -ForegroundColor Red
         }
     }
+}
+
+function ConnectSharepointSite ($target_site_url, [pscredential]$access_credential) {
+    try{
+        Write-Host "`nAttempting access to SharePoint site..." -ForegroundColor Gray
+        Connect-PnPOnline -Url $target_site_url -Credentials $access_credential
+        Write-Host "`n[Success] Connected to SharePoint site: $target_site_url" -ForegroundColor Yellow
+    }
+    catch [System.Exception]{
+        if ($null -ne ($_.Exception.Message | Select-String -Pattern "Forbidden")){
+            Write-Host "`n[Error] I guess you can't get everything!`nThis account DOES NOT have access to this SharePoint site. Try another site from the list or attempt to gain access to this site." -ForegroundColor Red
+            return
+        }
+        else {
+            Write-Host $_
+            return
+        }
+    }
+    catch{
+        Write-Host "`n[Error] Unable to access sharepoint site" -ForegroundColor Red
+    }
+}
+
+function ConnectEdiscovery ([pscredential]$access_credential){
+    Write-Host "Establishing access to Security & Compliance portal..." -ForegroundColor Gray
+
+    try {
+        Connect-IPPSSession -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid -Credential $access_credential
+        Start-Sleep -Seconds 5
+        Write-Host "`n[.] Established access to Security & Compliance" -ForegroundColor Yellow
+    }
+    catch {
+        Write-Host "`nFailed to establish session with compliance portal with the current credentials!" -ForegroundColor Red
+    }
+}
+
+function terminate_connection {
+
+    Write-Host "`nClosing all active connections........." -ForegroundColor Gray
+    try {
+        Disconnect-AzureAD -Confirm:$false | Out-Null
+    }
+    catch {
+        #do nothing
+    }
+
+    try {
+        Disconnect-ExchangeOnline -Confirm:$false | Out-Null
+    }
+    catch {
+        #do nothing
+    }
+    try {
+        Disconnect-AzAccount -Confirm:$false | Out-Null
+    }
+    catch {
+        #do nothing
+    }
+    try {
+        Disconnect-MicrosoftTeams -Confirm:$false | Out-Null
+    }
+    catch {
+        #do nothing
+    }
+    try {
+        Disconnect-PnPOnline | Out-Null
+    }
+    catch {
+        #do nothing
+    }
+    try {
+        Disconnect-SPOService | Out-Null
+    }
+    catch {
+        #do nothing
+    }
+    try {
+        [Microsoft.Online.Administration.Automation.ConnectMsolService]::ClearUserSessionState() | Out-Null
+    }
+    catch {
+        #do nothing
+    }
+    try {
+        if($null -ne (Get-MgContext)){
+            Disconnect-MgGraph | Out-Null
+        }
+    }
+    catch {
+        #do nothing
+    }
+    Write-MAADLog "info" "connections terminated"
 }

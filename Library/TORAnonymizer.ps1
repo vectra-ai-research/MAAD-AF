@@ -1,5 +1,8 @@
 function TORAnonymizer ($command){
 
+    $maad_config = Get-Content $global:maad_config_path | ConvertFrom-Json
+    $tor_root_directory = $maad_config.tor_config.tor_root_directory
+
     if ($command -eq "start") {
         $global:tor_proxy = $false
         
@@ -19,8 +22,8 @@ function TORAnonymizer ($command){
         
         if ($inititate_anonymity -notin "No","no","N","n"){
             mitre_details("TORAnonymizer")
-            #Check from global config file if TOR config file has been added by user
-            if ($global:tor_root_directory -eq "C:\Users\username\sub_folder\Tor Browser"){
+            #Check from local config file if TOR config has been updated by user
+            if ($tor_root_directory -eq "C:\Users\username\sub_folder\Tor Browser"){
                 Write-Host "TOR executable not found on the host!!!" -ForegroundColor Red
                 Write-Host "`nTip:`n1. Check that TOR is installed on your host. Checkout: https://www.torproject.org/`n2. Update the TOR direcotry path in MAAD_Config.ps1" -ForegroundColor Gray
                 Write-Host "`nNote: MAAD-AF will now continue without TOR!!!"
@@ -30,10 +33,10 @@ function TORAnonymizer ($command){
             Write-Host "Initiating TOR..."
             invoke-expression 'cmd /c start powershell -NoExit -Command  {. .\Library\TORAnonymizer.ps1;TORProxy}'
             Write-Warning "TOR server is initiated in a separate window. Please do not close the window if you want TOR to be running!!!"
-            Write-Host "Connecting to TOR nodes..."
+            Write-Host "Connecting to TOR nodes..." -ForegroundColor Gray
             Start-Sleep -Seconds 3
 
-            Write-Host "Configuring Proxy on host to route traffic through TOR..."
+            Write-Host "`nConfiguring Proxy on host to route traffic through TOR..." -ForegroundColor Gray
             try {
                 Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyServer -Value "http://127.0.0.1:9150" -ErrorAction Stop
                 Write-Host "- Successfully modified keys to add TOR proxy!" -ForegroundColor Gray
@@ -42,12 +45,13 @@ function TORAnonymizer ($command){
                 $global:tor_proxy = $true
             }
             catch {
-                Write-Host "Failed to setup proxy for TOR!!!"
+                Write-Host "[Error] Failed to setup proxy for TOR!!!" -ForegroundColor Red
                 break
             }
 
-            Write-Host "Routing traffic through TOR nodes..."
-            Write-Host "Going Dark!!! You are now anonymous!!!" -ForegroundColor Yellow -BackgroundColor Black
+            Write-Host "Routing traffic through TOR nodes..." -ForegroundColor Gray
+            Write-Host "[TOR Active] Going Dark!!! You are now anonymous!!!" -ForegroundColor Yellow
+            Write-MAADLog "START" "TOR started"
         }
     }
 
@@ -57,30 +61,35 @@ function TORAnonymizer ($command){
             Write-Host "`n- Successfully removed TOR proxy!" -ForegroundColor Gray
             Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyEnable -Value 0 -ErrorAction Stop
             Write-Host "- Successfully disabled proxy!" -ForegroundColor Gray
-            Write-Host "`Successfully reverted all network changes made by the tool!!!`n"
+            Write-Host "`n[Success] Reverted all network changes made by the tool!!!`n" -ForegroundColor Gray
             $global:tor_proxy = $false
+            Write-MAADLog "STOP" "TOR stopped"
         }
         catch {
-            Write-Host "Failed to remove proxy for TOR! Check out the guide for instructions on on how to do it manually!!!"
+            Write-Host "[Error] Failed to remove proxy for TOR! Check out the guide for instructions on on how to do it manually!!!" -ForegroundColor Red
             break
         }
     }
 }
 function TORProxy {
+    #Load local proxy configuration from maad_config
+    $maad_config = Get-Content $global:maad_config_path | ConvertFrom-Json
 
-    #Load proxy user configuration from file
-    . ./Library/MAAD_Config.ps1
+    $control_port = $maad_config.tor_config.control_port
+    $tor_root_directory = $maad_config.tor_config.tor_root_directory
+    $tor_host = $maad_config.tor_config.tor_host
+    $tor_port = $maad_config.tor_config.tor_port
     
     #set parameters for tor executable
-    $tor_exe = "$global:tor_root_directory\Browser\TorBrowser\Tor\tor.exe"
-    $torrc_defaults = "$global:tor_root_directory\Browser\TorBrowser\Data\Tor\torrc-defaults"
-    $torrc = "$global:tor_root_directory\Browser\TorBrowser\Data\Tor\torrc"
-    $tor_data = "$global:tor_root_directory\Browser\TorBrowser\Data\Tor"
-    $geo_IP_file = "$global:tor_root_directory\Browser\TorBrowser\Data\Tor\geoip"
-    $geo_IPv6_file = "$global:tor_root_directory\Browser\TorBrowser\Data\Tor\geoip6"
+    $tor_exe = "tor_root_directory\Browser\TorBrowser\Tor\tor.exe"
+    $torrc_defaults = "$tor_root_directory\Browser\TorBrowser\Data\Tor\torrc-defaults"
+    $torrc = "$tor_root_directory\Browser\TorBrowser\Data\Tor\torrc"
+    $tor_data = "$tor_root_directory\Browser\TorBrowser\Data\Tor"
+    $geo_IP_file = "$tor_root_directory\Browser\TorBrowser\Data\Tor\geoip"
+    $geo_IPv6_file = "$tor_root_directory\Browser\TorBrowser\Data\Tor\geoip6"
 
     #Run TOR proxy
-    Write-Host "Running TOR..." -ForegroundColor Red
-    Write-Host "Hit 'Ctrl+C' to stop Tor!"
-    & "$tor_exe" --defaults-torrc $torrc_defaults -f $torrc DataDirectory $tor_data GeoIPFile $geo_IP_file GeoIPv6File $geo_IPv6_file +__ControlPort $global:control_port +__HTTPTunnelPort "${global:tor_host}:$global:tor_port IPv6Traffic PreferIPv6 KeepAliveIsolateSOCKSAuth" __OwningControllerProcess $PID | more
+    Write-Host "Running TOR..." -ForegroundColor Gray
+    Write-Host "Hit 'Ctrl+C' to stop Tor!" -ForegroundColor Gray
+    & "$tor_exe" --defaults-torrc $torrc_defaults -f $torrc DataDirectory $tor_data GeoIPFile $geo_IP_file GeoIPv6File $geo_IPv6_file +__ControlPort $control_port +__HTTPTunnelPort "${tor_host}:$tor_port IPv6Traffic PreferIPv6 KeepAliveIsolateSOCKSAuth" __OwningControllerProcess $PID | more
 }

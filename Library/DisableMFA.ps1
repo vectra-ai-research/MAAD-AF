@@ -3,7 +3,7 @@ function DisableMFA {
     mitre_details("DisableMFA")
 
     EnterAccount ("Enter an account to disable MFA for (user@org.com)")
-    $target_account = $global:input_user_account
+    $target_account = $global:account_username
 
     #Disabe MFA
     try {

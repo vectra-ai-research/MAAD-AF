@@ -1,7 +1,7 @@
 # MAAD Attack Framework
 ![MAAD_Logo](images/MAAD_AF.png)                                                                     
         
-MAAD-AF is an open-source cloud attack tool developed for testing security of Microsoft 365 & Azure AD environments through adversary emulation. MAAD-AF provides security practitioners easy to use attack modules to exploit configurations across different M365/AzureAD cloud-based tools & services.
+MAAD-AF is an open-source cloud attack tool developed for testing security of Microsoft 365 & Azure AD environments through adversary emulation. MAAD-AF provides security practitioners easy to use attack modules to exploit different M365/AzureAD cloud-based tools & services.
 
 MAAD-AF is designed to make cloud security testing simple, fast and effective. Through its virtually no-setup requirement and easy to use interactive attack modules, security teams can test their security controls, detection and response capabilities easily and swiftly. 
 
@@ -16,8 +16,7 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 - Attack modules for eDiscovery
 
 ### MAAD-AF Attack Modules
-- Azure AD External Recon (Includes sub-modules)
-- Azure AD Internal Recon (Includes sub-modules)
+- Recon
 - Backdoor Account Setup
 - Trusted Network Modification
 - Disable Mailbox Auditing
@@ -25,13 +24,14 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 - Mailbox Deletion Rule Setup
 - Exfiltration through Mailbox Forwarding
 - Gain User Mailbox Access
-- External Teams Access Setup (Includes sub-modules)
-- Cross Tenant Synchronization Exploits (Includes sub-modules)
-- eDiscovery exploitation (Includes sub-modules)
+- External Teams Access Setup
+- Cross Tenant Synchronization Exploits
+- eDiscovery exploitation
 - Bruteforce
 - MFA Manipulation
 - User Account Deletion
-- SharePoint exploitation (Includes sub-modules)
+- SharePoint exploitation
+- Many more...
 
 ## Getting Started
 ### Plug & Play - It's that easy!
@@ -47,7 +47,7 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 
 ### Requirements
 1. Internet accessible Windows host
-2. PowerShell (version 5 or later) terminal as Administrator
+2. PowerShell (version 5) terminal as Administrator
 3. The following PowerShell modules are required and will be installed automatically:
  - [Az.Accounts](https://www.powershellgallery.com/packages/Az.Accounts/2.12.4)
  - [Az.Resources](https://www.powershellgallery.com/packages/Az.Resources/6.8.0)

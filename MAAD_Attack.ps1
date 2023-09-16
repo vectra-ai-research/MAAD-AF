@@ -14,19 +14,22 @@
 
 .NOTES
     Author: Arpan Sarkar (@openrec0n)
+    Version: 2.0
 #>
 
 #Import All MAAD Functions from MAAD Library
-foreach($maad_function in (Get-ChildItem ./Library/).Name){. ./Library/$maad_function}
+foreach($maad_function in (Get-ChildItem ./Library/* -Include *.ps1).Name){. ./Library/$maad_function}
+
+#Primary global variables
+$global:maad_credential_store = ".\Local\MAAD_Credential_Store.json"
+$global:maad_config_path = ".\Local\MAAD_Local_Configuration.json"
+$global:maad_log_file = ".\Local\MAAD_AF_Log.txt"
 
 #Initiation message 
 MAADInitialization
 
-#Clear any active sessions to prevent reaching session limit
-ClearActiveSessions 
-
-#Create outputs directory (if not present)
-CreateOutputsDir
+#Run primary checks for MAAD-AF
+InitializationChecks
 
 #Check for Powershell modules required for tool operation
 RequiredModules
@@ -34,14 +37,5 @@ RequiredModules
 #Check and Initiate TOR
 TORAnonymizer("start")
 
-###Main Script###
-while ($true) {
-    #Display primary modes
-    Write-Host "`n                    ___MAAD-AF Modes___`n(1)Pre-compromise                  (2)Exploit M365/AzureAD`n" -ForegroundColor Yellow
-    
-    [int]$mode = Read-Host "Choose mode:"
-    switch ($mode) {
-        1 {LaunchPreCompromise}
-        2 {LaunchExploitMode}
-    }    
-} 
+#Launch MAD-AF Attack Arsenal
+MAADAttackArsenal 

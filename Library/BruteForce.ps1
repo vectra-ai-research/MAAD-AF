@@ -85,7 +85,7 @@ function InternalBruteForce {
 
     #Get account to target
     EnterAccount ("`nEnter an account to brute-force (eg:user@org.com) or enter 'recon' to find all available accounts")
-    $username = $global:input_user_account
+    $username = $global:account_username
 
     BruteForce($username)
 }

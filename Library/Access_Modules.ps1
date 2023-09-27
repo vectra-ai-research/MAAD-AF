@@ -59,7 +59,7 @@ function EstablishAccess ($target_service){
         $global:current_username = Read-Host -Prompt "Enter username:"
         $global:current_secure_pass = Read-Host -Prompt "Enter $global:current_username password:" -AsSecureString 
         $global:current_credentials = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:current_username, $global:current_secure_pass)
-        Write-Host "`nTip: You can also store credentials in MAAD_Config.ps1 if you would like to." -ForegroundColor Gray
+        Write-Host "`nTip: You can store credentials in MAAD_Credential_Store. Use command: 'ADD CREDS'" -ForegroundColor Gray
     }
     else {
         Write-Host "`nRetrieved credentials..." -ForegroundColor Gray

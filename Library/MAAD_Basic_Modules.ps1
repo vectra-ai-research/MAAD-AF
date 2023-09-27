@@ -434,7 +434,7 @@ function ValidateManagementRole ($input_mgmt_role){
     ###This function returns if a group exists in Azure AD ($mgmt_role_found = $true) or not ($mgmt_role_found = $false)
     $global:mgmt_role_found = $false
 
-    $check_mgmt_role = Get-RoleGroup -Filter "Name -eq 'Reviewer'"
+    $check_mgmt_role = Get-RoleGroup -Filter "Name -eq '$input_mgmt_role'"
     
     if ($check_mgmt_role -eq $null){
         Write-Host "The role does not exist or matches any other role in the tenant!`n" -ForegroundColor Red

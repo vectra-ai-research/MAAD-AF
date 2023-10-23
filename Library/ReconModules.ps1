@@ -19,9 +19,9 @@ function MAADGetAllAADUsers ($download = $false){
                     $all_accounts | Format-Table -Property DisplayName, UserPrincipalName, ObjectID,UserType -Wrap -RepeatHeader | more
                 }
                 else{
-                    Write-Host "`nDownloading accounts list from tenant" -ForegroundColor Gray
+                    Write-Host "`nExporting accounts list from tenant" -ForegroundColor Gray
                     $all_accounts | Out-File -FilePath .\Outputs\All_Accounts.txt -Append
-                    Write-Host "`nAccounts list dumped to: /Outputs/All_Accounts.txt" -ForegroundColor Yellow
+                    Write-Host "`n[Success] Accounts list dumped to: /Outputs/All_Accounts.txt" -ForegroundColor Yellow
                 }
             }
             else{
@@ -30,7 +30,7 @@ function MAADGetAllAADUsers ($download = $false){
         }
     }
     catch {
-        Write-Host "[Error] Could not search accounts in tenant" -ForegroundColor Red
+        Write-Host "[Error] Failed to search accounts in tenant" -ForegroundColor Red
     }
 }
 
@@ -47,9 +47,9 @@ function MAADGetAllAADGroups {
                 $all_groups | Format-Table -Wrap | more
             }
             else{
-                Write-Host "`nDownloading groups list from tenant" -ForegroundColor Gray
+                Write-Host "`nExporting groups list from tenant" -ForegroundColor Gray
                 $all_groups | Out-File -FilePath .\Outputs\All_Groups.txt -Append
-                Write-Host "`nAccounts list dumped to: /Outputs/All_Groups.txt" -ForegroundColor Yellow
+                Write-Host "`n[Success] Group list dumped to: /Outputs/All_Groups.txt" -ForegroundColor Yellow
             }
         }
         else{
@@ -57,7 +57,7 @@ function MAADGetAllAADGroups {
         }
     }
     catch {
-        Write-Host "[Error] Could not search groups in tenant" -ForegroundColor Red
+        Write-Host "[Error] Failed to search groups in tenant" -ForegroundColor Red
     }
 }
 
@@ -66,12 +66,12 @@ function MAADGetAllMailboxes ($download = $false){
     try {
         $all_mailboxes = Get-Mailbox 
         if ($download -eq $true){
-            Write-Host "`nDownloading mailbox list from tenant" -ForegroundColor Gray
+            Write-Host "`nExporting mailbox list from tenant" -ForegroundColor Gray
             $all_mailboxes | Out-File -FilePath .\Outputs\All_Mailboxes.txt -Append
-            Write-Host "`nMailbox list dumped to: /Outputs/All_Mailboxes.txt" -ForegroundColor Yellow
+            Write-Host "`n[Success] Mailbox list dumped to: /Outputs/All_Mailboxes.txt" -ForegroundColor Yellow
         }
         else{
-            Write-Host "`nSearching mailoxes in tenant..." -ForegroundColor Gray
+            Write-Host "`nSearching mailboxes in tenant..." -ForegroundColor Gray
             $all_mailboxes | Format-Table -Property DisplayName,PrimarySmtpAddress | more
         }
     }
@@ -117,7 +117,7 @@ function MAADGetConditionalAccessPolicies {
     try {
         #Get conditional access policies
         Get-AzureADMSConditionalAccessPolicy | Format-Table DisplayName, Id, State
-        Write-Host "`nShowing detailed information on each policy below...`n" -ForegroundColor Gray
+        Write-Host "`nDisplaying detailed information on each policy below...`n" -ForegroundColor Gray
         Start-Sleep -Seconds 5
 
         $conditional_policy_list = Get-AzureADMSConditionalAccessPolicy
@@ -211,12 +211,11 @@ function MAADGetAccountGroupRoles {
      
      $user_roles = @()
  
-     Write-Host "`nEnumerating through user group roles ..."
+     Write-Host "`nEnumerating through user group roles ..." -ForegroundColor Gray
  
      foreach ($role in $all_roles){
          $role_object_id = $role.ObjectId
          if ($target_account -in (Get-AzureADDirectoryRoleMember -ObjectId $role_object_id).UserPrincipalName) {
-             #Write-Host "User has role: $($role.DisplayName)"
              $user_roles += $role.DisplayName
          }
      }

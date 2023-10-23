@@ -14,23 +14,26 @@ function CreateNewAzureADGroup {
         Write-Host "`nCreating a new Group ..."
         $new_group = New-AzureADGroup -DisplayName $new_group_display_name -Description $new_group_description -MailEnabled $false -SecurityEnabled $true -ErrorAction Stop
         Start-Sleep -Seconds 10
-        Write-Host "Successfully created new group!" -BackgroundColor Black -ForegroundColor Gray
+        Write-Host "`n[Success] Created new group" -ForegroundColor Yellow
         $allow_undo = $true
     }
     catch {
-        Write-Host "Error: Failed to create new group" -ForegroundColor Red
+        Write-Host "`n[Error] Failed to create new group" -ForegroundColor Red
     }
 
     #Undo changes
     if ($allow_undo -eq $true) {
-        try {
-            $group_details = Get-AzureADGroup -SearchString $new_group_display_name
-            $group_id = $group_details.ObjectId
-            Remove-AzureADGroup -ObjectId $group_id -ErrorAction Stop
-            Write-Host "`nUndo successful: Deleted new group: $new_group_display_name" -ForegroundColor Yellow
-        }
-        catch {
-            Write-Host "`nUndo failed: Could not delete new group: $new_group_display_name" -BackgroundColor Red
+        $user_confirm = Read-Host -Prompt "`nWould you like to undo changes by deleting the new group? (yes/no)"
+        if ($user_confirm -notin "No","no","N","n") {
+            try {
+                $group_details = Get-AzureADGroup -SearchString $new_group_display_name
+                $group_id = $group_details.ObjectId
+                Remove-AzureADGroup -ObjectId $group_id -ErrorAction Stop
+                Write-Host "`n[Success] Deleted new group: $new_group_display_name" -ForegroundColor Yellow
+            }
+            catch {
+                Write-Host "`n[Error] Could not delete new group: $new_group_display_name" -BackgroundColor Red
+            }
         }
     }
     Pause
@@ -42,24 +45,24 @@ function CreateNewM365Group{
 
     #Create the group with set parameters
     try {
-        Write-Host "`nCreating a new Group ..."
+        Write-Host "`nCreating a new Group ..." -ForegroundColor Gray
         $new_group = New-UnifiedGroup -DisplayName $new_group_display_name -AccessType Public -Confirm:$false -ErrorAction Stop
         Start-Sleep -Seconds 10
-        Write-Host "Successfully created new group!" -BackgroundColor Black -ForegroundColor Gray
+        Write-Host "`n[Success] Created new group" -ForegroundColor Yellow
         $allow_undo = $true
     }
     catch {
-        Write-Host "Error: Failed to create new group" -ForegroundColor Red
+        Write-Host "`n[Error] Failed to create new group" -ForegroundColor Red
     }
 
     #Undo changes
     if ($allow_undo -eq $true) {
         try {
             Remove-UnifiedGroup -Identity $new_group_display_name -Force -Confirm:$false -ErrorAction Stop
-            Write-Host "`nUndo successful: Deleted new group: $new_group_display_name" -ForegroundColor Yellow
+            Write-Host "`n[Undo Success] Deleted new group: $new_group_display_name" -ForegroundColor Yellow
         }
         catch {
-            Write-Host "`nUndo failed: Could not delete new group: $new_group_display_name" -BackgroundColor Red
+            Write-Host "`n[Undo Error] Failed to delete new group: $new_group_display_name" -BackgroundColor Red
         }
     }
     Pause

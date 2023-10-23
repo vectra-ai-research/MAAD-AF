@@ -9,7 +9,8 @@ function GenerateNewApplicationCredentials{
     try {
         $app_credentials = New-AzureADApplicationPasswordCredential -ObjectId $target_app_object_id
         Start-Sleep -s 5 
-        Write-Host "`nApp: $target_app`nNew Secret: $($app_credentials.value)"
+        Write-Host "`nApp: $target_app"
+        Write-Host "New Secret: $($app_credentials.value)"
         "$target_app :`n $app_credentials" | Out-File -FilePath .\Outputs\Application_Credentials.txt -Append
         Write-Host "`n[Success] New credential generated for $target_app" -ForegroundColor Yellow
 

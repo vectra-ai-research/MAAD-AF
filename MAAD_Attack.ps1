@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    Attack tool which exploits Microsoft 365 and Azure AD configurations to emulate attacker behavior in a compromised Microsoft cloud environment.
+    Attack tool to exploit Microsoft 365 and Entra ID(Azure AD) services & configurations to emulate attacker behavior in a compromised Microsoft cloud environment.
 
 .DESCRIPTION
     MAAD-AF is designed for security teams to test their cloud security controls, detection & response capabilities easily and swiftly. MAAD-AF intends to make cloud security testing simple, fast, and effective for security practitioners by providing an intuitive testing tool focused on prevalent attacker tactics & techniques.
     This tool is intended to be used for education purposes, for testing your OWN M365/AzureAD environments or one you are AUTHORIZED to test.
-    Please refrain from using the tool if you have any questions or concerns about its impact on your environment.
-    Most changes made by this tool can be reversed and the tool offers options to automatically revert most of the changes it does. However, please take any action at your own risk. 
+    Please refrain from using the tool if you have any questions or concerns about its impact on your cloud environment.
+    Many changes made by this tool can be reversed and the tool offers options to automatically revert most of the changes it does. However, please take any action at your own risk. 
 
 .EXAMPLE
     The example below shows how to execute the tool:
@@ -17,6 +17,8 @@
     Version: 2.0
 #>
 
+##Unblock module files before loading them
+Unblock-File -Path ./Library/*
 #Import All MAAD Functions from MAAD Library
 foreach($maad_function in (Get-ChildItem ./Library/* -Include *.ps1).Name){. ./Library/$maad_function}
 

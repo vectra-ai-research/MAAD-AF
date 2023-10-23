@@ -5,7 +5,7 @@ function Display_E_Discovery_Cases ($selection = $false) {
     Write-Host ""
 
     if ($null -eq $all_e_discovery_cases){
-        Write-Host "`nNo eDiscovery cases found!!!" -ForegroundColor Red
+        Write-Host "`nNo eDiscovery cases found" -ForegroundColor Red
         return
     }
 
@@ -22,16 +22,15 @@ function Display_E_Discovery_Cases ($selection = $false) {
             break
         }
         catch {
-            Write-Host "`nInvalid input!!! Choose an option number from the list!" -ForegroundColor Red
+            Write-Host "`n[Input Error] Choose an option number from the list!" -ForegroundColor Red
         }   
     }
 }
 
 function Display_E_Discovery_Case_Searches ($selection = $false, $case_name) {
-    #param ($selection = $false, $case_name)
     $all_case_searches = Get-ComplianceSearch -Case $case_name
 
-    Write-Host "`nHere are the available searches in the case: $case_name" -ForegroundColor Gray
+    Write-Host "`nSearches found in case $case_name :" -ForegroundColor Gray
     if ($all_case_searches -is [array]) {
         foreach ($item in $all_case_searches){
             Write-Host $([array]::IndexOf($all_case_searches,$item)+1) ':' $item.Name
@@ -51,7 +50,7 @@ function Display_E_Discovery_Case_Searches ($selection = $false, $case_name) {
             break
         }
         catch {
-            Write-Host "`nInvalid input!!! Choose an option number from the list!" -ForegroundColor Red
+            Write-Host "`n[Input Error] Choose an option number from the list!" -ForegroundColor Red
         }   
     }
 }
@@ -74,13 +73,13 @@ function E_Discovery_Downloader ($case_name, $export_name){
 
     #Download the exported file from M365
     
-    Write-Host "Initiating download of export ..."
-    Write-Host "Saving export to:" $export_location
+    Write-Host "Initiating download of export ..." -ForegroundColor Gray
+    Write-Host "Saving export to:" $export_location -ForegroundColor Gray
     
     #Start-Process -FilePath $export_tool -ArgumentList $Arguments
     & $export_tool -name $export_name -source $container_url -key $sas_token -dest $export_location -trace true
 
-    Write-Host "Download completed!!!"
+    Write-Host "Download completed." -ForegroundColor Gray
 }
 
 function E_Discovery_Priv_Esc {
@@ -105,7 +104,7 @@ function E_Discovery_Priv_Esc {
                 Start-Sleep -Seconds 30
             }
             catch {
-                Write-Host "[Error] Failed to elevate privileges to eDiscovery Manager" -ForegroundColor Red
+                Write-Host "`n[Error] Failed to elevate privileges to eDiscovery Manager" -ForegroundColor Red
                 break
             }
         }
@@ -116,24 +115,24 @@ function E_Discovery_Priv_Esc {
             Add-eDiscoveryCaseAdmin -User $target_account
             Write-Host "Waiting for changes to take effect..." -ForegroundColor Gray
             Start-Sleep -Seconds 30
-            Write-Host "`n[Success] You are now eDiscovery Admin!!!" -ForegroundColor Yellow
+            Write-Host "`n[Success] You are now eDiscovery Admin" -ForegroundColor Yellow
         }
         catch {
-            Write-Host "[Error] Failed to escalate privileges to eDiscovery Admin!" -ForegroundColor Red
+            Write-Host "`n[Error] Failed to escalate privileges to eDiscovery Admin" -ForegroundColor Red
             break
         }
     }
     else {
         Write-Host "`nSometimes life is not that hard ;)" -ForegroundColor Gray
-        Write-Host "You are already eDiscovery Admin & Manager!!!" -ForegroundColor Yellow
+        Write-Host "`nYou are already eDiscovery Admin & Manager" -ForegroundColor Gray
         return
     }
 }
 
 #Create a new search and export data
 function Create_New_Search {
-    
-    $new_search_choice = Read-Host -Prompt "`nCreate search in a 1.New or 2.Existing case:"
+    Write-Host "Create new search in: `n1. New Case `n2. Existing Case"
+    $new_search_choice = Read-Host -Prompt "`nSelect an option:"
 
     if ($new_search_choice -eq 1) {
         $case_name = Read-Host -Prompt "`nEnter a name for your new eDiscovery case"
@@ -166,7 +165,7 @@ function Create_New_Search {
         Start-ComplianceSearch -Identity $search_name -ErrorAction Stop
     }
     catch {
-        Write-Host "`n[Error] Failed to start compliance search!" -ForegroundColor Red
+        Write-Host "`n[Error] Failed to start compliance search" -ForegroundColor Red
         break
     }
     
@@ -176,7 +175,7 @@ function Create_New_Search {
             $complianceSearch = Get-ComplianceSearch -Identity $search_name
         }
     while ($complianceSearch.Status -ne 'Completed')
-    Write-Host "`n[Success] Compliance Search completed!!!" -ForegroundColor Yellow 
+    Write-Host "`n[Success] Compliance Search completed" -ForegroundColor Yellow 
 
     Read-Host -Prompt "Press enter to see details of the compliance search result:"
     Get-ComplianceSearch -Identity $search_name | fl
@@ -233,7 +232,7 @@ function Install_Unified_Export_Tool {
             Get-EventSubscriber|? {$_.SourceObject.ToString() -eq 'System.Deployment.Application.InPlaceHostingManager'} | Unregister-Event
         }
     }
-    Write-Host "`nUnified Export tool already installed. You are all set here!" -ForegroundColor Yellow
+    Write-Host "`n[Success] Unified Export tool already installed. You are all set here." -ForegroundColor Yellow
 }
 
 function EDiscoveryExfil {
@@ -269,7 +268,7 @@ function EDiscoveryExfil {
                         $complianceSearch = Get-ComplianceSearch -Identity $global:selected_search
                     }
                 while ($complianceSearch.Status -ne 'Completed')
-                Write-Host "`n[Success] Completed re-run of the selected compliance search!!!" -ForegroundColor Yellow  
+                Write-Host "`n[Success] Completed re-run of the selected compliance search" -ForegroundColor Yellow  
             }
         
             try {
@@ -285,12 +284,12 @@ function EDiscoveryExfil {
                 E_Discovery_Downloader $global:selected_case $export_name
             }
             catch {
-                Write-Host "`n[Error] Could not export search again." -ForegroundColor Red
-                Write-Host "Tip: Try with another case/search." -ForegroundColor Gray
+                Write-Host "`n[Error] Could not export search again" -ForegroundColor Red
+                Write-Host "[Tip] Try with another case/search." -ForegroundColor Gray
             }
         }
         else {
-            Write-Host "`nNo search available in selected case to export!!!`n Try another case." -ForegroundColor Red
+            Write-Host "`nNo search available in selected case to export. Try another case." -ForegroundColor Red
         }
     }
 }

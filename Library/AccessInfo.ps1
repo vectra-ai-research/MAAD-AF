@@ -106,7 +106,7 @@ function AccessInfo{
     if ($access_status_msol) {Write-Host "- Msol" -ForegroundColor Gray}
     if ($access_status_sp_site) {Write-Host "- Sharepoint Site" -ForegroundColor Gray}
     if ($access_status_spo_admin) {Write-Host "- Sharepoint Admin" -ForegroundColor Gray}
-    if ($access_status_ediscovery) {Write-Host " -Compliance Center" -ForegroundColor Gray}
+    if ($access_status_ediscovery) {Write-Host "- Compliance Center" -ForegroundColor Gray}
     Write-Host ""
 
     try {

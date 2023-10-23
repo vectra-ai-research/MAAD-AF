@@ -1,36 +1,39 @@
 # MAAD Attack Framework
 ![MAAD_Logo](images/MAAD_AF.png)                                                                     
         
-MAAD-AF is an open-source cloud attack tool developed for testing security of Microsoft 365 & Azure AD environments through adversary emulation. MAAD-AF provides security practitioners easy to use attack modules to exploit different M365/AzureAD cloud-based tools & services.
+MAAD-AF is an open-source cloud attack tool for Microsoft 365 & Entra ID(Azure AD) environments.
 
 MAAD-AF is designed to make cloud security testing simple, fast and effective. Through its virtually no-setup requirement and easy to use interactive attack modules, security teams can test their security controls, detection and response capabilities easily and swiftly. 
 
+MAAD-AF is completely developed in PowerShell.
+
 ## Features
-- Pre & Post-compromise techniques
+- Post-compromise techniques
 - Simple interactive use
+- Revert actions for clean testing
 - Virtually no-setup requirements
-- Attack modules for Azure AD
+- Attack modules for Entra ID (Azure AD)
 - Attack modules for Exchange
 - Attack modules for Teams
 - Attack modules for SharePoint
 - Attack modules for eDiscovery
 
-### MAAD-AF Attack Modules
-- Recon
+### MAAD-AF Modules
+- Recon data from various services & data stores
 - Backdoor Account Setup
 - Trusted Network Modification
-- Disable Mailbox Auditing
-- Disable Anti-Phishing
+- Mailbox Audit Bypass
+- Disable Anti-Phishing in Exchange
 - Mailbox Deletion Rule Setup
-- Exfiltration through Mailbox Forwarding
+- Exfiltration through Mail Forwarding
 - Gain User Mailbox Access
-- External Teams Access Setup
-- Cross Tenant Synchronization Exploits
-- eDiscovery exploitation
-- Bruteforce
+- Setup External Teams Access
+- Exploit Cross Tenant Synchronization 
+- eDiscovery exploitation for data recon & exfil
+- Bruteforce credentials
 - MFA Manipulation
 - User Account Deletion
-- SharePoint exploitation
+- SharePoint exploitation for data recon & exfil
 - Many more...
 
 ## Getting Started
@@ -46,41 +49,21 @@ MAAD-AF is designed to make cloud security testing simple, fast and effective. T
 ```
 
 ### Requirements
-1. Internet accessible Windows host
-2. PowerShell (version 5) terminal as Administrator
-3. The following PowerShell modules are required and will be installed automatically:
- - [Az.Accounts](https://www.powershellgallery.com/packages/Az.Accounts/2.12.4)
- - [Az.Resources](https://www.powershellgallery.com/packages/Az.Resources/6.8.0)
- - [AzureAd](https://www.powershellgallery.com/packages/AzureAD/) 
- - [MSOnline](https://www.powershellgallery.com/packages/MSOnline/) 
- - [ExchangeOnlineManagement](https://www.powershellgallery.com/packages/ExchangeOnlineManagement/)
- - [MicrosoftTeams](https://www.powershellgallery.com/packages/MicrosoftTeams/)
- - [AzureADPreview](https://www.powershellgallery.com/packages/AzureADPreview/)
- - [ADInternals](https://aadinternals.com/aadinternals/)
- - [ExchangePowershell](https://www.powershellgallery.com/packages/ExchangeOnlineManagement/3.0.0)
- - [Microsoft.Online.SharePoint.PowerShell](https://www.powershellgallery.com/packages/Microsoft.Online.SharePoint.PowerShell/16.0.23311.12000)
- - [PnP.PowerShell](https://github.com/pnp/powershell)
- - [Microsoft.Graph.Identity.SignIns](https://www.powershellgallery.com/packages/Microsoft.Graph.Identity.SignIns/2.0.0-rc3)
- - [Microsoft.Graph.Applications](https://www.powershellgallery.com/packages/Microsoft.Graph.Applications/2.0.0-rc3)
- - [Microsoft.Graph.Users](https://www.powershellgallery.com/packages/Microsoft.Graph.Users/2.0.0-rc3)
- - [Microsoft.Graph.Groups](https://www.powershellgallery.com/packages/Microsoft.Graph.Groups/2.0.0-rc3)
+1. Internet accessible Windows host.
+2. PowerShell (version 5) with local administrator permissions.
+3. All external powershell modules required will be installed automatically.
 
 ## Contribute
  - Thank you for considering contributing to MAAD-AF!  
  - Your contributions will help make MAAD-AF better.
  - Join the mission to make security testing simple, fast and effective.
- - There's an ongoing efforts to make the source code more modular.
  - Submit a PR to the main branch to contribute to MAAD-AF.
-
-### Add Custom Modules
- - Everyone is encouraged to come up with new attack modules that can be added to the MAAD-AF Library. 
- - Attack modules are functions that leverage access & privileges established by MAAD-AF to exploit configuration flaws in Microsoft services.
 
 ### Report Bugs
  - Submit bugs or other issues related to the tool directly in the "Issues" section
 
 ### Request Features
- - Share those great ideas. Submit new features by submitting a PR or sharing them in the Discussions. 
+ - Share those great ideas. Submit new features by submitting a PR or sharing them in GitHub Discussions. 
 
 ## Contact
 - If you found this tool useful, want to share an interesting use-case, bring issues to attention, whatever the reason - share them. You can email at: maad-af@vectra.ai or post it in Discussions on GitHub.

@@ -1,7 +1,7 @@
 ###Basic functions
 function RequiredModules {
     ###This function checks for required modules by MAAD and Installs them if unavailable. Some modules have specific version requirements specified in the dictionary values
-    $RequiredModules=@{"Az.Accounts" = "";"Az.Resources" = ""; "AzureAd" = "";"MSOnline" = "";"ExchangeOnlineManagement" = "";"MicrosoftTeams" = "";"AADInternals" = "";"Microsoft.Online.SharePoint.PowerShell" = "";"PnP.PowerShell" = "1.12.0";"Microsoft.Graph.Identity.SignIns" = "";"Microsoft.Graph.Applications" = "";"Microsoft.Graph.Users" = "";"Microsoft.Graph.Groups" = ""}
+    $RequiredModules=@{"Az.Accounts" = "2.13.1";"Az.Resources" = "6.11.2"; "AzureAd" = "2.0.2.182";"MSOnline" = "1.1.183.80";"ExchangeOnlineManagement" = "3.2.0";"MicrosoftTeams" = "5.7.0";"AADInternals" = "0.9.2";"Microsoft.Online.SharePoint.PowerShell" = "16.0.23710.12000";"PnP.PowerShell" = "1.12.0";"Microsoft.Graph.Identity.SignIns" = "2.6.1";"Microsoft.Graph.Applications" = "2.6.1";"Microsoft.Graph.Users" = "2.6.1";"Microsoft.Graph.Groups" = "2.6.1"}
     $missing_modules = @{}
     $installed_modules = @{}
 
@@ -74,8 +74,10 @@ function RequiredModules {
         } 
     }
 
+    Write-Host " $($installed_modules.Count) / $($RequiredModules.Count) modules installed!" -ForegroundColor Gray
+
     #Import all installed Modules
-    Write-Host "`nImporting all modules to current run space..." -ForegroundColor Gray
+    Write-Host "`nImporting installed modules to current run space..." -ForegroundColor Gray
     foreach ($module in $installed_modules.Keys){
         #Remove any member of module from current run space
         try {
@@ -96,9 +98,9 @@ function RequiredModules {
         catch {
             Write-Host "Failed to import. Skippig module: $module . " -ForegroundColor Red
         }
-    }          
-    Write-Host "Modules check completed!" -ForegroundColor Gray
-    Write-Host " $($installed_modules.Count) / $($RequiredModules.Count) modules available!"
+    }       
+
+    Write-Host "Modules check completed" -ForegroundColor Gray
     #Prevents overwrite from any imported modules 
     $host.UI.RawUI.WindowTitle = "MAAD Attack Framework"
     Write-MAADLog "info" "Modules check completed"
@@ -583,7 +585,7 @@ function EnterSharepointSite ($input_prompt){
     ###This function takes user input and checks for its validity. If invalid, then executes recon to show available options. If valid, returns role name($input_site)
     $repeat = $false
     do {
-        $input_site = Read-Host -Prompt $input_prompt
+        $input_site = (Read-Host -Prompt $input_prompt).Trim()
 
         if ($input_site.ToUpper() -eq "RECON" -or $input_site -eq "" -or $input_site -eq $null) {
             try {

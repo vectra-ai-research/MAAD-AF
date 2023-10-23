@@ -32,11 +32,11 @@ function AssignRole ($target_object_type){
         Write-Host "`nAttempting to assign $target_role role...`n"
         $role_assignment = New-AzureADMSRoleAssignment -DirectoryScopeId '/' -RoleDefinitionId $role_definition_id -PrincipalId $target_id
         Start-Sleep -Seconds 10
-        Write-Host "`n[Success] Assigned $target_role role to target." -ForegroundColor Yellow
+        Write-Host "`n[Success] Assigned $target_role role to target" -ForegroundColor Yellow
         $allow_undo = $true
     }
     catch {
-        Write-Host "[Error] Failed to assign role!" -ForegroundColor Red
+        Write-Host "`n[Error] Failed to assign role" -ForegroundColor Red
     }
 }
 
@@ -53,10 +53,10 @@ function AssignManagementRole {
     try {
         Write-Host "`nAttempting to assign $target_role role...`n" -ForegroundColor Gray
         Add-RoleGroupMember -Identity $target_role -Member $target_account -ErrorAction Stop
-        Write-Host "`n[Success] Assigned $target_role role." -ForegroundColor Yellow
+        Write-Host "`n[Success] Assigned $target_role role" -ForegroundColor Yellow
     }
     catch {
-        Write-Host "`n[Error] Failed to assign role!" -ForegroundColor Red
+        Write-Host "`n[Error] Failed to assign role" -ForegroundColor Red
     }
 
 }

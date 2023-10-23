@@ -23,10 +23,10 @@ function ExternalTeamsInvite {
     $team_details = Get-Team -DisplayName $target_team 
     $group_id = $team_details.GroupId
 
-    Write-Warning -Message "This configuration can sometimes take long to take effect."
+    Write-Host "`nThis configuration can sometimes take long to take effect" -ForegroundColor Gray
     [int]$time_limit_min = (Read-Host -Prompt "`nSet a limit on how long you would like to wait (minutes)")
     [int]$time_limit_sec = $time_limit_min*60
-    Write-Host "`nIts been a long day of hacking. Grab yourself some coffee!!! Checking for change confirmation...`n" -ForegroundColor Gray
+    Write-Host "`nIts been a long day - Grab yourself some coffee! Checking for change confirmation..." -ForegroundColor Gray
 
     #Add to teams group while waiting for the change to take effect
     [int]$timer = 0
@@ -38,7 +38,7 @@ function ExternalTeamsInvite {
             break
         }
         catch{
-            Write-Output "`nAccount hasn't replicated - Attempting again in 60 seconds" -ForegroundColor Gray
+            Write-Output "`nWaiting for account to replicate..." -ForegroundColor Gray
             Start-sleep -Seconds 60
             $timer = $timer+60
             Write-Host "Time remaining: $(($time_limit_sec - $timer)/60) minutes" -ForegroundColor Gray
@@ -46,7 +46,7 @@ function ExternalTeamsInvite {
     } 
 
     if ($allow_undo -eq $true) {
-        $user_choice = Read-Host -Prompt '`nWould you like to undo changes made in teams? (yes/no)'
+        $user_choice = Read-Host -Prompt "`nWould you like to undo changes made in teams? (yes/no)"
         if ($user_choice -notin "No","no","N","n") {
             Write-Host "`nRemoving new user from team $target_team ..." -ForegroundColor Gray
             try {
@@ -54,7 +54,7 @@ function ExternalTeamsInvite {
                 Write-Host "`n[Undo Success] Removed new user: $external_email_address from team: $target_team" -ForegroundColor Yellow
             }
             catch {
-                Write-Host "`n[Error] Failed to remove new user $external_email_address from team $target_team" -ForegroundColor Red
+                Write-Host "`n[Undo Error] Failed to remove new user $external_email_address from team $target_team" -ForegroundColor Red
             } 
         }
     }

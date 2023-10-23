@@ -4,10 +4,10 @@ function ResetPassword {
 
     Write-Warning "Results of this action cannot be reversed!!!"
 
-    EnterAccount ("`nEnter an account to reset password for (user@org.com)")
+    EnterAccount ("Enter an account to reset password for (user@org.com)")
     $target_account = $global:account_username
 
-    $new_password = Read-Host -Prompt "Enter new password to set (must comply with password policy)"
+    $new_password = Read-Host -Prompt "`nEnter new password to set (must comply with password policy)"
     $new_secure_password = ConvertTo-SecureString $new_password -AsPlainText -Force 
 
     #Reset password
@@ -16,7 +16,8 @@ function ResetPassword {
         Set-AzureADUserPassword -ObjectId $target_account -Password $new_secure_password -EnforceChangePasswordPolicy $false -ErrorAction Stop
         Start-Sleep -s 5 
         "User: $target_account | NewPassword: $new_password" | Out-File -FilePath .\Outputs\PasswordResets.txt -Append
-        Write-Host "`nUser: $target_account`nNew Password: $new_password"
+        Write-Host "`nUser: $target_account"
+        Write-Host "New Password: $new_password"
         Write-Host "`n[Success] Password reset for $target_account" -ForegroundColor Yellow
 
         #Save to credential store

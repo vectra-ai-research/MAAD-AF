@@ -31,10 +31,10 @@ function AddObjectToGroup {
                 Write-Host "`nRemoving account $target_account from group: $target_group..."
                 Remove-AzureADGroupMember -ObjectId $target_group_id -MemberId $target_account_id -ErrorAction Stop
                 Start-Sleep -s 5
-                Write-Host "`n[Success] Removed account: $target_account from group: $target_group" -ForegroundColor Yellow
+                Write-Host "`n[Undo Success] Removed account: $target_account from group: $target_group" -ForegroundColor Yellow
             }
             catch {
-                Write-Host "[Error] Failed to remove account from the group. Try removing through Admin console." -ForegroundColor Red
+                Write-Host "`n[Undo Error] Failed to remove account from the group. Try removing through Admin console" -ForegroundColor Red
             }
         }
     }

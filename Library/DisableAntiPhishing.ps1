@@ -6,7 +6,7 @@ function DisableAntiPhishing {
     $inititate_recon = Read-Host -Prompt "Initiate recon to retrive all AntiPhishing policies (Yes/No)"
     
     if ($inititate_recon -notin "No","no","N","n"){
-        Write-Host  "`nRecon: Finding all Anti-Phishing policies in the environment...`n" -ForegroundColor Gray
+        Write-Host  "`nFinding all Anti-Phishing policies in the environment..." -ForegroundColor Gray
         Get-AntiPhishRule | Format-Table Name,State,Priority,Identity
     }
     else {
@@ -22,11 +22,11 @@ function DisableAntiPhishing {
         Disable-AntiPhishRule -Identity $policy_name -Confirm:$false -ErrorAction Stop
         Start-Sleep -s 5  
         Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
-        Write-Host "`n[Success] Guard's down!!! Successfully disabled Anti-Phishing policy!!!" -ForegroundColor Yellow
+        Write-Host "`n[Success] Guard's down - Disabled anti-phishing policy" -ForegroundColor Yellow
         $allow_undo = $true
     }
     catch {
-        Write-Host "`n[Error] Failed to disable Anti-Phishing policy!" -ForegroundColor Red
+        Write-Host "`n[Error] Failed to disable anti-phishing policy!" -ForegroundColor Red
     }
     
     #Undo changes
@@ -39,10 +39,10 @@ function DisableAntiPhishing {
                 Enable-AntiPhishRule -Identity $policy_name -Confirm:$false
                 Start-Sleep -s 5 
                 Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
-                Write-Host "`n[Undo Success] Re-enabled Anti-Phishing policy: '$policy_name'" -ForegroundColor Yellow
+                Write-Host "`n[Undo Success] Re-enabled anti-phishing policy: '$policy_name'" -ForegroundColor Yellow
             }
             catch {
-                Write-Host "`n[Error] Failed to undo changes" -ForegroundColor Red
+                Write-Host "`n[Undo Error] Failed to re-enable policy" -ForegroundColor Red
             }
         }
     }

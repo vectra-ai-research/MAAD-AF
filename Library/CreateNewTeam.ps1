@@ -15,23 +15,27 @@ function CreateNewTeam{
         Write-Host "`nCreating a new Team ..."
         $new_team = New-Team -DisplayName $new_team_display_name -Description [string]$new_team_description -Visibility Private -ErrorAction Stop
         Start-Sleep -Seconds 10
-        Write-Host "Successfully created new team!" -BackgroundColor Black -ForegroundColor Gray
+        Write-Host "`n[Success] Created new team" -ForegroundColor Yellow
         $allow_undo = $true
     }
     catch {
-        Write-Host "Error: Failed to create new team" -ForegroundColor Red
+        Write-Host "`n[Error] Failed to create new team" -ForegroundColor Red
     }
    
     #Undo changes
     if ($allow_undo -eq $true) {
-        try {
-            $team_details = Get-Team -DisplayName $new_team_display_name 
-            $team_id = $team_details.GroupId
-            Remove-Team -GroupId $team_id -ErrorAction Stop
-            Write-Host "`nUndo successful: Deleted new team: $new_team_display_name" -ForegroundColor Yellow
-        }
-        catch {
-            Write-Host "`nUndo failed: Could not delete new team: $new_team_display_name" -BackgroundColor Red
+        $user_confirm = Read-Host -Prompt "`nWould you like to undo changes by deleting the new team? (yes/no)"
+
+        if ($user_confirm -notin "No","no","N","n") {
+            try {
+                $team_details = Get-Team -DisplayName $new_team_display_name 
+                $team_id = $team_details.GroupId
+                Remove-Team -GroupId $team_id -ErrorAction Stop
+                Write-Host "`n[Undo Success] Deleted new team: $new_team_display_name" -ForegroundColor Yellow
+            }
+            catch {
+                Write-Host "`n[Undo Error] Failed to delete new team: $new_team_display_name" -BackgroundColor Red
+            }
         }
     }
     Pause

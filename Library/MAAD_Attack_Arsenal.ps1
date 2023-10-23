@@ -3,7 +3,7 @@ function MAADAttackArsenal{
     [ordered]@{
         "Pre-Attack" = @{1 = "Recon Organization/Identity"; 2 = "Brute-Force Credentials"};
         "Access" = @{1 = "Show Available Credentials"; 2 = "Add Credentials"; 3 = "Establish Access - All"; 4 = "Establish Access - AzureAD"; 5= "Establish Access - Az"; 6 = "Establish Access - Exchange Online"; 7 = "Establish Access - Teams"; 8 = "Establish Access - Msol"; 9 = "Establish Access - Sharepoint Site"; 10 = "Establish Access - Sharepoint Admin Center"; 11 = "Establish Access - Compliance (eDiscovery)"; 12 = "Kill All Access"; 13 = "Anonymize Access with TOR"};
-        "Recon" = @{1 = "AAD : Find All Accounts"; 2= "AAD : Find All Groups"; 3 = "AAD : Find All Service Principals"; 4 = "AAD : Find All Auth Policy"; 5 = "AAD : Recon Named Locations"; 6 = "AAD : Recon Conditional Access Policy"; 7 = "AAD : Recon Registered Devices for Account"; 8 = "AAD : Recon All Accessible Tenants"; 9 = "Recon Account Group Roles"; 10 = "Teams : Recon All Teams"; 11 = "SP : Recon All Sharepoint Sites"; 12 = "Exchange : Find All Mailboxes"};
+        "Recon" = @{1 = "AAD : Find All Accounts"; 2= "AAD : Find All Groups"; 3 = "AAD : Find All Service Principals"; 4 = "AAD : Find All Auth Policy"; 5 = "AAD : Recon Named Locations"; 6 = "AAD : Recon Conditional Access Policy"; 7 = "AAD : Recon Registered Devices for Account"; 8 = "AAD : Recon All Accessible Tenants"; 9 = "AAD : Recon Account Group Roles"; 10 = "Teams : Recon All Teams"; 11 = "SP : Recon All Sharepoint Sites"; 12 = "Exchange : Find All Mailboxes"};
         "Account" = @{1 = "List Accounts in Tenant"; 2 = "Deploy Backdoor Account"; 3 = "Assign Azure AD Role to Account"; 4 = "Assign Management Role Account"; 5 = "Reset Password"; 6 = "Brute-Force Credentials"; 7 = "Disable Account MFA"; 8 = "Delete User"}; 
         "Group" = @{1 = "List Groups in Tenant"; 2 = "Create Group"; 3 = "Add user to Group"; 4 = "Assign Role to Group"};
         "Application" = @{1 = "List Applications in Tenant"; 2 = "Create Application"; 3 = "Generate new Application Credentials"};
@@ -11,7 +11,7 @@ function MAADAttackArsenal{
         "Exchange" = @{1 = "List Mailboxes in Tenant"; 2 = "Gain Access to Another Mailbox"; 3 = "Setup Email Forwarding"; 4 = "Setup Email Deletion Rule"; 5 = "Disable Mailbox Auditing"; 6 = "Disable Anti-Phishing Policy"};
         "Teams" = @{1 = "List Teams in Tenant"; 2 = "Search Creds in Teams"; 3 = "Invite External User to Teams"};
         "Sharepoint" = @{1 = "List Sharepoint Sites"; 2 = "Gain Access to Sharepoint Site"; 3 = "Search Files in Sharepoint"; 4= "Exfiltrate Data from Sharepoint"; 5 = "Upload File to Sharepoint Site"};
-        "Compliance" = @{1 = "Launch New Search with eDiscovery"; 2 = "Recon Existing eDiscovery Cases"; 3= "Recon Existing eDiscovery Searches"; 4 = "Find Details of a Search"; 5 = "Find eDiscovery Case Members"; 6 = "Exfil Data with eDiscovery"; 7 = "Escalate eDiscovery Privileges"; 8 ="Install Unified Export Tool"};
+        "Compliance" = @{1 = "Launch New eDiscovery Search"; 2 = "Recon Existing eDiscovery Cases"; 3= "Recon Existing eDiscovery Searches"; 4 = "Find eDiscovery Search Details"; 5 = "Find eDiscovery Case Members"; 6 = "Exfil Data with eDiscovery"; 7 = "Escalate eDiscovery Privileges"; 8 ="Install Unified Export Tool"};
         "Exit" = @{1 = "Exit - Close all connections"; 2 = "Exit - Keep all connections"}
     }
 
@@ -31,7 +31,7 @@ function MAADAttackArsenal{
                 "SHOW CREDS" {RetrieveCredentials}
                 "ADD CREDS" {$execution_choice = "Access.2"}
                 "ESTABLISH ACCESS" {EstablishAccess}
-                "SWITCH ACCESS" {establish_connection}
+                "SWITCH ACCESS" {EstablishAccess}
                 "ACCESS INFO" {AccessInfo}
                 "KILL ACCESS" {terminate_connection}
                 "EXIT" {exit}

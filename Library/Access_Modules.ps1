@@ -802,18 +802,22 @@ function AccessSharepointAdmin {
 }
 
 function ConnectSharepointSite ($target_site_url, [pscredential]$access_credential) {
+    $global:sp_site_connected = $null
     try{
         Write-Host "`nAttempting access to SharePoint site..." -ForegroundColor Gray
         Connect-PnPOnline -Url $target_site_url -Credentials $access_credential
         Write-Host "`n[Success] Connected to SharePoint site: $target_site_url" -ForegroundColor Yellow
+        $global:sp_site_connected = $true
     }
     catch [System.Exception]{
         if ($null -ne ($_.Exception.Message | Select-String -Pattern "Forbidden")){
             Write-Host "`n[Error] I guess you can't get everything!`nThis account DOES NOT have access to this SharePoint site. Try another site from the list or attempt to gain access to this site." -ForegroundColor Red
+            $global:sp_site_connected = $false
             return
         }
         else {
             Write-Host $_
+            $global:sp_site_connected = $false
             return
         }
     }

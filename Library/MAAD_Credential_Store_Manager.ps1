@@ -28,6 +28,14 @@ function RetrieveCredentials{
 }
 
 function AddCredentials ($new_cred_type, $name, $new_username, $new_password, $new_token){
+
+    #Sanitize user input - trim any leading & trailing spaces
+    $new_cred_type = $new_cred_type.Trim()
+    $name = $name.Trim()
+    $new_username = $new_username.Trim()
+    $new_password = $new_password.Trim()
+    $new_token = $new_token.Trim()
+
     $credential_file_path = $global:maad_credential_store
 
     #Load latest stored credentials to global:all_credentials

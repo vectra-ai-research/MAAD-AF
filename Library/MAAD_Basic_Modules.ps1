@@ -100,14 +100,20 @@ function RequiredModules {
         }
     }       
 
-    Write-Host "Modules check completed" -ForegroundColor Gray
+    Write-Host "`n[.] Modules check completed" -ForegroundColor Gray
     #Prevents overwrite from any imported modules 
     $host.UI.RawUI.WindowTitle = "MAAD Attack Framework"
     Write-MAADLog "info" "Modules check completed"
 } 
 
 function ClearActiveSessions {
-    Get-PSSession | Remove-PSSession
+    try {
+        Get-PSSession | Remove-PSSession
+    }
+    catch {
+        #Do nothing
+    }
+    
 }
 
 function DisplayCentre ($display_text,$text_colour) { 
@@ -155,11 +161,13 @@ function CreateLocalDir {
                 tor_port = "9150"
                 control_port = "9151"
             }
+            "DependecyCheckBypass" = $false
         })
         $maad_config_json = $maad_config | ConvertTo-Json
         $maad_config_json | Set-Content -Path $global:maad_config_path -Force
     }
 }
+
 
 function InitializationChecks{  
     if((($PSVersionTable).PSVersion.Major) -ne 5){
@@ -661,13 +669,20 @@ function MAADHelp {
         "SWITCH ACCESS" = "Use another credential from Credential Store to establish access in modules"
         "ACCESS INFO" = "Display details about my current access session";
         "KILL ACCESS" = "Terminate all active connections";
+        "ANONYMIZE" = "Enable TOR";
         "EXECUTE RECON" = "Gather all information from the environment using the current access and MAAD-AF reconnaissance modules";
         "EXIT" = "Exit MAAD-AF without closing active access connections.";
         "FULL EXIT" = "Exit MAAD-AF and close all active access connections."
     }
 
     #Display commands
-    Write-Host "`nSelect an option from the attack arsenal by entering the option name or choose from one of the shotcut keywords below" -ForegroundColor Gray
+    Write-Host ""
+    DisplayCentre "###################################### Help ######################################" "Gray"
+    Write-Host "`nExecute module: Select an option from the MAAD Attack Arsenal menu by typing the option name (eg: Access)"
+
+    Write-Host "`nShortcut Keywords: For quick actions enter one of the shotcut keywords below in MAAD Atack Arsenal menu"
+
     $maad_commands |Format-Table -HideTableHeaders -Wrap
+
     Pause
 }

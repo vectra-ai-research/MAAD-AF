@@ -56,19 +56,8 @@ function TORAnonymizer ($command){
     }
 
     if ($command -eq "stop" -and $global:tor_proxy -eq $true) {
-        try {
-            Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyServer -Value "" -ErrorAction Stop
-            Write-Host "`nRemoved TOR proxy!" -ForegroundColor Gray
-            Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyEnable -Value 0 -ErrorAction Stop
-            Write-Host "Disabled proxy!" -ForegroundColor Gray
-            Write-Host "`n[Success] Reverted all host network changes made by MAAD-AF" -ForegroundColor Gray
-            $global:tor_proxy = $false
-            Write-MAADLog "STOP" "TOR stopped"
-        }
-        catch {
-            Write-Host "`n[Error] Failed to remove proxy for TOR" -ForegroundColor Red
-            break
-        }
+        DisableHostProxy
+        Write-MAADLog "STOP" "TOR stopped"
     }
 }
 function TORProxy {

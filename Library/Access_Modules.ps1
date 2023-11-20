@@ -608,6 +608,9 @@ function AccessSharepoint {
     }
     
     if ($AccessToken -notin "",$null ) {
+        #Set environment variable to disable PNP module version check 
+        $env:PNPPOWERSHELL_UPDATECHECK= $false
+        
         try {
         #Attempt token authentication  
         Connect-PnPOnline -Url $sharepoint_url -AccessToken $AccessToken -ErrorAction Stop | Out-Null
@@ -656,6 +659,9 @@ function AccessSharepoint {
         }
     }
     else {
+        #Set environment variable to disable PNP module version check 
+        $env:PNPPOWERSHELL_UPDATECHECK= $false
+
         try {
             #Attempt basic authentication
             Connect-PnPOnline -Url $sharepoint_url -Credentials $AdminCredential -ErrorAction Stop

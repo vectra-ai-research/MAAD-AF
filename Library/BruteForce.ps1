@@ -4,9 +4,9 @@ function BruteForce ($target_account){
     $check_file = $false
     while ($check_file -eq $false) {
         #Display available files in MAAD-AF directory
-        $file_list = Get-ChildItem -Path ./* -Include *.txt
+        $file_list = Get-ChildItem -Path ./Local/* -Include *.txt
         if ($null -eq $file_list) {
-            Write-Host "`nNote: No potential dictionary files found. Add a password dictionary text file to '$((Get-Item ./).FullName)'" -ForegroundColor Red
+            Write-Host "`n[Note] No potential dictionary files found. Add a password dictionary text file to '$((Get-Item ./Local/).FullName)'" -ForegroundColor Red
         }
         else {
             Write-Host "`nPossible dictionary files found in the MAAD-AF directory:" -ForegroundColor Gray
@@ -15,12 +15,13 @@ function BruteForce ($target_account){
             }
         }
 
-        $filename = Read-Host -Prompt "`nEnter the password dictionary file (include file extension)"
+        Write-Host "`n[Note] Place the password file in ./MAAD-AF/Local" -ForegroundColor Gray
+        $filename = Read-Host -Prompt "`nEnter the password dictionary file name(eg: passwords.txt)"
         $filename = $filename.Trim()
-        $check_file = Test-Path -Path .\$filename
+        $check_file = Test-Path -Path .\Local\$filename
         
         if ($check_file -and $filename -ne "") {
-            Write-Host "File found!!!"
+            Write-Host "`n[.] File found" -ForegroundColor Gray
             #Check file format - Only txt files accepted
             $extn = [IO.Path]::GetExtension($filename) 
             if ($extn -ne ".txt") {
@@ -38,7 +39,7 @@ function BruteForce ($target_account){
     }
     
     #Read input password file
-    $passwords = Get-Content -Path .\$filename
+    $passwords = Get-Content -Path .\Local\$filename
 
     Write-Host "`nStarting brute-force on user: $target_account using the password dictionary: $filename..."
     [int]$counter = 0
@@ -71,7 +72,7 @@ function BruteForce ($target_account){
     }
     #Print if brute-force unsuccessful
     if ($userobject -eq $null){
-        Write-Host "`nPassword not found. Try another password dictionary or account" -ForegroundColor Yellow
+        Write-Host "`nPassword not found" -ForegroundColor Yellow
     }
     Pause
 }

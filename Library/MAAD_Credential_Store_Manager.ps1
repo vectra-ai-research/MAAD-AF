@@ -34,7 +34,6 @@ function AddCredentials ($new_cred_type, $name, $new_username, $new_password, $n
     $name = $name.Trim()
     $new_username = $new_username.Trim()
     $new_password = $new_password.Trim()
-    $new_token = $new_token.Trim()
 
     $credential_file_path = $global:maad_credential_store
 

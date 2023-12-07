@@ -3,7 +3,7 @@ function MAADAttackArsenal{
     [ordered]@{
         "Pre-Attack" = @{1 = "Find Tenant ID of Organization"; 2 = "Find DNS Info"; 3 = "Recon User Login Info"; 4 = "Check account validaity in target tenant"; 5 = "Enumerate users to find valid users in tenant"; 6 = "Brute-Force Credentials"};
         "Access" = @{1 = "Show Available Credentials"; 2 = "Add Credentials"; 3 = "Establish Access - All"; 4 = "Establish Access - AzureAD"; 5= "Establish Access - Az"; 6 = "Establish Access - Exchange Online"; 7 = "Establish Access - Teams"; 8 = "Establish Access - Msol"; 9 = "Establish Access - Sharepoint Site"; 10 = "Establish Access - Sharepoint Admin Center"; 11 = "Establish Access - Compliance (eDiscovery)"; 12 = "Kill All Access"; 13 = "Anonymize Access with TOR"};
-        "Recon" = @{1 = "AAD : Find All Accounts"; 2= "AAD : Find All Groups"; 3 = "AAD : Find All Service Principals"; 4 = "AAD : Find All Auth Policy"; 5 = "AAD : Recon Named Locations"; 6 = "AAD : Recon Conditional Access Policy"; 7 = "AAD : Recon Registered Devices for Account"; 8 = "AAD : Recon All Accessible Tenants"; 9 = "AAD : Recon Account Group Roles"; 10 = "Teams : Recon All Teams"; 11 = "SP : Recon All Sharepoint Sites"; 12 = "Exchange : Find All Mailboxes"};
+        "Recon" = @{1 = "AAD : Find All Accounts"; 2= "AAD : Find All Groups"; 3 = "AAD : Find All Service Principals"; 4 = "AAD : Find All Auth Policy"; 5 = "AAD : Recon Named Locations"; 6 = "AAD : Recon Conditional Access Policy"; 7 = "AAD : Recon Registered Devices for Account"; 8 = "AAD : Recon All Accessible Tenants"; 9 = "Teams : Recon All Teams"; 10 = "SP : Recon All Sharepoint Sites"; 11 = "Exchange : Find All Mailboxes"; 12 = "AAD : Recon All Directory Roles"; 13 = "AAD : Recon Directory Role Members"; 14 = "AAD : Recon Directory Roles Assigned To User"; 15 = "Exchange : Recon All Role Groups"; 16 = "Exchange : Recon Role Group Members"; 17 = "Exchange : Recon All Management Roles"; 18 = "Exchange : Recon All eDiscovery Admins in Tenant"};
         "Account" = @{1 = "List Accounts in Tenant"; 2 = "Deploy Backdoor Account"; 3 = "Assign Azure AD Role to Account"; 4 = "Assign Management Role Account"; 5 = "Reset Password"; 6 = "Brute-Force Credentials"; 7 = "Disable Account MFA"; 8 = "Delete User"}; 
         "Group" = @{1 = "List Groups in Tenant"; 2 = "Create Group"; 3 = "Add user to Group"; 4 = "Assign Role to Group"};
         "Application" = @{1 = "List Applications in Tenant"; 2 = "Create Application"; 3 = "Generate new Application Credentials"};
@@ -11,7 +11,7 @@ function MAADAttackArsenal{
         "Exchange" = @{1 = "List Mailboxes in Tenant"; 2 = "Gain Access to Another Mailbox"; 3 = "Setup Email Forwarding"; 4 = "Setup Email Deletion Rule"; 5 = "Disable Mailbox Auditing"; 6 = "Disable Anti-Phishing Policy"};
         "Teams" = @{1 = "List Teams in Tenant"; 2 = "Invite External User to Teams"};
         "Sharepoint" = @{1 = "List Sharepoint Sites"; 2 = "Gain Access to Sharepoint Site"; 3 = "Search Files in Sharepoint"; 4= "Exfiltrate Data from Sharepoint"};
-        "Compliance" = @{1 = "Launch New eDiscovery Search"; 2 = "Recon Existing eDiscovery Cases"; 3= "Recon Existing eDiscovery Searches"; 4 = "Find eDiscovery Search Details"; 5 = "Find eDiscovery Case Members"; 6 = "Exfil Data with eDiscovery"; 7 = "Escalate eDiscovery Privileges"; 8 ="Install Unified Export Tool"};
+        "Compliance" = @{1 = "Launch New eDiscovery Search"; 2 = "Recon Existing eDiscovery Cases"; 3= "Recon Existing eDiscovery Searches"; 4 = "Find eDiscovery Search Details"; 5 = "Find eDiscovery Case Members"; 6 = "Exfil Data with eDiscovery"; 7 = "Escalate eDiscovery Privileges"; 8 = "Delete compliance case"; 9 = "Install Unified Export Tool"};
         "MAAD-AF" = @{1 = "Set MAAD-AF TOR Configuration"; 2 = "Set Dependency Check Default Setting"; 3 = "Reset & Disable Local Host Proxy Settings"; 4 = "Launch New MAAD-AF Session"};
         "Exit" = @{1 = "Exit - Close all connections"; 2 = "Exit - Keep all connections"}
     }
@@ -23,7 +23,7 @@ function MAADAttackArsenal{
 
         try {
             $execution_choice = $null
-            $main_module_user_choice = (Read-Host -Prompt "`nSelect an option from the Arsenal:").Trim().ToUpper()
+            $main_module_user_choice = (Read-Host -Prompt "`nSelect an option from the Arsenal").Trim().ToUpper()
             
             ###Users can type "keywords" to quickly take actions or retrieve certain information
             ###MAAD Special Commands for quick actions
@@ -64,7 +64,7 @@ function MAADAttackArsenal{
                 "Access.2" {
                     $new_cred_id = Read-Host -Prompt "`nCredential Identifier"
                     $new_cred_type = Read-Host -Prompt "`nSelect Cred Type? [password / token]"
-                    if ($new_cred_type -eq "password"){
+                    if ($new_cred_type.Trim() -eq "password"){
                         $new_username = Read-Host -Prompt "`nUsername"
                         $new_password = Read-Host -Prompt "`nPassword"
                         AddCredentials $new_cred_type $new_cred_id $new_username $new_password 
@@ -94,11 +94,17 @@ function MAADAttackArsenal{
                 "Recon.6" {MAADGetConditionalAccessPolicies}
                 "Recon.7" {MAADGetRegisteredDevices}
                 "Recon.8" {MAADGetAccessibleTenants}
-                "Recon.9" {MAADGetAccountGroupRoles}
-                "Recon.10" {MAADGetAllTeams}
-                "Recon.11" {MAADGetAllSharepointSites}
-                "Recon.12" {MAADGetAllMailboxes}
-                
+                "Recon.9" {MAADGetAllTeams}
+                "Recon.10" {MAADGetAllSharepointSites}
+                "Recon.11" {MAADGetAllMailboxes}
+                "Recon.12" {MAADGetAllDirectoryRoles}
+                "Recon.13" {MAADGetDirectoryRoleMembers}
+                "Recon.14" {MAADGetAccountDirectoryRoles}
+                "Recon.15" {MAADGetAllRoleGroups}
+                "Recon.16" {MAADGetRoleGroupMembers}
+                "Recon.17" {MAADGetAllManagementRole}
+                "Recon.18" {MAADGetAllEdiscoveryAdmins}
+
                 "Account.1" {MAADGetAllAADUsers}
                 "Account.2" {CreateAccount}
                 "Account.3" {AssignRole "account"}
@@ -171,7 +177,9 @@ function MAADAttackArsenal{
                 }
                 "Compliance.6" {EDiscoveryExfil}
                 "Compliance.7" {E_Discovery_Priv_Esc}
-                "Compliance.8" {Install_Unified_Export_Tool}
+                "Compliance.8" {DeleteComplianceCase}
+                "Compliance.9" {Install_Unified_Export_Tool}
+                
 
                 "MAAD-AF.1" {ModifyMAADTORConfig}
                 "MAAD-AF.2" {ModifyMAADDependencyCheck}

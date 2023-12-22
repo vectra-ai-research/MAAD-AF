@@ -3,19 +3,22 @@
         
 MAAD-AF is an open-source cloud attack tool for Microsoft 365 & Entra ID(Azure AD) environments.
 
-MAAD-AF aims to deliver - simple, fast and effective security testing. Perform effective security testing with virutally no-setup and a fully interactive attack execution workflow. 
+MAAD-AF offers simple, fast and effective security testing. Validate Microsoft cloud controls and test detection & response capabilities with a virutally zero-setup process, complete with a fully interactive workflow for executing emulated attacks. 
 
-MAAD-AF is developed in PowerShell.
+MAAD-AF is developed natively in PowerShell.
 
 ## Usage
- 1. Clone MAAD-AF GitHub repo
- 2. Start PowerShell as Administrator 
- 3. Navigate to the /MAAD-AF directory 
- 4. Launch MAAD_Attack.ps1 
+1. Clone or download MAAD-AF from GitHub
+2. Start PowerShell as Admin and navigate to MAAD-AF directory
 ```
 > git clone https://github.com/vectra-ai-research/MAAD-AF.git
 > cd /MAAD-AF
-> ./MAAD_Attack.ps1
+```
+3. Launch MAAD-AF
+```
+> MAAD_Attack.ps1 
+# Launch and bypass dependency checks
+> MAAD_Attack.ps1 -ForceBypassDependencyCheck
 ```
 
 ## Requirements
@@ -23,10 +26,12 @@ MAAD-AF is developed in PowerShell.
  2. PowerShell 5.1
 
 ## Features
-- Post-compromise attack techniques
-- Interactive (no-commands) workflow
+- Attack emulation tool
+- Fully interactive (no-commands) workflow
+- Zero-setup deployment
 - Ability to revert actions for post-testing cleanup
-- No-setup required
+- Leverage MITRE ATT&CK
+- Emulate post-compromise attack techniques
 - Attack techniques for Entra ID (Azure AD)
 - Attack techniques for Exchange Online
 - Attack techniques for Teams
@@ -49,13 +54,15 @@ MAAD-AF is developed in PowerShell.
 - MFA Manipulation
 - User Account Deletion
 - SharePoint exploitation for data recon & exfil
-- Many more...
+- [Many more...](openrec0n.github.io/maad-af-docs/)
 
 ## Contribute
- - Thank you for considering contributing to MAAD-AF! Your contributions will help make MAAD-AF better.
+ - Thanks for considering contributing to MAAD-AF! Your contributions will help make MAAD-AF better.
  - Submit your PR to the main branch.
- - Submit bugs & issues directly to GitHub Issues.
- - Share ideas in GitHub Discussions. 
+ - Submit bugs & issues directly to [GitHub Issues](https://github.com/vectra-ai-research/MAAD-AF/issues).
+ - Share ideas in [GitHub Discussions](https://github.com/vectra-ai-research/MAAD-AF/discussions). 
 
 ## Contact
- - Email maintainers at: maad-af@vectra.ai
+If you found MAAD-AF useful, want to share an interesting use-case or idea - reach out & share them
+ - Maintainer : [Arpan Sarkar](linkedin.com/in/arpan-sarkar)
+ - Email : MAAD-AF@vectra.ai(mailto:maad-af@vectra.ai)

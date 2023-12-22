@@ -23,21 +23,23 @@ $global:maad_mitre_map =
 };
 
 function mitre_details ($module_name){
-    Write-Host "`n###################################### MITRE ######################################" -ForegroundColor Gray
+    Write-Host ""
     try {
-        Write-Host
-        Write-Host "Tactic:" $global:maad_mitre_map[$module_name]["tactic"]`n -ForegroundColor Gray
-        Write-Host "Technique:" $global:maad_mitre_map[$module_name]["technique"]`n -ForegroundColor Gray
+        MAADWriteInfo "MITRE ATT&CK Info"
+
         if ($global:maad_mitre_map[$module_name]["sub-technique"] -ne "") {
-            Write-Host "Sub-Technique:" $global:maad_mitre_map[$module_name]["sub-technique"]`n -ForegroundColor Gray
+            $mitre_object = [PSCustomObject]@{"Tactic" = $global:maad_mitre_map[$module_name]["tactic"]; "Technique" = $global:maad_mitre_map[$module_name]["technique"]; "Sub_Technique" = $global:maad_mitre_map[$module_name]["sub-technique"]; "Link" = $global:maad_mitre_map[$module_name]["ref"]}
+
+            $mitre_object | Format-Table @{Label = "Tactic"; Expression = {$tf = "96"; $e = [char]27; "$e[${tf}m$($_.Tactic)${e}[0m"}}, @{Label = "Technique"; Expression = {$tf = "96"; $e = [char]27; "$e[${tf}m$($_.Technique)${e}[0m"}}, @{Label = "Sub-Technique"; Expression = {$tf = "96"; $e = [char]27; "$e[${tf}m$($_.Sub_Technique)${e}[0m"}}, @{Label = "Link"; Expression = {$tf = "96"; $e = [char]27; "$e[${tf}m$($_.Link)${e}[0m"}} -AutoSize -Wrap
         }
-        Write-Host "Description:" $global:maad_mitre_map[$module_name]["description"]`n -ForegroundColor Gray
-        Write-Host "Reference:" $global:maad_mitre_map[$module_name]["ref"] -ForegroundColor Gray
-        Write-Host "`n###################################################################################" -ForegroundColor Gray
+        else {
+            $mitre_object = [PSCustomObject]@{"Tactic" = $global:maad_mitre_map[$module_name]["tactic"]; "Technique" = $global:maad_mitre_map[$module_name]["technique"]; "Link" = $global:maad_mitre_map[$module_name]["ref"]}
+
+            $mitre_object | Format-Table @{Label = "Tactic"; Expression = {$tf = "96"; $e = [char]27; "$e[${tf}m$($_.Tactic)${e}[0m"}}, @{Label = "Technique"; Expression = {$tf = "96"; $e = [char]27; "$e[${tf}m$($_.Technique)${e}[0m"}}, @{Label = "Link"; Expression = {$tf = "96"; $e = [char]27; "$e[${tf}m$($_.Link)${e}[0m"}} -AutoSize -Wrap
+        }
     }
     catch {
         #Do-nothing
     }
-    Pause
-    Write-Host ""
+    Read-Host -Prompt "[?] Continue"
 }

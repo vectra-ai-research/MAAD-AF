@@ -1,7 +1,7 @@
 #AccessInfo
 function AccessInfo{
-
-    Write-Host "`nGathering information on current access & privilege..." -ForegroundColor Gray
+    Write-Host ""
+    MAADWriteProcess "Fetching current access info"
 
     try {
         $azure_ad_session_info = Get-AzureADCurrentSessionInfo -ErrorAction Stop 
@@ -96,17 +96,15 @@ function AccessInfo{
         $access_status_ediscovery = $false
     }
 
-    Write-Host "`n########################################################################`n" -ForegroundColor Gray
-
-    Write-Host "Connected Services/Modules:" -ForegroundColor Gray
-    if ($access_status_azure_ad) {Write-Host "- Azure AD" -ForegroundColor Gray}
-    if ($access_status_az) {Write-Host "- Az" -ForegroundColor Gray}
-    if ($access_status_exchange_online) {Write-Host "- Exchange Online" -ForegroundColor Gray}
-    if ($access_status_teams) {Write-Host "- Teams" -ForegroundColor Gray}
-    if ($access_status_msol) {Write-Host "- Msol" -ForegroundColor Gray}
-    if ($access_status_sp_site) {Write-Host "- Sharepoint Site" -ForegroundColor Gray}
-    if ($access_status_spo_admin) {Write-Host "- Sharepoint Admin" -ForegroundColor Gray}
-    if ($access_status_ediscovery) {Write-Host "- Compliance Center" -ForegroundColor Gray}
+    $connected_modules = @()
+    if ($access_status_azure_ad) {$connected_modules += "Azure AD"}
+    if ($access_status_az) {$connected_modules += "Az"}
+    if ($access_status_exchange_online) {$connected_modules += "Exchange Online"}
+    if ($access_status_teams) {$connected_modules += "Teams"}
+    if ($access_status_msol) {$connected_modules += "Msol"}
+    if ($access_status_sp_site) {$connected_modules += "Sharepoint Site"}
+    if ($access_status_spo_admin) {$connected_modules += "Sharepoint Admin"}
+    if ($access_status_ediscovery) {$connected_modules += "Compliance Center"}
     Write-Host ""
 
     try {
@@ -136,28 +134,74 @@ function AccessInfo{
         }
 
         foreach ($objects in $account_owned_objects){
-            $account_owned_objects_name += $membership.DisplayName
+            $account_owned_objects_name += $objects.DisplayName
         }
 
-        $account_all_roles = $account_role_name -join ', '
-        $account_all_groups = $account_group_name -join ', '
-        $account_all_owned = $account_owned_objects_name -join ', '
-        
-        Write-Host "Tenant: $tenant_id`n" -ForegroundColor Gray
-        Write-Host "Logged in as: $logged_in_user`n" -ForegroundColor Gray
-        Write-Host "Roles assigned: $account_all_roles`n" -ForegroundColor Gray
-        Write-Host "Groups member of: $account_all_groups`n" -ForegroundColor Gray
-        Write-Host "Owner of: $account_all_owned`n" -ForegroundColor Gray
+
+        #Display access info
+        MAADWriteInfo "Tenant"
+        MAADWriteProcess "$tenant_id"
+        Write-Host ""
+        Start-Sleep -Seconds 1
+
+        MAADWriteInfo "User"
+        MAADWriteProcess "$logged_in_user"
+        Write-Host ""
+        Start-Sleep -Seconds 1
+
+        MAADWriteInfo "Connected Services/ PS Modules"
+        foreach ($connection in $connected_modules){
+            MAADWriteProcess $connection
+        }
+        Write-Host ""
+        Start-Sleep -Seconds 1
+
+        MAADWriteInfo "Roles Assigned"
+        foreach ($role in $account_role_name){
+            MAADWriteProcess $role
+        }
+        Write-Host ""
+        Start-Sleep -Seconds 1
+
+        MAADWriteInfo "Group Membership"
+        foreach ($group in $account_group_name){
+            MAADWriteProcess $group
+        }
+        Write-Host ""
+        Start-Sleep -Seconds 1
+
+        MAADWriteInfo "Owner of"
+        foreach ($object in $account_owned_objects_name){
+            MAADWriteProcess $object
+        }
     }
     catch {
-        Write-Host "Tenant: N/A`n" -ForegroundColor Gray
-        Write-Host "Logged in as: N/A`n" -ForegroundColor Gray
-        Write-Host "Roles assigned: N/A`n" -ForegroundColor Gray
-        Write-Host "Groups member of: N/A`n" -ForegroundColor Gray
-        Write-Host "Owner of: N/A`n" -ForegroundColor Gray
+        #Display access info
+        MAADWriteInfo "Tenant"
+        MAADWriteError "No Access"
+        Write-Host ""
+
+        MAADWriteInfo "User"
+        MAADWriteError "No Access"
+        Write-Host ""
+
+        MAADWriteInfo "Connected Services/ PS Modules"
+        MAADWriteError "No Access"
+        Write-Host ""
+
+        MAADWriteInfo "Roles"
+        MAADWriteError "No Access"
+        Write-Host ""
+
+        MAADWriteInfo "Group Membership"
+        MAADWriteError "No Access"
+        Write-Host ""
+
+        MAADWriteInfo "Owner of"
+        MAADWriteError "No Access"
     }
 
-    Write-Host "########################################################################`n" -ForegroundColor Gray
+    MAADPause
 }
 
 

@@ -1,464 +1,477 @@
 #Reconnaissance modules
-
 function MAADGetAllAADUsers ($download = $false){
     #Search all accounts
+    Write-Host ""
+
     try {
+        MAADWriteProcess "Searching accounts in tenant"
         $all_accounts = Get-AzureADUser -All $true 
         
         #Check if output is too large
         if ($download -eq $true){
-            Write-Host "[*] Downloading all accounts list from tenant" -ForegroundColor Gray
-            $all_accounts | Out-File -FilePath .\Outputs\All_Accounts.txt -Append
-            Write-Host "`[+] Accounts list dumped to: /Outputs/All_Accounts.txt" -ForegroundColor Yellow
+            $output_time_stamp = Get-Date -Format "MMM dd yyyy HH:mm:ss"
+            "$output_time_stamp `n--------------------" | Out-File -FilePath .\Outputs\All_Accounts.txt -Append
+            $all_accounts | Out-File -FilePath .\Outputs\All_Accounts.txt -Append -Width 10000
+            MAADWriteProcess "Output Saved -> MAAD-AF\Outputs\All_Accounts.txt"
         }
         else{
-            Write-Host "[*] Searching accounts in tenant" -ForegroundColor Gray
-            if ($all_accounts.Count -gt 20){
-                Write-Host "[+]Found $($all_accounts.Count) accounts in tenant" -ForegroundColor Yellow
-                $user_input = Read-Host "`n[?] Display all accounts (y/n)"
-                if ($user_input -eq "y"){
-                    $all_accounts | Format-Table -Property DisplayName, UserPrincipalName, ObjectID,UserType -Wrap -RepeatHeader | more
-                }
-                else{
-                    Write-Host "[*] Exporting accounts list from tenant" -ForegroundColor Gray
-                    $all_accounts | Out-File -FilePath .\Outputs\All_Accounts.txt -Append
-                    Write-Host "[+] Accounts list dumped to: /Outputs/All_Accounts.txt" -ForegroundColor Yellow
-                }
-            }
-            else{
-                $all_accounts | Format-Table -Property DisplayName, UserPrincipalName, ObjectID,UserType -Wrap -RepeatHeader | more
-            }
+            Show-MAADOutput -large_limit 5 -output_list $all_accounts -file_path ".\Outputs\AAD_Accounts.txt"
         }
     }
     catch {
-        Write-Host "[x] Failed to search accounts in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to search accounts in tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetAllAADGroups {
     #Search all groups
+    Write-Host ""
+
     try {
-        Write-Host "[*] Searching groups in tenant" -ForegroundColor Gray
+        MAADWriteProcess "Searching groups in tenant"
         $all_groups = Get-AzureADGroup -All $true  
-        
-        #Check if output is too large
-        if ($all_groups.Count -gt 20){
-            Write-Host "[+] Found $($all_groups.Count) accounts in tenant" -ForegroundColor Yellow
-            $user_input = Read-Host "`n[?] Display them all (y/n)"
-            if ($user_input -eq "y"){
-                $all_groups | Format-Table -Wrap | more
-            }
-            else{
-                Write-Host "[*] Exporting groups list from tenant" -ForegroundColor Gray
-                $all_groups | Out-File -FilePath .\Outputs\All_Groups.txt -Append
-                Write-Host "[+] Group list dumped to: /Outputs/All_Groups.txt" -ForegroundColor Yellow
-            }
-        }
-        else{
-            $all_groups | Format-Table -Wrap | more
-        }
+        # MAADWriteProcess "Found $($all_groups.Count) groups"
+
+        Show-MAADOutput -large_limit 5 -output_list $all_groups -file_path ".\Outputs\AAD_Groups.txt"
     }
     catch {
-        Write-Host "[x] Failed to search groups in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to search groups in tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetAllMailboxes ($download = $false){
-    #List all accounts
+    #List all mailboxes
+    Write-Host ""
+
     try {
-        Write-Host "[*] Searching mailboxes in tenant" -ForegroundColor Gray
-        $all_mailboxes = Get-Mailbox 
+        MAADWriteProcess "Searching mailboxes in tenant"
+        $all_mailboxes = Get-Mailbox | Select-Object DisplayName, PrimarySmtpAddress, AuditEnabled
+
         if ($download -eq $true){
-            Write-Host "[*] Exporting mailbox list from tenant" -ForegroundColor Gray
-            $all_mailboxes | Out-File -FilePath .\Outputs\All_Mailboxes.txt -Append
-            Write-Host "[+] Mailbox list dumped to: /Outputs/All_Mailboxes.txt" -ForegroundColor Yellow
+            $output_time_stamp = Get-Date -Format "MMM dd yyyy HH:mm:ss"
+            "$output_time_stamp `n--------------------" | Out-File -FilePath .\Outputs\All_Mailboxes.txt -Append
+            $all_mailboxes | Out-File -FilePath .\Outputs\All_Mailboxes.txt -Append -Width 10000
+            MAADWriteProcess "Output Saved -> MAAD-AF\Outputs\All_Mailboxes.txt"
         }
         else{
-            Write-Host "[+] Found $($all_mailboxes.Count) mailboxes in tenant" -ForegroundColor Yellow
-            Read-Host "`n[?] Press enter to display all mailboxes"
-            $all_mailboxes | Format-Table -Property DisplayName,PrimarySmtpAddress | more
+            Show-MAADOutput -large_limit 5 -output_list $all_mailboxes -file_path ".\Outputs\Exchange_Mailboxes.txt"
         }
     }
     catch {
-        Write-Host "[x] Failed to list mailboxes in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to search mailboxes in tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetAllServicePrincipal {
-    #List all service principaals
+    #List all service principals
+    Write-Host ""
+
     try {
-        Write-Host "[*] Finding service principals in tenant" -ForegroundColor Gray
+        MAADWriteProcess "Searching service principals in tenant"
         $all_service_principal = Get-AzureADServicePrincipal 
-        Write-Host "[+] Found $($all_service_principal.Count) service principals in tenant" -ForegroundColor Yellow
-        Read-Host "`n[?] Press enter to display all service principals"
-        
-        $all_service_principal | Format-Table DisplayName, AppId, ObjectId -Wrap | more
+
+        Show-MAADOutput -large_limit 10 -output_list $all_service_principal -file_path ".\Outputs\AAD_Service_Princiapls.txt"
     }
     catch {
-        Write-Host "[x] Failed to find service principals in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to find service principals in tenant"
     }
-    Pause
+    MAADPause
 }
+
 
 function ListAuthorizationPolicy {
     #List all authorization policies
-    try {
-        Write-Host "[*] Finding authorization policies in tenant" -ForegroundColor Gray
-        $all_auth_policy = Get-AzureADMSAuthorizationPolicy 
-        Write-Host "[+] Found $($all_auth_policy.Count) authorization policies in tenant" -ForegroundColor Yellow
-        Read-Host "`n[?] Press enter to display all service principals"
+    Write-Host ""
 
-        $all_auth_policy | Format-Table | more
+    try {
+        MAADWriteProcess "Searching authorization policies in tenant"
+        $all_auth_policy = Get-AzureADMSAuthorizationPolicy 
+
+        Show-MAADOutput -large_limit 10 -output_list $all_auth_policy -file_path ".\Outputs\AAD_Authorization_Policies.txt"
     }
     catch {
-        Write-Host "[x] Failed to find authorization policies in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to find authorization policies in tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetNamedLocations {
     #List all named locations
-    try {
-        Write-Host "[*] Finding named locations in tenant" -ForegroundColor Gray
-        $all_named_locations = Get-AzureADMSNamedLocationPolicy 
-        Write-Host "[+] Found $($all_named_locations.Count) named locations in tenant" -ForegroundColor Yellow
-        Read-Host "`n[?] Press enter to display all named locations"
+    Write-Host ""
 
-        $all_named_locations | Format-Table DisplayName, IsTrusted, IpRanges, CountriesAndRegions -Wrap | more
+    try {
+        MAADWriteProcess "Searching named locations in tenant"
+        $all_named_locations = Get-AzureADMSNamedLocationPolicy 
+
+        Show-MAADOutput -large_limit 10 -output_list $all_named_locations -file_path ".\Outputs\AAD_Named_Locations.txt"
+
+        # MAADWriteProcess "Found $($all_named_locations.Count) named locations in tenant"
+        # Read-Host "`n[?] Press enter to display all named locations"
+        # Write-Host ""
+        # MAADWriteProcess "Displaying Named Locations"
+
+        # $all_named_locations | Format-Table DisplayName, IsTrusted, IpRanges, CountriesAndRegions -Wrap | more
     }
     catch {
-        Write-Host "[x] Failed to find named locations in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to find Named Locations in tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetConditionalAccessPolicies {
-    try {
-        #Get conditional access policies
-        Write-Host "[*] Finding CAP in tenant" -ForegroundColor Gray
-        Get-AzureADMSConditionalAccessPolicy | Format-Table DisplayName, Id, State
-        Write-Host "[*] Gathering detailed information on each policy below" -ForegroundColor Gray
+    #Get conditional access policies
+    Write-Host ""
 
-        $conditional_policy_list = Get-AzureADMSConditionalAccessPolicy
-        foreach ($policy in $conditional_policy_list){
-                Write-Host "`n###########################################" 
-                Write-Host "Policy Name:" -ForegroundColor Yellow
-                $policy.DisplayName
-                Write-Host "###########################################" 
-                Write-Host "`nPolicy state:"
-                $policy.State
-                Write-Host "`nPolicy ID:"
-                $policy.Id
-                Write-Host "`nPolicy Conditions:`n"
-                #$policy.Conditions | Format-Table
-                $policy.Conditions.Applications | Format-Table
-                $policy.Conditions.Users | Format-Table
-                $policy.Conditions.Platforms| Format-Table
-                $policy.Conditions.Locations| Format-Table
-                $policy.Conditions.SignInRiskLevels| Format-Table
-                $policy.Conditions.ClientAppTypes| Format-Table
-        }  
+    try {
+        MAADWriteProcess "Searching Conditional Access Policies in tenant"
+
+        $all_conditional_policy = Get-AzureADMSConditionalAccessPolicy
+
+        MAADWriteProcess "Found $($all_conditional_policy.Count) conditional access policies"
+
+        #Save Output to file
+        $file_path = ".\Outputs\All_CAP.txt"
+        $output_time_stamp = Get-Date -Format "MMM dd yyyy HH:mm:ss"
+        "`n$output_time_stamp `n--------------------" | Out-File -FilePath $file_path -Append
+
+        foreach ($policy in $all_conditional_policy){
+            "###########################################" | Out-File -FilePath $file_path -Append
+            "Policy Name: $($policy.DisplayName)" | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+            "Policy State: $($policy.State)" | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+            "Policy ID: $($policy.Id)" | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+            "Policy Conditions:" | Out-File -FilePath $file_path -Append
+            $($policy.Conditions.Applications) | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+            $($policy.Conditions.Users) | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+            $($policy.Conditions.Platforms) | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+            $($policy.Conditions.Locations) | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+            $($policy.Conditions.SignInRiskLevels) | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+            $($policy.Conditions.ClientAppTypes) | Format-Table -Wrap -AutoSize | Out-File -FilePath $file_path -Append
+        }
+
+        MAADWriteProcess "Output Saved -> \MAAD-AF\Outputs\All_CAP.txt"
+
+        if ($all_conditional_policy.Count -gt 5){
+            $user_input = Read-Host "`n[?] Display full results (y/n)"
+            Write-Host ""
+            if ($user_input -eq "y"){
+                MAADWriteProcess "Large Output -> Checkout results in MAAD-AF Output view"
+
+                $script = {
+                    $name = 'MAAD-AF Output View'
+                    $host.ui.RawUI.WindowTitle = $name
+                }
+                Start-Process powershell -ArgumentList "-NoExit $script `"Get-Content -Path $file_path; Read-Host `"Press [enter] to exit`" ;exit`""
+            }
+        }
+        else {
+            MAADWriteProcess "Checkout results in MAAD-AF Output view"
+            Start-Process powershell -ArgumentList "-NoExit $script `"Get-Content -Path $file_path; Read-Host `"Press [enter] to exit`" ;exit`""
+        }
     }
     catch {
-        Write-Host "[x] Failed to find conditional access policies in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to find Conditional Access Policies in tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetRegisteredDevices {
     #List all user's registered devices
+    Write-Host ""
+
     try {
-        $target_account = Read-Host "`n[?] Enter a user account to retrieve its registered devices"
-        Write-Host ""
-        Write-Host "[*] Finding registered devices for the account" -ForegroundColor Gray
+        EnterAccount "`n[?] Enter account to retrieve registered devices"
+        $target_account = $global:account_username
+        MAADWriteProcess "Searching registered devices"
         $user_reg_devices = Get-AzureADUserRegisteredDevice -ObjectId $target_account 
 
-        Write-Host "[+] Found $($user_reg_devices.Count) registered devices for user" -ForegroundColor Yellow
-        Read-Host "`n[?] Press enter to display all registered devices for user"
-        
-        $user_reg_devices | Format-Table -Wrap | more
-        
+        Show-MAADOutput -large_limit 10 -output_list $user_reg_devices -file_path ".\Outputs\AAD_User_Registed_Devices.txt"
     }
     catch {
-        Write-Host "[x] Failed to find registered devices for the account" -ForegroundColor Red
+        MAADWriteError "Failed to find registered devices for the account"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetAccessibleTenants {
     #List all accessible tenants
+    Write-Host ""
+
     try {
-        Write-Host "[*] Listing all accessible tenant..." -ForegroundColor Gray
-        Get-AzTenant | Format-Table
+        MAADWriteProcess "Searching accessible tenants for account"
+        $all_tenants = Get-AzTenant
+
+        Show-MAADOutput -large_limit 10 -output_list $all_tenants -file_path ".\Outputs\AAD_Accessible_Tenants.txt"
     }
     catch {
-        Write-Host "[x]Failed to find accessible tenant" -ForegroundColor Red
+        MAADWriteError "Failed to find accessible tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetAllSharepointSites ($teams_connected = $false){
     #List all accessible sites in tenants
+    Write-Host ""
+
     try {
         if ($teams_connected -eq $true){
-            Write-Host "[*] Searching for teams connected SharePoint sites in tenant" -ForegroundColor Gray
+            MAADWriteProcess "Searching Teams connected SharePoint sites in tenant"
             $all_sites = Get-SPOSite | ?{$_.IsTeamsConnected -eq $true}
         }
         else{
-            Write-Host "[*] Searching for all SharePoint sites in tenant" -ForegroundColor Gray 
+            MAADWriteProcess "Searching all SharePoint sites in tenant" 
             $all_sites = Get-SPOSite 
             
         }
-        $all_sites
-        Write-Host "[+] Found $($all_sites.Count) sites in tenant" -ForegroundColor Yellow
-        
-        Read-Host "`n[?] Press enter to display all sites"
-        $all_sites | Format-Table -Property Title,URL,SharingCapability | more
+
+        Show-MAADOutput -large_limit 10 -output_list $all_sites -file_path ".\Outputs\M365_SharePoint_Sites.txt"
     }
     catch {
-        Write-Host "[x] Failed to find SharePoint sites in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to find SharePoint sites in tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetAllTeams{
     #List all teams tenants
+    Write-Host ""
+
     try {
-        Write-Host "[*]Searching for all teams sites in tenant" -ForegroundColor Gray
+        MAADWriteProcess "Searching all Teams in tenant"
         $all_teams = Get-Team 
-        Write-Host "[+] Found $($all_teams.Count) teams in tenant" -ForegroundColor Yellow
-        
-        Read-Host "`n[?] Press enter to display all teams"
-        $all_teams  | Format-Table  DisplayName,GroupID,Description,Visibility -RepeatHeader| more
+
+        Show-MAADOutput -large_limit 10 -output_list $all_teams -file_path ".\Outputs\M365_Teams.txt"
     }
     catch {
-        Write-Host "[x] Failed to find teams in tenant" -ForegroundColor Red
+        MAADWriteError "Failed to find teams in tenant"
     }
-    Pause
+    MAADPause
 }
 
 function MAADGetAllDirectoryRoles {
     #Get all directory roles in Azure AD
     Write-Host ""
-    Write-Host "[*] Finding directory roles in tenant" -ForegroundColor Gray
-    $all_directory_roles = Get-AzureADDirectoryRole
 
-    #Create custom object with all directory roles
-    $seq = 1
-    $directory_role_list = @()
-
-    foreach ($directory_role in $all_directory_roles){
-        $directory_role_list += [PSCustomObject]@{"seq" = $seq; "DirectoryRole" = $directory_role.DisplayName; "ObjectID" = $directory_role.ObjectID} 
-        $seq += 1
-    }
-
-    Write-Host "[+] Found $($all_directory_roles.Count) directory roles in tenant" -ForegroundColor Yellow
-
-    Read-Host "`n[?] Press enter to display all directory roles"
-    #Display as table
-    $directory_role_list | Format-Table @{Label="Directory Role";Expression={$_.DirectoryRole}}, @{Label="Object ID";Expression={$_.ObjectID}}
-    Pause
- }
-
-function MAADGetDirectoryRoleMembers {
-    do {
-        #Get all directory roles in Azure AD
-        Write-Host ""
-        Write-Host "[*] Finding directory roles in tenant" -ForegroundColor Gray
-        $all_directory_roles = Get-AzureADDirectoryRole
+    try {
+        MAADWriteProcess "Searching directory roles in tenant"
+        $all_directory_roles = Get-AzureADDirectoryRole | Select-Object DisplayName, ObjectID
 
         #Create custom object with all directory roles
         $seq = 1
         $directory_role_list = @()
 
         foreach ($directory_role in $all_directory_roles){
-            $directory_role_list += [PSCustomObject]@{"seq" = $seq; "DirectoryRole" = $directory_role.DisplayName; "ObjectID" = $directory_role.ObjectID} 
+            $directory_role_list += [PSCustomObject]@{"Seq" = $seq; "DirectoryRole" = $directory_role.DisplayName; "ObjectID" = $directory_role.ObjectID} 
             $seq += 1
         }
 
-        Write-Host "[+] Found $($all_directory_roles.Count) directory roles in tenant" -ForegroundColor Yellow
-
-        Read-Host "`n[?] Press enter to display all directory roles"
-        #Display as table
-        $directory_role_list | Format-Table @{Label="#";Expression={$_.seq}}, @{Label="Directory Roles";Expression={$_.DirectoryRole}}, @{Label="Object ID";Expression={$_.ObjectID}}
-
-        $user_input = Read-Host "`n[?] Select a directory role from the list"
-        
-    } while ($user_input -notin $directory_role_list.seq)
-
-    $target_directory_role = ($directory_role_list |Where-Object {$_.seq -eq $user_input}).DirectoryRole
-    $target_directory_role_object_id = ($directory_role_list |Where-Object {$_.seq -eq $user_input}).ObjectID
-
-    Write-Host ""
-    $all_members = Get-AzureADDirectoryRoleMember -ObjectId $target_directory_role_object_id
-
-    Write-Host "[+] Found $($all_members.Count) members in directory role $target_directory_role" -ForegroundColor Yellow
-
-    Read-Host "`n[?] Press enter to display all members of directory role"
-
-    #Create custom object with all directory role members
-    $directory_role_members_list = @()
-
-    foreach ($directory_role_member in $all_members){
-        $directory_role_members_list += [PSCustomObject]@{"Member" = $directory_role_member.DisplayName; "MemberType" = $directory_role_member.UserType; "ObjectID" = $directory_role_member.ObjectID} 
+        Show-MAADOutput -large_limit 10 -output_list $directory_role_list -file_path ".\Outputs\AAD_Directory_Roles.txt"
     }
-    #Display in table
-    $directory_role_members_list | Format-Table @{Label="Directory Role Member";Expression={$_.Member}}, @{Label="Object ID";Expression={$_.ObjectID}}, @{Label="Type";Expression={$_.MemberType}}
-    Pause
+    catch {
+        MAADWriteError "Failed to find directory roles in tenant"
+    }
+    MAADPause
+ }
+
+function MAADGetDirectoryRoleMembers {
+    try {
+        do {
+            #Get all directory roles in Azure AD
+            Write-Host ""
+            MAADWriteProcess "Finding directory roles in tenant"
+            $all_directory_roles = Get-AzureADDirectoryRole
+
+            #Create custom object with all directory roles
+            $seq = 1
+            $directory_role_list = @()
+
+            foreach ($directory_role in $all_directory_roles){
+                $directory_role_list += [PSCustomObject]@{"seq" = $seq; "DirectoryRole" = $directory_role.DisplayName; "ObjectID" = $directory_role.ObjectID} 
+                $seq += 1
+            }
+            
+            #Display as table
+            $directory_role_list | Format-Table @{Label="#";Expression={$_.seq}}, @{Label="Directory Roles";Expression={$_.DirectoryRole}}, @{Label="Object ID";Expression={$_.ObjectID}}
+
+            $user_input = Read-Host "`n[?] Select a directory role from the list"
+            Write-Host ""
+            
+        } while ($user_input -notin $directory_role_list.seq)
+
+        $target_directory_role = ($directory_role_list |Where-Object {$_.seq -eq $user_input}).DirectoryRole
+        $target_directory_role_object_id = ($directory_role_list |Where-Object {$_.seq -eq $user_input}).ObjectID
+
+        $all_members = Get-AzureADDirectoryRoleMember -ObjectId $target_directory_role_object_id
+
+        #Create custom object with all directory role members
+        $directory_role_members_list = @()
+
+        foreach ($directory_role_member in $all_members){
+            $directory_role_members_list += [PSCustomObject]@{"DirectoryRole" = $target_directory_role; "Member" = $directory_role_member.DisplayName; "MemberType" = $directory_role_member.UserType; "ObjectID" = $directory_role_member.ObjectID} 
+        }
+
+        Show-MAADOutput -large_limit 10 -output_list $directory_role_members_list -file_path ".\Outputs\AAD_Directory_Role_Members.txt"
+    }
+    catch{
+        MAADWriteError "Failed to find directory role members"
+    }
+    MAADPause
 
  }
 
  function MAADGetAccountDirectoryRoles {
     #Get all group roles in Azure AD
     Write-Host ""
-    Write-Host "[*] Finding directory roles in tenant" -ForegroundColor Gray
-    $all_directoryroles = Get-AzureADDirectoryRole
- 
-    #Get target account
-    EnterAccount ("Enter an account to recon directory roles for")
-    $target_account = $global:account_username
-     
-    $user_roles = @()
- 
-    Write-Host "[*] Enumerating through directory roles" -ForegroundColor Gray
- 
-    foreach ($role in $all_directoryroles){
-        $role_object_id = $role.ObjectId
-        if ($target_account -in (Get-AzureADDirectoryRoleMember -ObjectId $role_object_id).UserPrincipalName) {
-            $user_roles += [PSCustomObject]@{"DirectoryRole" = $role.DisplayName}
+
+    try {
+        MAADWriteProcess "Finding directory roles in tenant"
+        $all_directoryroles = Get-AzureADDirectoryRole
+    
+        #Get target account
+        EnterAccount ("`n[?] Enter account to recon directory roles for")
+        $target_account = $global:account_username
+        
+        $user_roles_list = @()
+    
+        MAADWriteProcess "Enumerating through directory roles"
+    
+        foreach ($role in $all_directoryroles){
+            $role_object_id = $role.ObjectId
+            if ($target_account -in (Get-AzureADDirectoryRoleMember -ObjectId $role_object_id).UserPrincipalName) {
+                $user_roles_list += [PSCustomObject]@{"User" = $target_account ; "DirectoryRole" = $role.DisplayName}
+            }
         }
+
+        Show-MAADOutput -large_limit 10 -output_list $user_roles_list -file_path ".\Outputs\AAD_User_Directory_Roles.txt"
+    }
+    catch {
+        MAADWriteError "Failed to find directory roles"
     }
 
-    Write-Host "[+] User has: $($user_roles.Count)/$($all_directoryroles.Count) directory roles" -ForegroundColor Yellow
-
-    if ($user_roles.Count -gt 0) {
-        #Write-Host "[*] Following directory roles are assigned to user $target_account" -ForegroundColor Gray
-        $user_roles | Format-Table @{Label="Directory Role";Expression={$_.DirectoryRole}}
-    }
-    Pause
+    MAADPause
 }
 
 function MAADGetAllRoleGroups {
     #Get all role groups in tenant
     Write-Host ""
-    Write-Host "[*] Finding management role groups in tenant" -ForegroundColor Gray
-    $all_roles_groups = Get-RoleGroup
 
-    #Create custom object with all role groups
-    $seq = 1
-    $role_groups_list = @()
-
-    foreach ($role_group in $all_roles_groups){
-        $role_groups_list += [PSCustomObject]@{"RoleGroup" = $role_group.DisplayName}
-        $seq += 1
-    }
-    Write-Host "[+] Found $($all_roles_groups.Count) role groups in tenant" -ForegroundColor Yellow
-
-    Read-Host "`n[?] Press enter to display all role groups"
-    #Display as table
-    $role_groups_list | Format-Table @{Label="Role Group";Expression={$_.RoleGroup}}
-    Pause
-}
-
-function MAADGetRoleGroupMembers {
-
-    do {
-        #Get all role groups in tenant
-        Write-Host ""
-        Write-Host "[*] Finding management role groups in tenant" -ForegroundColor Gray
-        try {
-            $all_roles_groups = Get-RoleGroup
-        }
-        catch {
-            Write-Host "[x] Failed to recon management roles" -ForegroundColor Red
-            return
-        }
+    try {
+        MAADWriteProcess "Searching management role groups in tenant"
+        $all_roles_groups = Get-RoleGroup
 
         #Create custom object with all role groups
         $seq = 1
         $role_groups_list = @()
 
         foreach ($role_group in $all_roles_groups){
-            $role_groups_list += [PSCustomObject]@{"seq" = $seq; "RoleGroup" = $role_group.DisplayName}
+            $role_groups_list += [PSCustomObject]@{"RoleGroup" = $role_group.DisplayName}
             $seq += 1
         }
-        Write-Host "[+] Found $($all_roles_groups.Count) role groups in tenant" -ForegroundColor Yellow
 
-        Read-Host "`n[?] Press enter to display all role groups"
-        #Display as table
-        $role_groups_list | Format-Table @{Label="#";Expression={$_.seq}}, @{Label="Role Group";Expression={$_.RoleGroup}}
-
-        $user_input = Read-Host "`n[?] Select a role group from the list"
-    } while ($user_input -notin $role_groups_list.seq)
-    
-    $target_role_group = ($role_groups_list | Where-Object {$_.seq -eq $user_input}).RoleGroup
-
-    Write-Host ""
-    try {
-        $all_members = Get-RoleGroupMember -Identity $target_role_group
+        Show-MAADOutput -large_limit 10 -output_list $role_groups_list -file_path ".\Outputs\Roles_Groups.txt"
     }
     catch {
-        Write-Host "[x] Failed to recon management role members" -ForegroundColor Red
-        return
+        MAADWriteError "Failed to find management role groups"
+    }
+    MAADPause
+}
+
+function MAADGetRoleGroupMembers {
+    try {
+        do {
+            #Get all role groups in tenant
+            Write-Host ""
+            MAADWriteProcess "Searching management role groups in tenant"
+            try {
+                $all_roles_groups = Get-RoleGroup
+            }
+            catch {
+                MAADWriteError "Failed to recon management roles"
+                return
+            }
+
+            #Create custom object with all role groups
+            $seq = 1
+            $role_groups_list = @()
+
+            foreach ($role_group in $all_roles_groups){
+                $role_groups_list += [PSCustomObject]@{"seq" = $seq; "RoleGroup" = $role_group.DisplayName}
+                $seq += 1
+            }
+            MAADWriteProcess "Found $($all_roles_groups.Count) role groups"
+
+            Read-Host "`n[?] Press enter to display all role groups"
+            #Display as table
+            $role_groups_list | Format-Table @{Label="#";Expression={$_.seq}}, @{Label="Role Group";Expression={$_.RoleGroup}}
+
+            $user_input = Read-Host "`n[?] Select a role group from the list"
+        } while ($user_input -notin $role_groups_list.seq)
+        
+        $target_role_group = ($role_groups_list | Where-Object {$_.seq -eq $user_input}).RoleGroup
+
+        Write-Host ""
+        try {
+            $all_members = Get-RoleGroupMember -Identity $target_role_group
+        }
+        catch {
+            MAADWriteError "Failed to recon management role members"
+            return
+        }
+
+        #Create custom object with all role group members
+        $role_group_members_list = @()
+
+        foreach ($role_group_member in $all_members){
+            $role_group_members_list += [PSCustomObject]@{"RoleGroup" = $target_role_group; "Member" = $role_group_member.Name; "Alias" = $role_group_member.Alias}
+        }
+        #Display in table
+        Show-MAADOutput -large_limit 10 -output_list $role_group_members_list -file_path ".\Outputs\Role_Group_Members.txt"
+    }
+    catch {
+        MAADWriteError "Failed to find role group members"
     }
 
-    Write-Host "[+] Found $($all_members.Count) members in role group $target_role_group" -ForegroundColor Yellow
-
-    Read-Host "`n[?] Press enter to display all members of role group"
-
-    #Create custom object with all role group members
-    $role_group_members_list = @()
-
-    foreach ($role_group_member in $all_members){
-        $role_group_members_list += [PSCustomObject]@{"Member" = $role_group_member.Name; "Alias" = $role_group_member.Alias}
-    }
-    #Display in table
-    $role_group_members_list | Format-Table @{Label="Role Group Member";Expression={$_.Member}}, Alias
-    Pause
+    MAADPause
 }
 
 function MAADGetAllManagementRole {
     #Get all management roles in tenant
     Write-Host ""
-    Write-Host "[*] Finding management roles in tenant" -ForegroundColor Gray
-    $all_management_roles = Get-ManagementRole
-    
-    #Create custom object with all management roles
-    $seq = 1
-    $management_roles_list = @()
 
-    foreach ($management_role in $all_management_roles){
-        $management_roles_list += [PSCustomObject]@{"ManagementRole" = $management_role.Name}
-        $seq += 1
+    try {
+        MAADWriteProcess "Finding management roles in tenant"
+        $all_management_roles = Get-ManagementRole
+        
+        #Create custom object with all management roles
+        $seq = 1
+        $management_roles_list = @()
+
+        foreach ($management_role in $all_management_roles){
+            $management_roles_list += [PSCustomObject]@{"Seq" = $seq; "ManagementRole" = $management_role.Name}
+            $seq += 1
+        }
+
+        Show-MAADOutput -large_limit 10 -output_list $management_roles_list -file_path ".\Outputs\Management_Roles.txt"
     }
-    Write-Host "[+] Found $($all_management_roles.Count) management roles in tenant" -ForegroundColor Yellow
-
-    Read-Host "`n[?] Press enter to display all management roles"
-    #Display as table
-    $management_roles_list | Format-Table @{Label="Management Role";Expression={$_.ManagementRole}} | more
-    Pause
+    catch {
+        MAADWriteError "Failed to recon management roles"
+    }
+    MAADPause
 }
 
 function MAADGetAllEdiscoveryAdmins {
     Write-Host ""
-    Write-Host "[*] Finding eDiscovery Admins in tenant" -ForegroundColor Gray
+
+    MAADWriteProcess "Finding eDiscovery Admins in tenant"
     try {
         $all_ediscovery_admins = Get-eDiscoveryCaseAdmin
 
-        Write-Host "[+] Found $($all_ediscovery_admins.Count) eDiscovery Admins in tenant" -ForegroundColor Yellow
-
-        if ($all_ediscovery_admins.Count -gt 0) {
-            Read-Host "`n[?] Press enter to display all eDiscovery Admins"
-        }
-
-        $all_ediscovery_admins | Format-Table @{Label="eDiscovery Admin";Expression={$_.Name}}, @{Label="Email Address";Expression={$_.PrimarySmtpAddress}}, Title
+        Show-MAADOutput -large_limit 10 -output_list $all_ediscovery_admins -file_path ".\Outputs\EDiscovery_Admins.txt"
     }
     catch {
-        Write-Host "[x] Failed to recon eDiscovery Admins" -ForegroundColor Red
+        MAADWriteError "Failed to recon eDiscovery Admins"
     }
-    Pause
-    
+    MAADPause   
 }

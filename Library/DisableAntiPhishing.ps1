@@ -3,10 +3,11 @@ function DisableAntiPhishing {
     mitre_details("DisableAntiPhishing")
 
     #List all AntiPhish Policy
-    $inititate_recon = Read-Host -Prompt "Initiate recon to retrive all AntiPhishing policies (Yes/No)"
+    $inititate_recon = Read-Host -Prompt "`n[?] Initiate recon to retrive all AntiPhishing policies (y/n)"
+    Write-Host ""
     
     if ($inititate_recon -notin "No","no","N","n"){
-        Write-Host  "`nFinding all Anti-Phishing policies in the environment..." -ForegroundColor Gray
+        MAADWriteProcess "Finding Anti-Phishing policies in tenant"
         Get-AntiPhishRule | Format-Table Name,State,Priority,Identity
     }
     else {
@@ -14,37 +15,52 @@ function DisableAntiPhishing {
     }
 
     #Select a policy to modify
-    $policy_name = Read-Host -Prompt "`nEnter the name of AntPhishing policy from the table to disable"
+    $policy_name = Read-Host -Prompt "`n[?] Enter AntPhishing policy from table to disable"
+    Write-Host ""
+
+    try {
+        MAADWriteProcess "Fetching policy current status"
+        $policy_current_status = Get-AntiPhishRule -Identity $policy_name
+        MAADWriteProcess "$($policy_current_status.Name) -> $($policy_current_status.State)"
+    }
+    catch {
+        MAADWriteError "Failed to fetch policy status"
+    }
 
     #Disable AntiPhishing policy
     try {
-        Write-Host "`nDisabling Anti-Phishing policy: '$policy_name'..." -ForegroundColor Gray
-        Disable-AntiPhishRule -Identity $policy_name -Confirm:$false -ErrorAction Stop
-        Start-Sleep -s 5  
-        Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
-        Write-Host "`n[Success] Guard's down - Disabled anti-phishing policy" -ForegroundColor Yellow
+        MAADWriteProcess "Disabling anti-phishing policy -> $policy_name"
+        Disable-AntiPhishRule -Identity $policy_name -Confirm:$false -ErrorAction Stop | Out-Null
+        Start-Sleep -s 5
+        MAADWriteProcess "Fetching updated policy status"
+        $policy_updated_status = Get-AntiPhishRule -Identity $policy_name
+        MAADWriteProcess "$($policy_updated_status.Name) -> $($policy_updated_status.State)"
+        MAADWriteSuccess "Disabled Anti-phishing Policy"
         $allow_undo = $true
     }
     catch {
-        Write-Host "`n[Error] Failed to disable anti-phishing policy!" -ForegroundColor Red
+        MAADWriteError "Failed to disable anti-phishing policy"
     }
     
     #Undo changes
     if ($allow_undo -eq $true) {
         #Re-enble AntiPhishing Policy
-        $user_choice = Read-Host -Prompt "`nWould you like to re-enable the Anti-Phishing policy? (yes/no)"
+        $user_choice = Read-Host -Prompt "`n[?] Undo: Re-enable Anti-Phishing policy (y/n)"
+        Write-Host ""
 
         if ($user_choice -notin "No","no","N","n") {
             try {
-                Enable-AntiPhishRule -Identity $policy_name -Confirm:$false
+                MAADWriteProcess "Enabling anti-phishing policy -> $policy_name"
+                Enable-AntiPhishRule -Identity $policy_name -Confirm:$false | Out-Null
                 Start-Sleep -s 5 
-                Get-AntiPhishRule -Identity $policy_name | Format-Table Name,State,Priority
-                Write-Host "`n[Undo Success] Re-enabled anti-phishing policy: '$policy_name'" -ForegroundColor Yellow
+                $policy_updated_status = Get-AntiPhishRule -Identity $policy_name
+                MAADWriteProcess "$($policy_updated_status.Name) -> $($policy_updated_status.State)"
+                MAADWriteSuccess "Re-enabled Anti-phishing Policy"
             }
             catch {
-                Write-Host "`n[Undo Error] Failed to re-enable policy" -ForegroundColor Red
+                MAADWriteError "Failed to re-enable anti-phishing policy"
             }
         }
     }
-    Pause
+    MAADPause
 }

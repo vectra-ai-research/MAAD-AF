@@ -2,27 +2,37 @@
 function RemoveAccess {
     mitre_details("RemoveAccess")
 
-    Write-Warning "Results of this action cannot be reversed!"
+    MAADWriteInfo "Results of this action cannot be reversed"
 
-    EnterAccount("Enter an account to remove from Azure AD")
+    EnterAccount("`n[?] Enter account to delete from tenant")
     $target_account = $global:account_username
 
     if ($target_account -eq $global:AdminUsername){
-        Write-Host "`n[Input Error] Sorry, you are too great to destroy yourself!" -ForegroundColor Red
-        Write-Host "[Tip] Try deleting another account or create a backdoor account then use it to delete this account (MAAD-AF can help you with that)" -ForegroundColor Gray
+        MAADWriteError "You are too great to destroy yourself"
+        MAADWriteError "Failed to delete account"
+        MAADWriteInfo "Cannot delete account currently in use"
+        MAADWriteInfo "Create a backdoor account then use it to delete this account"
         break
     }
 
     #Delete account
     try {
-        Write-Host "`nDeleting the selected account ..." -ForegroundColor Gray
-        Remove-AzureADUser -ObjectId $target_account -ErrorAction Stop
-        Start-Sleep -s 5 
-        Write-Host "`n[Success] Deleted account: $target_account" -ForegroundColor Yellow
+        $user_confirm = Read-Host -Prompt "`n[?] Confirm account deletion [$target_account] (y/n)"
+        Write-Host ""
+        if ($user_confirm.ToUpper() -in "Y","YES"){
+            MAADWriteProcess "Attempting to delete account" 
+            Remove-AzureADUser -ObjectId $target_account -ErrorAction Stop | Out-Null
+            Start-Sleep -s 5 
+            MAADWriteProcess "Deleted -> Account: $target_account"
+            MAADWriteSuccess "Account Deleted from Tenant"
+        }
+        else {
+            MAADWriteProcess "Deletion Aborted"
+        }
     }
     catch {
-        Write-Host "`n[Error] Failed to delete account $target_account" -ForegroundColor Red
+        MAADWriteError "Failed to delete account"
     }
-    
+    MAADPause
 }
     

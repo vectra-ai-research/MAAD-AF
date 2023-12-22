@@ -2,28 +2,31 @@ function ResetPassword {
 
     mitre_details("ResetPassword")
 
-    Write-Warning "Results of this action cannot be reversed!!!"
+    MAADWriteInfo "Results of this action cannot be reversed"
 
-    EnterAccount ("Enter an account to reset password for (user@org.com)")
+    EnterAccount "`n[?] Enter user to reset password for (user@org.com)"
     $target_account = $global:account_username
 
-    $new_password = Read-Host -Prompt "`nEnter new password to set (must comply with password policy)"
+    $new_password = Read-Host -Prompt "`n[?] Enter new password to set (must comply with password policy)"
+    Write-Host ""
     $new_secure_password = ConvertTo-SecureString $new_password -AsPlainText -Force 
+    $output_path = ".\Outputs\PasswordResets.txt"
 
     #Reset password
     try {
-        Write-Host "`nResetting password...`n" -ForegroundColor Gray
+        MAADWriteProcess "Resetting account password"
         Set-AzureADUserPassword -ObjectId $target_account -Password $new_secure_password -EnforceChangePasswordPolicy $false -ErrorAction Stop
         Start-Sleep -s 5 
-        "User: $target_account | NewPassword: $new_password" | Out-File -FilePath .\Outputs\PasswordResets.txt -Append
-        Write-Host "`nUser: $target_account"
-        Write-Host "New Password: $new_password"
-        Write-Host "`n[Success] Password reset for $target_account" -ForegroundColor Yellow
-
+        "User: $target_account | NewPassword: $new_password" | Out-File -FilePath $output_path -Append
+        MAADWriteProcess "Output Saved -> \MAAD-AF\Outputs\PasswordResets.txt"
+        
         #Save to credential store
         AddCredentials "password" "RP_$target_account-$(([DateTimeOffset](Get-Date)).ToUnixTimeSeconds())" $target_account $new_password
+
+        MAADWriteSuccess "Password reset successful"
     }
     catch {
-        Write-Host "`n[Error] Failed to reset password for $target_account" -ForegroundColor Red
+        MAADWriteError "Failed to reset password"
     }
+    MAADPause
 }

@@ -2,50 +2,58 @@ function ModifyTrustedNetworkConfig {
     mitre_details("TrustedNetworkConfig")
 
     #Get public IP
-    $trusted_policy_name = Read-Host -Prompt "Enter a name for the new trusted network policy"
+    $trusted_policy_name = Read-Host -Prompt "`n[?] Enter name for new Trusted Network Policy"
+    Write-Host ""
+    MAADWriteInfo "Leave blank and press [enter] to automatically use your public IP"
 
-    $ip_addr = Read-Host -Prompt "`nEnter IP to add as trusted named location (or leave blank and hit 'enter' to automatically resolve and use your public IP)"
+    $ip_addr = Read-Host -Prompt "`n[?] Enter IP to add as trusted named location"
+    Write-Host ""
 
     if ($ip_addr -eq "") {
-        Write-Host "`nResolving your public IP..." -ForegroundColor Gray
-        Write-Host "`nQuerying DNS..." -ForegroundColor Gray
+        MAADWriteProcess "Resolving your public IP"
+        MAADWriteProcess "Querying DNS"
         $ip_addr = $(Resolve-DnsName -Name myip.opendns.com -Server 208.67.222.220).IPAddress
-        Write-Host "`nYour public IP: $ip_addr`n"
-        Pause
+        MAADWriteProcess "Your public IP -> $ip_addr"
+        MAADPause
 
         if ($ip_addr -eq "") {
-            Write-Host "`n[Error] Failed to resolve IP automatically" -ForegroundColor Red
-            $ip_addr = Read-Host -Prompt "`nManually enter IP address to add as trusted named location"
+            MAADWriteError "Failed to resolve IP automatically"
+            $ip_addr = Read-Host -Prompt "`n[?] Manually enter IP address to add as trusted named location"
+            Write-Host ""
         }
     }
     
     #Create trusted network policy
     try {
-        Write-Host "`nDeploying policy $trusted_policy_name to add your IP as trusted named location..." -ForegroundColor Gray
+        MAADWriteProcess "Deploying policy -> $trusted_policy_name"
         $trusted_nw = New-AzureADMSNamedLocationPolicy -OdataType "#microsoft.graph.ipNamedLocation" -DisplayName $trusted_policy_name -IsTrusted $true -IpRanges "$ip_addr/32" -ErrorAction Stop
-        Write-Host "`nDisplaying details of deployed policy..." -ForegroundColor Gray
-        $trusted_nw | Out-Host
-        Write-Host "`n[Success] Deployed trusted location policy: $trusted_policy_name with IP: $ip_addr" -ForegroundColor Yellow
+        MAADWriteProcess "Trusted network policy created"
+        MAADWriteProcess "Retrieving details of deployed policy"
+        MAADWriteProcess "Policy Name -> $($trusted_nw.DisplayName)"
+        MAADWriteProcess "Policy ID -> $($trusted_nw.Id)"
+        MAADWriteProcess "Trusted IP Range -> $($trusted_nw.IpRanges.CidrAddress)"
+        MAADWriteSuccess "Deployed Trusted Network Policy"
         $allow_undo = $true
     }
     catch {
-        Write-Host "`n[Error] Failed to create trusted location policy" -ForegroundColor Red
+        MAADWriteError "Failed to deploy trusted network policy"
     }
     
     #Undo changes
     if ($allow_undo -eq $true) {
-        $user_confirm = Read-Host -Prompt "`nWould you like to undo changes by deleting the new trusted location policy? (yes/no)"
+        $user_confirm = Read-Host -Prompt "`n[?] Undo: Delete new trusted network policy (y/n)"
+        Write-Host ""
 
         if ($user_confirm -notin "No","no","N","n") {
             try {
-                Write-Host "`nRemoving trusted location policy: $trusted_policy_name ...`n" -ForegroundColor Gray
+                MAADWriteProcess "Removing Trusted Network Policy"
                 Remove-AzureADMSNamedLocationPolicy -PolicyId $trusted_nw.Id
-                Write-Host "`n[Undo Success] Removed the trusted location policy" -ForegroundColor Yellow
+                MAADWriteSuccess "Deleted New Trusted Location Policy"
             }
             catch {
-                Write-Host "`n[Undo Error] Failed to remove the trusted location policy" -ForegroundColor Red
+                MAADWriteError "Failed to delete new trusted network policy"
             }
         }
     }
-    Pause
+    MAADPause
 }

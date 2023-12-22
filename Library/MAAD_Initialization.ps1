@@ -13,10 +13,10 @@ function MAADInitialization {
     DisplayCentre "MMM  YMA  MMM   AMMA   MMM   AMMA   MMM MMM    MMM         AMMA   MMM MMM        " "Yellow"
     DisplayCentre "MMM   Y   MMM  AMMMMMMMMMM  AMMMMMMMMMM MMM   AMMA        AMMMMMMMMMM MMM        " "Yellow"
     DisplayCentre "MMM       MMM AMMA     MMM AMMA     MMM MMMMMMMAD        AMMA     MMM MMM        " "Yellow"
-    DisplayCentre "v_2.1" "Gray"
+    DisplayCentre "v_3.0" "Gray"
     DisplayCentre "Created by Arpan Sarkar (@openrec0n)" "Gray"
     Write-Host ""
     DisplayCentre "Simple, Fast & Effective Security Testing" "White" 
     Write-Host ""
-    $null = Read-Host "Enter to continue..."
+    Start-Sleep -Seconds 2
 }

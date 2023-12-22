@@ -3,10 +3,10 @@
     Attack tool to test Microsoft 365 and Entra ID(Azure AD) security by attack emulation.
 
 .DESCRIPTION
-    MAAD-AF is designed for security teams to test their cloud security controls, detection & response capabilities easily and swiftly. MAAD-AF intends to make cloud security testing simple, fast, and effective for security practitioners by providing an intuitive testing tool focused on prevalent attacker tactics & techniques.
+    MAAD-AF is designed for security teams to test their Microsoft cloud security controls, detection & response capabilities easily and swiftly. MAAD-AF intends to make cloud security testing simple, fast, and effective for security practitioners by providing an intuitive testing tool focused on prevalent attacker tactics & techniques.
     This tool is intended to be used for education purposes, for testing your OWN M365 / Entra ID environments or one you are AUTHORIZED to test.
     Please refrain from using the tool if you have any questions or concerns about its impact on your cloud environment.
-    Many changes made by this tool can be reversed and the tool offers options to automatically revert most of the changes it does. However, please take any action at your own risk. 
+    Many changes executed using techniques in MAAD-AF can be reversed and the tool offers options to automatically revert most of the changes. However, please take any action at your own risk. 
 
 .EXAMPLE
     The example below shows how to execute the tool:
@@ -21,7 +21,7 @@
 
 .NOTES
     Author: Arpan Sarkar (@openrec0n)
-    Version: 2.1
+    Version: 3.0
 #>
 param (
     [switch]$ForceBypassDependencyCheck,

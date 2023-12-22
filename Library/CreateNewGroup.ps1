@@ -1,8 +1,9 @@
 #Create New Group
 
 function CreateNewAzureADGroup {
-    $new_group_display_name = Read-Host -Prompt 'Enter a cool name to create new group'
-    $new_group_description = Read-Host -Prompt 'Enter a description for new group (leave blank and press enter for default description)'
+    $new_group_display_name = Read-Host -Prompt "`n[?] Enter name to create new group"
+    $new_group_description = Read-Host -Prompt "`n[?] Enter description for new group (leave blank and press [enter] for default description)"
+    Write-Host ""
 
     #If no description provided by user, set default description
     if ($null -eq $new_group_description -or "" -eq $new_group_description) {
@@ -11,60 +12,67 @@ function CreateNewAzureADGroup {
 
     #Create the group with set parameters
     try {
-        Write-Host "`nCreating a new Group ..."
+        MAADWriteProcess "Attempting to create new Group -> $new_group_display_name"
         $new_group = New-AzureADGroup -DisplayName $new_group_display_name -Description $new_group_description -MailEnabled $false -SecurityEnabled $true -ErrorAction Stop
         Start-Sleep -Seconds 10
-        Write-Host "`n[Success] Created new group" -ForegroundColor Yellow
+        MAADWriteSuccess "New Group Created"
         $allow_undo = $true
     }
     catch {
-        Write-Host "`n[Error] Failed to create new group" -ForegroundColor Red
+        MAADWriteError "Failed to create new group"
     }
 
     #Undo changes
     if ($allow_undo -eq $true) {
-        $user_confirm = Read-Host -Prompt "`nWould you like to undo changes by deleting the new group? (yes/no)"
+        $user_confirm = Read-Host -Prompt "`n[?] Undo: Delete the new group (y/n)"
+        Write-Host ""
         if ($user_confirm -notin "No","no","N","n") {
             try {
+                MAADWriteProcess "Attempting to delete new Group -> $new_group_display_name"
                 $group_details = Get-AzureADGroup -SearchString $new_group_display_name
                 $group_id = $group_details.ObjectId
-                Remove-AzureADGroup -ObjectId $group_id -ErrorAction Stop
-                Write-Host "`n[Success] Deleted new group: $new_group_display_name" -ForegroundColor Yellow
+                Remove-AzureADGroup -ObjectId $group_id -ErrorAction Stop | Out-Null
+                MAADWriteSuccess "New Group Deleted"
             }
             catch {
-                Write-Host "`n[Error] Could not delete new group: $new_group_display_name" -BackgroundColor Red
+                MAADWriteError "Could not delete new group"
             }
         }
     }
-    Pause
+    MAADPause
 }
-    
+
 
 function CreateNewM365Group{
-    [string]$new_group_display_name = Read-Host -Prompt 'Enter a cool name to create new group'
+    [string]$new_group_display_name = Read-Host -Prompt "`n[?] Enter name to create new group"
 
     #Create the group with set parameters
     try {
-        Write-Host "`nCreating a new Group ..." -ForegroundColor Gray
+        MAADWriteProcess "Creating a new Group -> $new_group_display_name"
         $new_group = New-UnifiedGroup -DisplayName $new_group_display_name -AccessType Public -Confirm:$false -ErrorAction Stop
         Start-Sleep -Seconds 10
-        Write-Host "`n[Success] Created new group" -ForegroundColor Yellow
+        MAADWriteSuccess "New Group Created"
         $allow_undo = $true
     }
     catch {
-        Write-Host "`n[Error] Failed to create new group" -ForegroundColor Red
+        MAADWriteError "Failed to create new group"
     }
 
     #Undo changes
     if ($allow_undo -eq $true) {
-        try {
-            Remove-UnifiedGroup -Identity $new_group_display_name -Force -Confirm:$false -ErrorAction Stop
-            Write-Host "`n[Undo Success] Deleted new group: $new_group_display_name" -ForegroundColor Yellow
-        }
-        catch {
-            Write-Host "`n[Undo Error] Failed to delete new group: $new_group_display_name" -BackgroundColor Red
+        $user_confirm = Read-Host -Prompt "`n[?] Undo: Delete the new group (y/n)"
+        Write-Host ""
+        if ($user_confirm -notin "No","no","N","n") {
+            try {
+                MAADWriteProcess "Attempting to delete new Group -> $new_group_display_name"
+                Remove-UnifiedGroup -Identity $new_group_display_name -Force -Confirm:$false -ErrorAction Stop | Out-Null
+                MAADWriteSuccess "New Group Deleted"
+            }
+            catch {
+                MAADWriteError "Could not delete new group"
+            }
         }
     }
-    Pause
+    MAADPause
 }
 

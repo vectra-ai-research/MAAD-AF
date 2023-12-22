@@ -1,41 +1,44 @@
 #Add user to group
 function AddObjectToGroup {
 
-    mitre_details("AddObjectToGroup")
+    mitre_details "AddObjectToGroup"
 
-    EnterAccount ("Select an account to add to group (user@org.com)")
+    EnterAccount "`n[?] Enter account to add to group (user@org.com)"
     $target_account = $global:account_username
     $target_account_id = (Get-AzureADUser -SearchString $target_account).ObjectId
 
-    EnterGroup("Enter a target group name to add the account to (Leave blank and press enter to recon all groups)")
+    EnterGroup "`n[?] Enter group to add the account (press [enter] to find groups)"
     $target_group = $global:group_name
     $target_group_id = (Get-AzureADMSGroup -SearchString $target_group).Id
 
     #Add account to group
     try {
-        Write-Host "`nAdding account to group..." -ForegroundColor Gray
-        Add-AzureADGroupMember -ObjectId $target_group_id -RefObjectId $target_account_id -ErrorAction Stop
+        MAADWriteProcess "Adding account to group"
+        MAADWriteProcess "$target_account -> $target_group"
+        Add-AzureADGroupMember -ObjectId $target_group_id -RefObjectId $target_account_id -ErrorAction Stop | Out-Null
         Start-Sleep -s 5
-        Write-Host "`n[Success] added account: $target_account to group: $target_group" -ForegroundColor Yellow
+        MAADWriteSuccess "Account Added to Group"
         $allow_undo = $true
     }
     catch {
-        Write-Host "`n[Error] Failed to add account to group $target_group" -ForegroundColor Red
+        MAADWriteError "Failed to add account to group" 
     }
 
     if ($allow_undo -eq $true) {
         #Remove user from Group
-        $user_choice = Read-Host -Prompt "Would you like to undo actions by removing account from the group? (yes/no)"
+        $user_choice = Read-Host -Prompt "`n[?] Undo: Remove account from group (y/n)"
+        Write-Host ""
         if ($user_choice -notin "No","no","N","n") {
             try {
-                Write-Host "`nRemoving account $target_account from group: $target_group..."
-                Remove-AzureADGroupMember -ObjectId $target_group_id -MemberId $target_account_id -ErrorAction Stop
+                MAADWriteProcess "Removing account $target_account from group $target_group"
+                Remove-AzureADGroupMember -ObjectId $target_group_id -MemberId $target_account_id -ErrorAction Stop | Out-Null
                 Start-Sleep -s 5
-                Write-Host "`n[Undo Success] Removed account: $target_account from group: $target_group" -ForegroundColor Yellow
+                MAADWriteSuccess "Account Removed from Group"
             }
             catch {
-                Write-Host "`n[Undo Error] Failed to remove account from the group. Try removing through Admin console" -ForegroundColor Red
+                MAADWriteError "Failed to remove account from the group"
             }
         }
     }
+    MAADPause
 }

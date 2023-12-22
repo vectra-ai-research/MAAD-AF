@@ -11,47 +11,46 @@ function TORAnonymizer ($command){
         $global:tor_proxy = $false
         mitre_details("TORAnonymizer")
   
-        Write-Host "[i] Selecting (Yes) will attempt to connect to the TOR network" -ForegroundColor Cyan
+        MAADWriteInfo "Selecting [y] will attempt to connect to the TOR network"
 
-        $inititate_anonymity = Read-Host -Prompt "`n[?] Confirm to connect to TOR network and establish anonymity? (Yes/No)"
+        $inititate_anonymity = Read-Host -Prompt "`n[?] Connect to TOR network and establish anonymity (y/n)"
         Write-Host ""
  
         if ($inititate_anonymity -notin "No","no","N","n"){
             
             #Check from local config file if TOR config has been updated by user
             if (-Not (Test-Path -Path $tor_root_directory)){
-                Write-Host "[x] TOR executable not found" -ForegroundColor Red
-                Write-Host "[i] Check if TOR is installed on your host" -ForegroundColor Cyan
-                Write-Host "[i] Checkout: https://www.torproject.org/" -ForegroundColor Cyan
-                Write-Host "[i] Update the TOR direcotry path in: $global:maad_config_path" -ForegroundColor Cyan
+                MAADWriteError "TOR executable not found"
+                MAADWriteInfo "Check if TOR is installed on your host"
+                MAADWriteInfo "Checkout: https://www.torproject.org/"
+                MAADWriteInfo "Update the TOR direcotry path in: $global:maad_config_path"
                 Write-Host ""
-                Pause
+                MAADPause
                 return
             }
 
-            Write-Host "[*] Initiating TOR" -ForegroundColor Gray
+            MAADWriteProcess "Initiating TOR"
             invoke-expression 'cmd /c start powershell -NoExit -Command  {. .\Library\TORAnonymizer.ps1; TORProxy}'
-            Write-Host "[*] TOR proxy initialized in new PS window" -ForegroundColor Gray
+            MAADWriteProcess "TOR proxy initialized in new PS window"
             Start-Sleep -Seconds 3
 
-            Write-Host "[*] Configuring host proxy to route traffic through TOR" -ForegroundColor Gray
+            MAADWriteProcess "Configuring host proxy to route traffic through TOR"
             try {
                 Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyServer -Value "$($tor_host):$($tor_port)" -ErrorAction Stop
-                Write-Host "[*] Host keys modified to add TOR proxy" -ForegroundColor Gray
+                MAADWriteProcess "Host keys modified to add TOR proxy"
                 Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -name ProxyEnable -Value 1 -ErrorAction Stop
-                Write-Host "[*] Host keys modified to enable TOR proxy" -ForegroundColor Gray
+                MAADWriteProcess "Host keys modified to enable TOR proxy"
                 $global:tor_proxy = $true
 
-                Write-Host "`n[+] Routing traffic through TOR`n" -ForegroundColor Yellow
+                MAADWriteProcess "Check TOR PS window to validate TOR is running"
                 Write-MAADLog "START" "TOR started"
             }
             catch {
-                Write-Host "`n[x] Failed to configure host proxy for TOR" -ForegroundColor Red
+                MAADWriteError "Failed to configure host proxy for TOR"
                 break
             } 
-
             Write-Host ""
-            Pause  
+            MAADPause  
         }
     }
 
@@ -60,7 +59,10 @@ function TORAnonymizer ($command){
         Write-MAADLog "STOP" "TOR stopped"
     }
 }
+
 function TORProxy {
+    ###Ths function doesnt use any other MAAD functions because its executed in a separate window
+    
     #Load local proxy configuration from maad_config
     $global:maad_config_path = ".\Local\MAAD_AF_Global_Config.json"
     $maad_config = Get-Content $global:maad_config_path | ConvertFrom-Json

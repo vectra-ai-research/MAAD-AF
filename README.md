@@ -54,15 +54,15 @@ MAAD-AF is developed natively in PowerShell.
 - MFA Manipulation
 - User Account Deletion
 - SharePoint exploitation for data recon & exfil
-- [Many more...](openrec0n.github.io/maad-af-docs/)
+- [More...](https://openrec0n.github.io/maad-af-docs/)
 
 ## Contribute
  - Thanks for considering contributing to MAAD-AF! Your contributions will help make MAAD-AF better.
  - Submit your PR to the main branch.
- - Submit bugs & issues directly to [GitHub Issues](https://github.com/vectra-ai-research/MAAD-AF/issues).
- - Share ideas in [GitHub Discussions](https://github.com/vectra-ai-research/MAAD-AF/discussions). 
+ - Submit bugs & issues directly to [GitHub Issues](https://github.com/vectra-ai-research/MAAD-AF/issues)
+ - Share ideas in [GitHub Discussions](https://github.com/vectra-ai-research/MAAD-AF/discussions)
 
 ## Contact
 If you found MAAD-AF useful, want to share an interesting use-case or idea - reach out & share them
- - Maintainer : [Arpan Sarkar](linkedin.com/in/arpan-sarkar)
- - Email : MAAD-AF@vectra.ai(mailto:maad-af@vectra.ai)
+ - Maintainer : [Arpan Sarkar](https://www.linkedin.com/in/arpan-sarkar/)
+ - Email : [MAAD-AF@vectra.ai](mailto:maad-af@vectra.ai)

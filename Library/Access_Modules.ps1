@@ -705,13 +705,15 @@ function AccessSharepointAdmin {
         }
         $sharepoint_url = "https://$global:sharepoint_tenant.sharepoint.com"
         MAADWriteProcess "SharePoint url -> $sharepoint_url"
+        $sharepoint_admin_url = "https://$global:sharepoint_tenant-admin.sharepoint.com"
+        MAADWriteProcess "SharePoint admin url -> $sharepoint_admin_url"
     }
 
     ###Connect SharePoint Online Administration Center 
     if ($AccessToken -notin "",$null) {
         try {
         #Attempt token authentication  
-        Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -AccessToken $AccessToken -ErrorAction Stop | Out-Null
+        Connect-SPOService -Url $sharepoint_admin_url -AccessToken $AccessToken -ErrorAction Stop | Out-Null
         #SPOService currently does not support token auth so this is intended to fail and rollover to other auth methods
         MAADWriteSuccess "Established access -> SharePoint Online Administration Center"
         }
@@ -720,7 +722,7 @@ function AccessSharepointAdmin {
             MAADWriteProcess "Attempting basic authentication"
             try {
                 #Attempt basic authentication
-                Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -Credential $AdminCredential -ErrorAction Stop
+                Connect-SPOService -Url $sharepoint_admin_url -Credential $AdminCredential -ErrorAction Stop
                 MAADWriteSuccess "Established access -> SharePoint Online Administration Center"
             }
             catch [Microsoft.Online.SharePoint.PowerShell.AuthenticationException]{
@@ -730,7 +732,7 @@ function AccessSharepointAdmin {
                     MAADWriteProcess "Launching interactive authentication window to continue"
                     try {
                         #Attempt interactive authentication  
-                        Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -ErrorAction Stop | Out-Null
+                        Connect-SPOService -Url $sharepoint_admin_url -ErrorAction Stop | Out-Null
                         MAADWriteSuccess "Established access -> SharePoint Online Administration Center"
                     }
                     catch {
@@ -749,7 +751,7 @@ function AccessSharepointAdmin {
     else {
         try {
             #Attempt basic authentication
-            Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -Credential $AdminCredential -ErrorAction Stop
+            Connect-SPOService -Url $sharepoint_admin_url -Credential $AdminCredential -ErrorAction Stop
             MAADWriteSuccess "Established access -> SharePoint Online Administration Center" 
         }
         catch [Microsoft.Online.SharePoint.PowerShell.AuthenticationException]{
@@ -759,7 +761,7 @@ function AccessSharepointAdmin {
                 MAADWriteProcess "Launching interactive authentication window to continue"
                 try {
                     #Attempt interactive authentication  
-                    Connect-SPOService -Url "https://$global:sharepoint_tenant-admin.sharepoint.com" -ErrorAction Stop | Out-Null
+                    Connect-SPOService -Url $sharepoint_admin_url -ErrorAction Stop | Out-Null
                     MAADWriteSuccess "Established access -> SharePoint Online Administration Center"
                 }
                 catch {

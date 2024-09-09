@@ -555,16 +555,29 @@ function AccessSharepoint {
 
     #Find the sharepoint URL
     if ($sharepoint_url -notin "No","no","N","n"){
-        $tenant = $AdminUsername.Split("@")[1]
-        $tenant_intel = Invoke-AADIntReconAsOutsider -DomainName $tenant
+        try {
+            $tenant = $AdminUsername.Split("@")[1]
+            $tenant_intel = Invoke-AADIntReconAsOutsider -DomainName $tenant
 
-        foreach ($domain in $tenant_intel){
-            if ($domain.Name -match ".onmicrosoft.com" -and $domain.Name -notmatch ".mail.onmicrosoft.com"){
-                $global:sharepoint_tenant = $domain.Name.Split(".")[0]
+            foreach ($domain in $tenant_intel){
+                if ($domain.Name -match ".onmicrosoft.com" -and $domain.Name -notmatch ".mail.onmicrosoft.com"){
+                    $global:sharepoint_tenant = $domain.Name.Split(".")[0]
+                }
             }
+            $sharepoint_url = "https://$global:sharepoint_tenant.sharepoint.com"
+            MAADWriteProcess "SharePoint url -> $sharepoint_url"
         }
-        $sharepoint_url = "https://$global:sharepoint_tenant.sharepoint.com"
-        MAADWriteProcess "SharePoint url -> $sharepoint_url"
+        catch {
+            # Do nothing
+            MAADWriteError "Failed to automatically discover SharePoint url"
+        }
+    }
+    if ($sharepoint_url -eq $null){
+        $sharepoint_url = Read-Host "`n[?] Manually enter SharePoint URL (https://tenant.sharepoint.com)"
+    }
+    if ($sharepoint_url -in $null,""){
+        MAADWriteError "Sharepoint URL not found"
+        break
     }
     
     if ($AccessToken -notin "",$null ) {
@@ -694,19 +707,33 @@ function AccessSharepointAdmin {
     )
 
     #Find the sharepoint URL
-    if ($sharepoint_url -notin "No","no","N","n"){
-        $tenant = $AdminUsername.Split("@")[1]
-        $tenant_intel = Invoke-AADIntReconAsOutsider -DomainName $tenant
+    if ($sharepoint_admin_url -eq $null){
+        try {
+            MAADWriteProcess "Attempting to discover target SharePoint Admin URL"
+            $tenant = $AdminUsername.Split("@")[1]
+            $tenant_intel = Invoke-AADIntReconAsOutsider -DomainName $tenant
 
-        foreach ($domain in $tenant_intel){
-            if ($domain.Name -match ".onmicrosoft.com" -and $domain.Name -notmatch ".mail.onmicrosoft.com"){
-                $global:sharepoint_tenant = $domain.Name.Split(".")[0]
+            foreach ($domain in $tenant_intel){
+                if ($domain.Name -match ".onmicrosoft.com" -and $domain.Name -notmatch ".mail.onmicrosoft.com"){
+                    $global:sharepoint_tenant = $domain.Name.Split(".")[0]
+                }
             }
+            $sharepoint_url = "https://$global:sharepoint_tenant.sharepoint.com"
+            MAADWriteProcess "SharePoint url -> $sharepoint_url"
+            $sharepoint_admin_url = "https://$global:sharepoint_tenant-admin.sharepoint.com"
+            MAADWriteProcess "SharePoint admin url -> $sharepoint_admin_url"
         }
-        $sharepoint_url = "https://$global:sharepoint_tenant.sharepoint.com"
-        MAADWriteProcess "SharePoint url -> $sharepoint_url"
-        $sharepoint_admin_url = "https://$global:sharepoint_tenant-admin.sharepoint.com"
-        MAADWriteProcess "SharePoint admin url -> $sharepoint_admin_url"
+        catch {
+            #Do nothing
+            MAADWriteError "Failed to automatically discover SharePoint Admin URL"
+        }
+    }
+    if ($sharepoint_admin_url -eq $null){
+        $sharepoint_admin_url = Read-Host "`n[?] Manually enter SharePoint Admin URL (https://tenant-admin.sharepoint.com)"
+    }
+    if ($sharepoint_admin_url -in $null,""){
+        MAADWriteError "Sharepoint Admin URL not found"
+        break
     }
 
     ###Connect SharePoint Online Administration Center 
@@ -773,7 +800,16 @@ function AccessSharepointAdmin {
             }
         }
         catch {
-            MAADWriteError "Failed to establish access -> SharePoint Online Administration Center"
+            MAADWriteInfo "MFA required for authentication"
+            MAADWriteProcess "Launching interactive authentication window to continue"
+            try {
+                #Attempt interactive authentication  
+                Connect-SPOService -Url $sharepoint_admin_url -ErrorAction Stop | Out-Null
+                MAADWriteSuccess "Established access -> SharePoint Online Administration Center"
+            }
+            catch {
+                MAADWriteError "Failed to establish access -> SharePoint Online Administration Center"
+            }
         }
     }
 }

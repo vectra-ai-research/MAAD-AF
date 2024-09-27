@@ -46,6 +46,8 @@ function ModifyTrustedNetworkConfig {
 
         if ($user_confirm -notin "No","no","N","n") {
             try {
+                MAADWriteProcess "Marking IP as untrusted"
+                Set-AzureADMSNamedLocationPolicy -OdataType "#microsoft.graph.ipNamedLocation" -PolicyId $trusted_nw.Id -IsTrusted $false
                 MAADWriteProcess "Removing Trusted Network Policy"
                 Remove-AzureADMSNamedLocationPolicy -PolicyId $trusted_nw.Id
                 MAADWriteSuccess "Deleted New Trusted Location Policy"

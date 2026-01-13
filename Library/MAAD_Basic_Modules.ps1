@@ -66,7 +66,7 @@ function RequiredModules {
                 }
                 catch {
                     MAADWriteError "Failed to install -> $module"
-                    MAADWriteProcess "Skippig module -> $module"
+                    MAADWriteProcess "Skipping module -> $module"
                 }   
             }
         }
@@ -98,7 +98,7 @@ function RequiredModules {
         }
         catch {
             MAADWriteError "Failed to import module"
-            MAADWriteProcess "Skippig module import -> $module"
+            MAADWriteProcess "Skipping module import -> $module"
         }
     }       
 
